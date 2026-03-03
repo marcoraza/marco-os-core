@@ -4,3 +4,8 @@ export { default as FocusMode } from './FocusMode';
 export { default as GamificationBar } from './GamificationBar';
 export { default as DashboardRightSidebar } from './DashboardRightSidebar';
 export { KANBAN_COLUMNS } from './types';
+export { MissionControlBar } from './MissionControlBar';
+export { MorningBriefCard } from './MorningBriefCard';
+export { DashboardWidgetGrid } from './DashboardWidgetGrid';
+export { HealthScoreWidget } from './HealthScoreWidget';
+export { ActivityHeatmapWidget } from './ActivityHeatmapWidget';

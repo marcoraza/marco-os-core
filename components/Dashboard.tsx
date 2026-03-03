@@ -8,6 +8,11 @@ import {
   GamificationBar,
   DashboardRightSidebar,
   KANBAN_COLUMNS,
+  MissionControlBar,
+  MorningBriefCard,
+  DashboardWidgetGrid,
+  HealthScoreWidget,
+  ActivityHeatmapWidget,
 } from './dashboard/index';
 
 interface DashboardProps {
@@ -142,6 +147,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="flex flex-row h-full overflow-hidden">
       <div className="flex-grow flex flex-col min-w-0 overflow-hidden">
+
+        {/* Sprint B — Dashboard Evolution */}
+        <MissionControlBar />
+        <MorningBriefCard />
+        <div className="grid grid-cols-2 gap-3 px-4 mb-3">
+          <HealthScoreWidget />
+          <ActivityHeatmapWidget />
+        </div>
+        <DashboardWidgetGrid />
 
         <DashboardHeader
           activeProject={activeProject}
