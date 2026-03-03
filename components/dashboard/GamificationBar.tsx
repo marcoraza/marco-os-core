@@ -1,6 +1,9 @@
+import React, { Suspense, lazy } from 'react';
 import type { Task } from '../../lib/appTypes';
 import { Icon, Card } from '../ui';
 import { cn } from '../../utils/cn';
+
+const PredictiveWidgets = lazy(() => import('./PredictiveWidgets').then(m => ({ default: m.PredictiveWidgets })));
 import {
   BarChart, Bar, Cell, AreaChart, Area,
   XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -238,6 +241,10 @@ export default function GamificationBar({
                 {a.unlocked && <Icon name="check_circle" size="xs" className="text-brand-mint shrink-0" />}
               </div>
             ))}
+            {/* Insights card inline with achievements */}
+            <Suspense fallback={null}>
+              <PredictiveWidgets inline />
+            </Suspense>
           </div>
         </div>
 

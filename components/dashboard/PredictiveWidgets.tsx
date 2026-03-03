@@ -88,7 +88,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ widget }) => {
 };
 
 // ─── Main component ────────────────────────────────────────────────────────────
-export const PredictiveWidgets: React.FC = () => {
+export const PredictiveWidgets: React.FC<{ inline?: boolean }> = ({ inline = false }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { reunioes, projetos, saude, content } = useNotionData();
 
@@ -200,6 +200,23 @@ export const PredictiveWidgets: React.FC = () => {
 
   // While loading, show skeleton
   if (!hasData && widgets.length === 0) return null;
+
+  // Inline mode: render as a single compact card in the achievements row
+  if (inline) {
+    const top = widgets[0];
+    if (!top) return null;
+    const colorMap = { mint: 'text-brand-mint', orange: 'text-accent-orange', blue: 'text-accent-blue' };
+    const iconColor = colorMap[top.priority ?? 'mint'];
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-sm border shrink-0 bg-surface border-brand-mint/20 hover:border-brand-mint/40 transition-all">
+        <Icon name={top.icon} size="xs" className={iconColor} />
+        <div>
+          <p className="text-[9px] font-bold leading-none text-text-primary">{top.label}</p>
+          <p className="text-[7px] text-text-secondary/60 leading-none mt-0.5">{top.text}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-1">
