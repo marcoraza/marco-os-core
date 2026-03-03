@@ -5,6 +5,10 @@ import { useNotionData } from '../contexts/NotionDataContext';
 const LearningExploration = React.lazy(() => import('./learning/LearningExploration').then(m => ({ default: m.LearningExploration })));
 const CreatorsRoster = React.lazy(() => import('./learning/CreatorsRoster').then(m => ({ default: m.CreatorsRoster })));
 const SkillsWidget = React.lazy(() => import('./learning/SkillsWidget').then(m => ({ default: m.SkillsWidget })));
+const ChronicleView = React.lazy(() => import('./learning/ChronicleView').then(m => ({ default: m.ChronicleView })));
+const ContentPipelineView = React.lazy(() => import('./learning/ContentPipelineView').then(m => ({ default: m.ContentPipelineView })));
+const DecisionJournalView = React.lazy(() => import('./learning/DecisionJournalView').then(m => ({ default: m.DecisionJournalView })));
+const KnowledgeGraph = React.lazy(() => import('./learning/KnowledgeGraph').then(m => ({ default: m.KnowledgeGraph })));
 
 const knowledgeCards = [
   { id: 1, category: 'IA', categoryVariant: 'purple' as const, date: '22 Out', status: 'PENDENTE', statusVariant: 'orange' as const,
@@ -22,17 +26,19 @@ const knowledgeCards = [
 ];
 
 const Learning: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'curriculum' | 'knowledge' | 'resources' | 'exploration' | 'creators'>('curriculum');
+  const [activeTab, setActiveTab] = useState<'curriculum' | 'knowledge' | 'chronicle' | 'exploration' | 'creators' | 'content' | 'resources'>('curriculum');
   const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [knowledgeSearch, setKnowledgeSearch] = useState('');
   const { research } = useNotionData();
 
   const tabs = [
     { id: 'curriculum', label: 'Currículo' },
-    { id: 'knowledge', label: 'Conhecimento' }, // Shortened label for mobile fit
+    { id: 'knowledge', label: 'Conhecimento' },
+    { id: 'chronicle', label: 'Crônica' },
     { id: 'exploration', label: 'Exploração' },
     { id: 'creators', label: 'Criadores' },
-    { id: 'resources', label: 'Recursos' }
+    { id: 'content', label: 'Conteúdo' },
+    { id: 'resources', label: 'Recursos' },
   ];
 
   return (
@@ -287,7 +293,24 @@ const Learning: React.FC = () => {
                       <EmptyState icon="school" title="Nenhuma anotação encontrada" description="Tente ajustar a busca ou o filtro de pendentes." />
                     )}
                 </div>
+
+                {/* Knowledge Graph — Sprint D */}
+                <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-12 w-full mt-6" />}>
+                  <KnowledgeGraph className="mt-6" />
+                </Suspense>
+
+                {/* Decision Journal — Sprint D */}
+                <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-12 w-full mt-6" />}>
+                  <DecisionJournalView className="mt-6" />
+                </Suspense>
              </div>
+          )}
+
+          {/* Chronicle tab — Sprint D */}
+          {activeTab === 'chronicle' && (
+            <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-24 w-full" />}>
+              <ChronicleView />
+            </Suspense>
           )}
 
           {activeTab === 'exploration' && (
@@ -299,6 +322,13 @@ const Learning: React.FC = () => {
           {activeTab === 'creators' && (
             <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-24 w-full" />}>
               <CreatorsRoster />
+            </Suspense>
+          )}
+
+          {/* Content Pipeline tab — Sprint D */}
+          {activeTab === 'content' && (
+            <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-24 w-full" />}>
+              <ContentPipelineView />
             </Suspense>
           )}
 
