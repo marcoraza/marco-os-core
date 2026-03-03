@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDb, type ChatMessage } from '../data/db';
+import { sendToGateway, type GatewayMessage } from '../lib/gatewayClient';
 
 interface UseAgentChatOptions {
   agentId: string;
@@ -47,25 +48,53 @@ export function useAgentChat({ agentId, sectionId }: UseAgentChatOptions) {
       content,
       timestamp: new Date().toISOString(),
     };
-    const updated = [...messages, userMsg];
-    setMessages(updated);
+    const withUser = [...messages, userMsg];
+    setMessages(withUser);
+    await persist(withUser);
     setIsLoading(true);
 
+    // Temporary "thinking" message
+    const thinkingId = crypto.randomUUID();
+    const thinkingMsg: ChatMessage = {
+      id: thinkingId,
+      role: 'agent',
+      content: '...',
+      timestamp: new Date().toISOString(),
+    };
+    setMessages([...withUser, thinkingMsg]);
+
     try {
-      // TODO: integrate with OpenClaw Gateway HTTP client
+      // Build gateway-compatible history (map 'agent' → 'assistant')
+      const gatewayHistory: GatewayMessage[] = withUser.map((m) => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
+      const responseText = await sendToGateway(gatewayHistory, sectionId);
+
       const agentMsg: ChatMessage = {
-        id: crypto.randomUUID(),
+        id: thinkingId, // reuse same id so UI replaces thinking msg
         role: 'agent',
-        content: '[Integracao OpenClaw pendente]',
+        content: responseText,
         timestamp: new Date().toISOString(),
       };
-      const final_ = [...updated, agentMsg];
+      const final_ = [...withUser, agentMsg];
       setMessages(final_);
       await persist(final_);
+    } catch {
+      const errorMsg: ChatMessage = {
+        id: thinkingId,
+        role: 'agent',
+        content: 'Não consegui conectar ao Frank. Tente novamente.',
+        timestamp: new Date().toISOString(),
+      };
+      const withError = [...withUser, errorMsg];
+      setMessages(withError);
+      await persist(withError);
     } finally {
       setIsLoading(false);
     }
-  }, [messages, persist]);
+  }, [messages, persist, sectionId]);
 
   const clearSession = useCallback(async () => {
     try {

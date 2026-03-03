@@ -22,6 +22,9 @@ import type {
   FinancaItem,
   SaudeItem,
   SkillItem,
+  DecisionItem,
+  CalendarEvent,
+  GitHubRepo,
 } from "../lib/dataProvider";
 
 // ─── DB name → JSON filename mapping ────────────────────────────────────────
@@ -39,6 +42,9 @@ const DB_FILES = [
   "financas",
   "saude",
   "skills",
+  "decisions",
+  "calendar",
+  "github",
 ] as const;
 
 type DBName = (typeof DB_FILES)[number];
@@ -58,6 +64,9 @@ interface NotionDataContextValue {
   financas: DataProvider<FinancaItem>;
   saude: DataProvider<SaudeItem>;
   skills: DataProvider<SkillItem>;
+  decisions: DataProvider<DecisionItem>;
+  calendar: DataProvider<CalendarEvent>;
+  github: DataProvider<GitHubRepo>;
   isLoading: boolean;
   lastSync: string | null;
   error: string | null;
@@ -158,6 +167,9 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
     financas: buildProvider<FinancaItem>("financas", cache, ...sharedArgs),
     saude: buildProvider<SaudeItem>("saude", cache, ...sharedArgs),
     skills: buildProvider<SkillItem>("skills", cache, ...sharedArgs),
+    decisions: buildProvider<DecisionItem>("decisions", cache, ...sharedArgs),
+    calendar: buildProvider<CalendarEvent>("calendar", cache, ...sharedArgs),
+    github: buildProvider<GitHubRepo>("github", cache, ...sharedArgs),
     isLoading,
     lastSync,
     error,

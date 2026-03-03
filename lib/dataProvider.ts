@@ -157,3 +157,39 @@ export interface SkillItem {
   recursos: string;
   notion_url: string;
 }
+
+export interface DecisionItem {
+  id: string;
+  title: string;
+  data: string;
+  contexto: string;
+  opcoes_consideradas: string;
+  framework: string;
+  decisao_tomada: string;
+  outcome_esperado: string;
+  outcome_real: string;
+  status: string;
+  impacto: string;
+  tags: string[];
+  projeto: string;
+  notion_url: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  account: string;
+  location: string;
+  description: string;
+  all_day: boolean;
+}
+
+export interface GitHubRepo {
+  repo: string;
+  last_commit: { message: string; date: string; author: string };
+  open_prs: number;
+  ci_status: string;
+  contributors_30d: string[];
+}

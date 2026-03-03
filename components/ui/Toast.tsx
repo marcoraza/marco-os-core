@@ -45,7 +45,7 @@ export function ToastContainer() {
             exit={{ opacity: 0, x: 40, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-md',
+              'flex items-center gap-2 px-4 py-2 rounded-sm',
               'bg-surface border border-brand-mint/30 shadow-lg'
             )}
           >

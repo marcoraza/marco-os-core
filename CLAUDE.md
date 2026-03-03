@@ -17,13 +17,13 @@ Marco OS is a personal operating system PWA (React + Vite + TypeScript). Dark th
 
 | Section            | View ID        | Icon            | Label (PT-BR)        | Description                                     |
 |--------------------|----------------|-----------------|----------------------|-------------------------------------------------|
-| Central de Comando | `dashboard`    | `dashboard`     | Central de Comando   | Aggregates all sections as widgets              |
+| Central de Comando | `dashboard`    | `dashboard`     | Central de Comando   | MissionControlBar + MorningBrief + WidgetGrid 2x2 + QuickCapture + Kanban + Achievements |
 | Financas           | `finance`      | `payments`      | Financas             | Transactions, cashflow, crypto, debts, goals    |
-| Saude              | `health`       | `monitor_heart` | Saude                | Workouts, weight, habits, streaks               |
-| Aprendizado        | `learning`     | `school`        | Aprendizado          | Research pipeline, deep dives, creators, skills |
-| Projetos           | `planner`      | `event_note`    | Projetos             | Kanban projects, content, checklists            |
-| Network            | `crm`          | `contacts`      | Network              | Contacts (Pessoas) + meetings (Reunioes)        |
-| Notas              | `notes`        | `sticky_note_2` | Notas                | Brain dump + IndexedDB local notes              |
+| Saude              | `health`       | `monitor_heart` | Saude                | 3 tabs: Registro Diario, Tendencias & Insights, Atividades. Workouts, weight, habits |
+| Aprendizado        | `learning`     | `school`        | Aprendizado          | 5 tabs: Curriculo, Conhecimento, Exploracao, Criadores, Recursos. Research pipeline, deep dives, creators roster, skills |
+| Projetos           | `planner`      | `event_note`    | Projetos             | 2 tabs: Projetos (Notion), Planejador (AI). Kanban projects, content pipeline, checklists |
+| Network            | `crm`          | `contacts`      | Network              | AlertBanner + 2 tabs: Contatos, Reunioes. Follow-ups banner, source badges |
+| Notas              | `notes`        | `sticky_note_2` | Notas                | 4 tabs: Editor, Brain Dump, Cronica, Decisoes. Local notes + Notion dumps + weekly chronicle + decision journal |
 | Agentes            | `agents-overview` | `hub`        | Agentes              | OpenClaw agent roster, crons, executions        |
 | Configuracoes      | `settings`     | `settings`      | Configuracoes        | OpenClaw config, theme, preferences             |
 
@@ -67,6 +67,7 @@ data/
   financas.json        # Financas DB
   saude.json           # Saude DB
   skills.json          # Skills DB
+  decisions.json       # Decision Journal DB
 ```
 
 Each JSON file schema:
@@ -197,6 +198,52 @@ fontFamily: { sans: ['Inter', 'sans-serif'] }
 <span className="text-[8px] font-bold uppercase tracking-widest bg-surface border border-border-panel px-2 py-0.5 rounded-sm">
 ```
 
+**NotionCard:**
+```tsx
+<div className="bg-surface border border-border-panel rounded-sm p-3">
+  <div className="flex items-start justify-between">
+    <span className="text-xs font-bold text-text-primary">{title}</span>
+    <SourceBadge source="notion" />
+  </div>
+  {meta && <div className="mt-1 flex gap-2">{meta}</div>}
+  {children}
+  {href && <a href={href} target="_blank" rel="noopener" className="text-[8px] text-brand-mint">
+    <Icon name="open_in_new" size="xs" />
+  </a>}
+</div>
+```
+
+**Widget (Dashboard):**
+```tsx
+<div className="bg-surface border border-border-panel rounded-sm p-3">
+  <SectionLabel>{TITULO}</SectionLabel>
+  {/* compact content */}
+  <a className="text-[8px] text-brand-mint uppercase tracking-widest">
+    Ver tudo <Icon name="arrow_forward" size="xs" />
+  </a>
+</div>
+```
+
+**AlertBanner:**
+```tsx
+<div className="bg-accent-orange/10 border border-accent-orange/30 rounded-sm px-3 py-2 flex items-center justify-between">
+  <span className="flex items-center gap-2 text-accent-orange text-xs">
+    <Icon name="warning" size="sm" /> {count} {label}
+  </span>
+  <Icon name="expand_more" size="sm" className="text-accent-orange cursor-pointer" />
+</div>
+```
+
+**Mission Control border (alert state):**
+```tsx
+className={cn(
+  "bg-surface border rounded-sm p-3",
+  level === 'critical' && "border-l-2 border-accent-red",
+  level === 'warning' && "border-l-2 border-accent-orange",
+  !hasAlert && "border-border-panel"
+)}
+```
+
 **Tab bar:**
 ```tsx
 <div className="flex items-center gap-1 border-b border-border-panel">
@@ -288,6 +335,94 @@ fontFamily: { sans: ['Inter', 'sans-serif'] }
 - Do not center-align body text (always left-aligned)
 - Do not use placeholder images or illustrations for empty states
 - Do not use emojis anywhere in the UI — not in labels, buttons, badges, toasts, or empty states
+- Do not use rounded-full on containers larger than 32px (w-10 h-10 max) — only for StatusDot and small avatars
+
+---
+
+## New UI Components (Uma Design Pipeline)
+
+### UI Primitives (`components/ui/`)
+
+| Component | File | Purpose | Used by |
+|-----------|------|---------|---------|
+| `SourceBadge` | `SourceBadge.tsx` | Notion (mint) vs IndexedDB (blue) indicator | 5+ sections |
+| `PipelineBadge` | `PipelineBadge.tsx` | Status badge via `PIPELINE_STATUS_MAP` lookup | 6+ features |
+| `NotionCard` | `NotionCard.tsx` | Base card for any Notion item (title, meta, source, href, children) | Universal |
+| `FilterPills` | `FilterPills.tsx` | Quick filter pills with active state | 8+ features |
+| `AlertBanner` | `AlertBanner.tsx` | Collapsible alert/follow-up banner | Network, Dashboard |
+| `MetricBar` | `MetricBar.tsx` | Horizontal KPI strip | Dashboard, Finance, Ghost, Deep Work |
+| `TimelineList` | `TimelineList.tsx` | Vertical timeline with line connector | Chronicle, Decisions, Replay |
+| `FullscreenOverlay` | `FullscreenOverlay.tsx` | z-50 overlay with Framer Motion fade | Ghost Mode |
+| `Sparkline` | `Sparkline.tsx` | 7-bar SVG inline chart (no Recharts) | Dev Pulse |
+| `HeatmapGrid` | `HeatmapGrid.tsx` | GitHub-style contribution grid | Activity Heatmap, Energy Map |
+| `AlertBadge` | `AlertBadge.tsx` | Header alert indicator with pulse | Mission Control |
+
+### Status Tokens (`utils/statusTokens.ts`)
+
+All pipeline/status badges use declarative color mapping:
+- Pendente: `text-text-secondary border-border-panel`
+- Na Fila: `text-accent-orange border-accent-orange/30`
+- Em Execucao: `text-accent-blue border-accent-blue/30`
+- Analisado/Ativo/Processado: `text-brand-mint border-brand-mint/30`
+- Pausado: `text-accent-orange border-accent-orange/30`
+- Concluido/Realizada: `text-text-secondary border-border-panel`
+
+Badge base: `text-[7px] font-bold uppercase tracking-widest px-2 py-0.5 border rounded-sm`
+
+### New Hooks
+
+| Hook | File | Purpose |
+|------|------|---------|
+| `useOnboardingTrigger` | `hooks/useOnboardingTrigger.ts` | Opens ChatPanel if data empty (sessionStorage flag, once per session) |
+| `useFinanceData` | `hooks/useFinanceData.ts` | Calculates metrics from financas.json |
+| `useCountUp` | `hooks/useCountUp.ts` | Number animation via rAF (respects prefers-reduced-motion) |
+| `useFlowState` | `hooks/useFlowState.ts` | Detects flow by interaction pattern + commits |
+| `useGhostMode` | `hooks/useGhostMode.ts` | Controls Ghost Mode + Deep Work panel |
+| `useHealthScore` | `hooks/useHealthScore.ts` | Calculates 0-100 score from all JSONs |
+| `useQuickCapture` | `hooks/useQuickCapture.ts` | Classifies captured text via Frank |
+
+### New Section Components
+
+| Component | File | Section |
+|-----------|------|---------|
+| `LearningExploration` | `components/learning/LearningExploration.tsx` | Aprendizado > Exploracao |
+| `CreatorsRoster` | `components/learning/CreatorsRoster.tsx` | Aprendizado > Criadores |
+| `SkillsWidget` | `components/learning/SkillsWidget.tsx` | Aprendizado > Curriculo (widget) |
+| `NotionProjectsView` | `components/planner/NotionProjectsView.tsx` | Projetos > Projetos tab |
+| `ReunioesView` | `components/crm/ReunioesView.tsx` | Network > Reunioes tab |
+| `ActivitiesView` | `components/health/ActivitiesView.tsx` | Saude > Atividades tab |
+| `BrainDumpView` | `components/notes/BrainDumpView.tsx` | Notas > Brain Dump tab |
+| `MissionControlBar` | `components/dashboard/MissionControlBar.tsx` | Dashboard (top) |
+| `MorningBriefCard` | `components/dashboard/MorningBriefCard.tsx` | Dashboard (below MissionControl) |
+| `DashboardWidgetGrid` | `components/dashboard/DashboardWidgetGrid.tsx` | Dashboard (2x2 grid) |
+
+### New Utilities
+
+| File | Content |
+|------|---------|
+| `utils/statusTokens.ts` | `PIPELINE_STATUS_MAP` + status helpers |
+| `utils/dateUtils.ts` | `formatRelative`, `groupByWeek`, `getDayKey` |
+| `utils/scoreUtils.ts` | `calculateHealthScore(data)` by dimension |
+
+### Sprint Order
+
+| Sprint | Focus | Key deliverables |
+|--------|-------|-------------------|
+| 0 | Bugfixes | EmptyState rounded-md, Toast rounded-sm, EmptyState rounded-full |
+| Foundation | UI primitives | 13 components + 3 utils + 3 hooks |
+| A | Notion integrations | 7 section components + ChatPanel onboarding |
+| B | Dashboard evolution | MissionControl, MorningBrief, WidgetGrid, HealthScore, Heatmap |
+| C | Focus modes | Ghost Mode (Cmd+Shift+G), Deep Work (Cmd+Shift+D), Flow State |
+| D | Knowledge + Content | KnowledgeGraph, Chronicle, Decisions, Scenario, Replay |
+| E | Intelligence layer | Quick Capture (Cmd+N), Atomic Notes, Predictive Widgets |
+
+### Integration Principle
+
+**Additive only — zero removals, zero breaking changes.**
+- New tabs added alongside existing ones
+- New components composed into existing section files
+- Existing functionality never removed or replaced
+- JSON empty = EmptyState, never crash
 
 ---
 
@@ -357,6 +492,16 @@ import { cn } from '@/utils/cn';
 | `data/agentMockData.ts` | Mock data fallback for development |
 | `hooks/useHotkeys.ts` | Keyboard shortcuts (Cmd+K, Go shortcuts) |
 | `utils/cn.ts` | className utility |
+
+**Keyboard Shortcuts:**
+
+| Keyboard Shortcut | Action |
+|-------------------|--------|
+| `Cmd+K` | Command Palette (existing) |
+| `Cmd+N` | Quick Capture (mod: true) |
+| `Cmd+Shift+G` | Ghost Mode toggle |
+| `Cmd+Shift+D` | Deep Work panel toggle |
+| `Escape` | Close overlay/modal |
 
 ---
 
@@ -457,6 +602,7 @@ These IDs are stable references — do not change.
 | Financas    | `318b72d5-042d-8184-95fc-c5b9a65e0249` | Exists  | finance     |
 | Saude       | `318b72d5-042d-8179-9398-fc1ed4c6c297` | Exists  | health      |
 | Skills      | `318b72d5-042d-810e-9f8e-ca073a1b4587` | Exists  | learning    |
+| Decision Journal | `318b72d5-042d-812b-91a4-f1bde3362a59` | Exists  | notes  |
 
 ---
 
@@ -473,4 +619,4 @@ HTML files remain as fallback URLs.
 
 ---
 
-*Rules version: 2.3 | Source: PRD v2.3 | Last updated: 2026-03-03*
+*Rules version: 3.0 | Source: PRD v3.0 + Uma UX Design Pipeline | Last updated: 2026-03-03*
