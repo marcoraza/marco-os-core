@@ -17,6 +17,9 @@ export type { View, Project, Task } from './lib/appTypes';
 const GhostMode = lazy(() => import('./components/focus/GhostMode').then(m => ({ default: m.GhostMode })));
 const DeepWorkPanel = lazy(() => import('./components/focus/DeepWorkPanel').then(m => ({ default: m.DeepWorkPanel })));
 
+// Lazy-loaded Sprint E components
+const QuickCaptureModal = lazy(() => import('./components/capture/QuickCaptureModal').then(m => ({ default: m.QuickCaptureModal })));
+
 // Lazy-loaded pages (code-split)
 const Finance = lazy(() => import('./components/Finance'));
 const Health = lazy(() => import('./components/Health'));
@@ -124,6 +127,7 @@ const App: React.FC = () => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isDeepWorkOpen, setIsDeepWorkOpen] = useState(false);
+  const [quickCaptureOpen, setQuickCaptureOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // ─── Focus modes ─────────────────────────────────────────────────────────────
@@ -181,11 +185,13 @@ const App: React.FC = () => {
 
   useHotkeys([
     { key: 'k', mod: true, handler: () => setIsPaletteOpen(true), description: 'Command Palette' },
+    { key: 'n', mod: true, handler: () => setQuickCaptureOpen(true), description: 'Quick Capture' },
     { key: 'g', mod: true, shift: true, handler: () => ghostMode.toggle(), description: 'Ghost Mode' },
     { key: 'd', mod: true, shift: true, handler: () => setIsDeepWorkOpen(o => !o), description: 'Deep Work' },
     { key: '?', shift: true, handler: () => setIsShortcutsOpen(o => !o), description: 'Toggle shortcuts' },
     { key: 'Escape', handler: () => {
       if (ghostMode.isActive) { ghostMode.exit(); return; }
+      if (quickCaptureOpen) { setQuickCaptureOpen(false); return; }
       if (isDeepWorkOpen) { setIsDeepWorkOpen(false); return; }
       setIsShortcutsOpen(false);
       setIsPaletteOpen(false);
@@ -530,6 +536,14 @@ const App: React.FC = () => {
           onClose={() => setIsDeepWorkOpen(false)}
           flowState={flowState}
           tasks={tasks}
+        />
+      </Suspense>
+
+      {/* Sprint E — Quick Capture Modal */}
+      <Suspense fallback={null}>
+        <QuickCaptureModal
+          open={quickCaptureOpen}
+          onClose={() => setQuickCaptureOpen(false)}
         />
       </Suspense>
 

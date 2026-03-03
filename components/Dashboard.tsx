@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import type { Task, Project } from '../lib/appTypes';
 import type { StoredEvent } from '../data/models';
 import {
@@ -13,6 +13,8 @@ import {
   HealthScoreWidget,
   ActivityHeatmapWidget,
 } from './dashboard/index';
+
+const PredictiveWidgets = lazy(() => import('./dashboard/PredictiveWidgets').then(m => ({ default: m.PredictiveWidgets })));
 
 interface DashboardProps {
   tasks: Task[];
@@ -187,6 +189,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             <HealthScoreWidget />
             <ActivityHeatmapWidget />
           </div>
+          {/* Sprint E — Predictive Widgets (INSIGHTS) */}
+          <Suspense fallback={null}>
+            <PredictiveWidgets />
+          </Suspense>
           <MorningBriefCard />
         </div>
 

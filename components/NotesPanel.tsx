@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, Suspense } from 'react';
 import type { StoredNote } from '../data/models';
 import { Icon, Card, SectionLabel, TabNav } from './ui';
 import { cn } from '../utils/cn';
+import { AtomicNoteRenderer } from './notes/AtomicNoteRenderer';
 
 const BrainDumpView = React.lazy(() => import('./notes/BrainDumpView').then(m => ({ default: m.BrainDumpView })));
 
@@ -320,10 +321,19 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
               )}
 
               {previewMode ? (
-                <div
-                  className="flex-1 bg-bg-base border border-border-panel rounded-md p-4 text-sm text-text-primary overflow-y-auto leading-relaxed prose-sm"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(selected.body || '<span class="text-text-secondary/30 italic">Nada para exibir</span>') }}
-                />
+                <div className="flex-1 bg-bg-base border border-border-panel rounded-sm p-4 overflow-y-auto leading-relaxed">
+                  {selected.body ? (
+                    <AtomicNoteRenderer
+                      content={selected.body}
+                      onWikiLinkClick={(term) => {
+                        // Future: navigate to matching note
+                        console.info('[AtomicNotes] wiki-link clicked:', term);
+                      }}
+                    />
+                  ) : (
+                    <span className="text-text-secondary/30 italic text-sm">Nada para exibir</span>
+                  )}
+                </div>
               ) : (
                 <textarea
                   ref={textareaRef}
