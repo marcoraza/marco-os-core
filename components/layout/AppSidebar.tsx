@@ -21,9 +21,9 @@ const NAV_ITEMS = [
   { id: 'finance',   icon: 'payments',       label: 'Finanças' },
   { id: 'health',    icon: 'monitor_heart',  label: 'Saúde' },
   { id: 'learning',  icon: 'school',         label: 'Aprendizado' },
-  { id: 'planner',   icon: 'event_note',     label: 'Planejador' },
+  { id: 'planner',   icon: 'event_note',     label: 'Projetos' },
   { id: 'notes',     icon: 'sticky_note_2',  label: 'Notas' },
-  { id: 'crm',       icon: 'contacts',       label: 'Gestão de Contatos' },
+  { id: 'crm',       icon: 'contacts',       label: 'Network' },
   { id: 'settings',  icon: 'settings',       label: 'Configurações' },
 ] as const;
 

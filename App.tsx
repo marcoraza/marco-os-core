@@ -29,6 +29,7 @@ import AgentAddModal from './components/AgentAddModal';
 import MissionModal from './components/MissionModal';
 import { ToastContainer, showToast } from './components/ui';
 import { useConnectionState } from './contexts/OpenClawContext';
+import { NotionDataProvider } from './contexts/NotionDataContext';
 
 // Layout components
 import { AppHeader, AppSidebar, ProjectSwitcher, MobileNav, ShortcutsDialog } from './components/layout';
@@ -355,6 +356,7 @@ const App: React.FC = () => {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
+    <NotionDataProvider>
     <div className="flex h-screen w-full flex-col bg-bg-base text-text-primary overflow-hidden font-sans transition-colors duration-300">
       <AgentAddModal
         open={isAddAgentOpen}
@@ -497,6 +499,7 @@ const App: React.FC = () => {
 
       <ToastContainer />
     </div>
+    </NotionDataProvider>
   );
 };
 
