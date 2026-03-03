@@ -87,7 +87,14 @@ const CRM: React.FC = () => {
     { id: 'contatos', label: 'Contatos' },
     { id: 'reunioes', label: 'Reuniões' },
   ];
-  const pendingFollowUps = reunioes.items.filter((r: any) => r.status === 'Pendente' || r.status === 'pendente' || r.status === 'PENDENTE').length;
+  // reunioes.items may be the raw JSON {_meta, items} — extract safely
+  const reunioesItems: any[] = Array.isArray(reunioes.items) && reunioes.items.length > 0 && reunioes.items[0]?._meta
+    ? (reunioes.items[0] as any).items ?? []
+    : Array.isArray(reunioes.items) ? reunioes.items : [];
+  const pendingFollowUps = reunioesItems.filter((r: any) => {
+    const s = r?.Status ?? r?.status ?? '';
+    return s === 'Pendente' || s === 'pendente' || s === 'PENDENTE';
+  }).length;
 
   const [contacts, setContacts] = useState<StoredContact[]>([]);
   const [selectedContact, setSelectedContact] = useState<StoredContact | null>(null);
