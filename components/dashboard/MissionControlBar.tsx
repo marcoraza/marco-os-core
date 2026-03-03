@@ -77,12 +77,6 @@ export function MissionControlBar() {
       icon: 'rocket_launch',
     },
     {
-      label: 'saldo',
-      value: saldoValue,
-      icon: 'account_balance_wallet',
-      color: saldoColor,
-    },
-    {
       label: 'último treino',
       value: saude.isLoading ? '...' : ultimoTreino,
       icon: 'fitness_center',

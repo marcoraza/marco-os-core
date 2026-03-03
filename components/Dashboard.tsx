@@ -148,14 +148,8 @@ const Dashboard: React.FC<DashboardProps> = ({
     <div className="flex flex-row h-full overflow-hidden">
       <div className="flex-grow flex flex-col min-w-0 overflow-hidden">
 
-        {/* Sprint B — Dashboard Evolution */}
+        {/* MissionControlBar — compact metrics strip */}
         <MissionControlBar />
-        <MorningBriefCard />
-        <div className="grid grid-cols-2 gap-3 px-4 mb-3">
-          <HealthScoreWidget />
-          <ActivityHeatmapWidget />
-        </div>
-        <DashboardWidgetGrid />
 
         <DashboardHeader
           activeProject={activeProject}
@@ -187,6 +181,16 @@ const Dashboard: React.FC<DashboardProps> = ({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         />
+
+        {/* Sprint B — below Kanban, compact */}
+        <div className="px-4 py-3 flex flex-col gap-3">
+          <MorningBriefCard />
+          <div className="grid grid-cols-2 gap-3">
+            <HealthScoreWidget />
+            <ActivityHeatmapWidget />
+          </div>
+          <DashboardWidgetGrid />
+        </div>
 
         {focusMode && focusTask && (
           <FocusMode
