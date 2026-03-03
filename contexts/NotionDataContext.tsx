@@ -121,7 +121,8 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
     for (let i = 0; i < DB_FILES.length; i++) {
       const name = DB_FILES[i];
       try {
-        const res = await fetch(`/data/${name}.json`);
+        const base = import.meta.env.BASE_URL ?? '/';
+        const res = await fetch(`${base}data/${name}.json`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: unknown[] = await res.json();
         cacheRef.current.set(name, { data, fetchedAt: Date.now() });
