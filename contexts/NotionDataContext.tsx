@@ -49,6 +49,25 @@ const DB_FILES = [
 
 type DBName = (typeof DB_FILES)[number];
 
+// Maps DB key → actual JSON filename (hyphens/plurals differ from key names)
+const DB_FILENAME: Record<DBName, string> = {
+  research: "research",
+  deep_dives: "deep-dives",
+  criadores: "criadores",
+  projetos: "projetos",
+  checklist: "checklists",
+  reunioes: "reunioes",
+  pessoas: "pessoas",
+  content: "content",
+  brain_dump: "brain-dump",
+  financas: "financas",
+  saude: "saude",
+  skills: "skills",
+  decisions: "decisions",
+  calendar: "calendar",
+  github: "github",
+};
+
 // ─── Context shape ───────────────────────────────────────────────────────────
 
 interface NotionDataContextValue {
@@ -77,6 +96,7 @@ interface NotionDataContextValue {
 
 type CacheEntry = { data: unknown[]; fetchedAt: number };
 type Cache = Map<DBName, CacheEntry>;
+type ErrorMap = Map<DBName, string | null>;
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
@@ -89,16 +109,16 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 function buildProvider<T>(
   name: DBName,
   cache: Cache,
+  errors: ErrorMap,
   isLoading: boolean,
   lastSync: string | null,
-  error: string | null,
   refetch: () => Promise<void>
 ): DataProvider<T> {
   return {
     items: (cache.get(name)?.data ?? []) as T[],
     isLoading,
     lastSync,
-    error,
+    error: errors.get(name) ?? null,
     refetch,
   };
 }
@@ -107,6 +127,7 @@ function buildProvider<T>(
 
 export function NotionDataProvider({ children }: { children: ReactNode }) {
   const cacheRef = useRef<Cache>(new Map());
+  const errorsRef = useRef<ErrorMap>(new Map());
   const [tick, setTick] = useState(0); // bump to trigger re-render after fetch
   const [isLoading, setIsLoading] = useState(true);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -122,12 +143,16 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
       const name = DB_FILES[i];
       try {
         const base = import.meta.env.BASE_URL ?? '/';
-        const res = await fetch(`${base}data/${name}.json`);
+        const filename = DB_FILENAME[name];
+        const res = await fetch(`${base}data/${filename}.json`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: unknown[] = await res.json();
         cacheRef.current.set(name, { data, fetchedAt: Date.now() });
+        errorsRef.current.set(name, null); // clear per-DB error on success
       } catch (err) {
-        anyError = err instanceof Error ? err.message : String(err);
+        const msg = err instanceof Error ? err.message : String(err);
+        errorsRef.current.set(name, msg);
+        anyError = msg;
         // keep previous cache entry — no update needed, it stays
       }
       if (i < DB_FILES.length - 1) await sleep(100);
@@ -153,7 +178,8 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
 
   // Rebuild context value on every tick
   const cache = cacheRef.current;
-  const sharedArgs = [isLoading, lastSync, error, refetch] as const;
+  const errors = errorsRef.current;
+  const sharedArgs = [errors, isLoading, lastSync, refetch] as const;
 
   const value: NotionDataContextValue = {
     research: buildProvider<ResearchItem>("research", cache, ...sharedArgs),
