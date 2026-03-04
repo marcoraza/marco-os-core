@@ -41,7 +41,8 @@ export default function DashboardRightSidebar({
   activeProjectId,
   onNavigate,
 }: DashboardRightSidebarProps) {
-  const { refetch } = useSupabaseData();
+  const supabaseData = useSupabaseData();
+  const refetch = supabaseData?.refetch ?? (async () => {});
 
   // ─── Quick Action handlers ────────────────────────────────────────────────
 

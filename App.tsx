@@ -32,6 +32,9 @@ const AgentCommandCenter = lazy(() => import('./components/AgentCommandCenter'))
 const AgentDetailView = lazy(() => import('./components/AgentDetailView'));
 const MissionDetail = lazy(() => import('./components/MissionDetail'));
 
+// Error boundary
+import { ErrorBoundary } from './components/ErrorBoundary';
+
 // Eagerly loaded (always needed)
 import CommandPalette from './components/CommandPalette';
 import AgentAddModal from './components/AgentAddModal';
@@ -40,6 +43,7 @@ import { ToastContainer, showToast } from './components/ui';
 import { useConnectionState, useOpenClaw } from './contexts/OpenClawContext';
 import { NotionDataProvider } from './contexts/NotionDataContext';
 import { SupabaseDataProvider } from './contexts/SupabaseDataContext';
+import { ProjectProvider } from './contexts/ProjectContext';
 
 // Layout components
 import { AppHeader, AppSidebar, ProjectSwitcher, MobileNav, ShortcutsDialog } from './components/layout';
@@ -436,6 +440,7 @@ const App: React.FC = () => {
     // components can still use useNotionData() from NotionDataContext directly.
     <SupabaseDataProvider>
     <NotionDataProvider>
+    <ProjectProvider>
     <div className="flex h-screen w-full flex-col bg-bg-base text-text-primary overflow-hidden font-sans transition-colors duration-300">
       <AgentAddModal
         open={isAddAgentOpen}
@@ -488,6 +493,7 @@ const App: React.FC = () => {
                 transition={pageTransition}
                 className="flex-grow flex flex-col"
               >
+                <ErrorBoundary>
                 <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="animate-pulse text-text-secondary text-xs font-mono">Carregando...</div></div>}>
                 {currentView === 'dashboard' && (
                   <Dashboard
@@ -527,6 +533,7 @@ const App: React.FC = () => {
                   />
                 )}
                 </Suspense>
+                </ErrorBoundary>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -612,6 +619,7 @@ const App: React.FC = () => {
 
       <ToastContainer />
     </div>
+    </ProjectProvider>
     </NotionDataProvider>
     </SupabaseDataProvider>
   );

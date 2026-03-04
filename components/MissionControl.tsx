@@ -7,7 +7,9 @@ import { cn } from '../utils/cn';
 type FilterTab = 'all' | 'active' | 'queued' | 'completed';
 
 export default function MissionControl() {
-  const { agents, isConnected } = useAgentStream();
+  const streamData = useAgentStream();
+  const agents = streamData?.agents ?? [];
+  const isConnected = streamData?.isConnected ?? false;
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
 
   // Filter agents based on active tab

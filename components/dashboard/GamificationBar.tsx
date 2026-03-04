@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import type { Task } from '../../lib/appTypes';
 import { Icon, Card } from '../ui';
 import { cn } from '../../utils/cn';
+import { useGamification } from '../../hooks/useGamification';
 
 const PredictiveWidgets = lazy(() => import('./PredictiveWidgets').then(m => ({ default: m.PredictiveWidgets })));
 import {
@@ -47,12 +48,22 @@ interface GamificationBarProps {
 }
 
 export default function GamificationBar({
-  level, xpInLevel, xpToNext, totalXP, completedTasks,
+  level: levelProp, xpInLevel: xpInLevelProp, xpToNext: xpToNextProp, totalXP: totalXPProp, completedTasks: completedTasksProp,
   focusMode, onToggleFocusMode, focusTask,
   missionView, onToggleMissionView,
   achievements, unlockedCount,
   statusChartData, weeklyActivityData,
 }: GamificationBarProps) {
+  // Use real gamification data from Supabase; fall back to props when data is loading
+  const gamification = useGamification();
+  const level = gamification.isLoading ? levelProp : gamification.level;
+  const xpInLevel = gamification.isLoading ? xpInLevelProp : gamification.xpInLevel;
+  const xpToNext = gamification.isLoading ? xpToNextProp : gamification.nextLevelXP;
+  const totalXP = gamification.isLoading ? totalXPProp : gamification.xp;
+  const completedTasks = gamification.isLoading ? completedTasksProp : Math.floor(gamification.xp / 10);
+  const streak = gamification.streak;
+  const todayXP = gamification.todayXP;
+
   return (
     <div className="shrink-0 border-t border-border-panel bg-header-bg">
       <div className="p-3 md:p-4 flex flex-col gap-2">
@@ -84,19 +95,25 @@ export default function GamificationBar({
                 </div>
                 <div className="w-full h-1.5 bg-bg-base rounded-full overflow-hidden mb-2">
                   <div
-                    className="h-full bg-gradient-to-r from-accent-purple/60 to-accent-purple rounded-full transition-all duration-1000"
+                    className="h-full bg-gradient-to-r from-brand-mint/60 to-brand-mint rounded-full transition-all duration-1000"
                     style={{ width: `${(xpInLevel / xpToNext) * 100}%` }}
                   />
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     <Icon name="stars" size="xs" className="text-accent-purple" />
-                    <span className="text-xs font-black text-text-primary">{totalXP} XP</span>
+                    <span className="text-xs font-black font-mono text-text-primary">{totalXP} XP</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Icon name="task_alt" size="xs" className="text-brand-mint" />
                     <span className="text-[9px] font-bold text-text-secondary">{completedTasks} completadas</span>
                   </div>
+                  {todayXP > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Icon name="bolt" size="xs" className="text-accent-orange" />
+                      <span className="text-[9px] font-bold font-mono text-accent-orange">+{todayXP} hoje</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -110,7 +127,7 @@ export default function GamificationBar({
               </div>
               <div>
                 <span className="text-[8px] font-black uppercase tracking-widest text-text-secondary block">Streak</span>
-                <p className="text-xl font-black text-text-primary group-hover:text-brand-flame transition-colors leading-none mt-0.5">12</p>
+                <p className="text-xl font-black font-mono text-text-primary group-hover:text-brand-flame transition-colors leading-none mt-0.5">{streak}</p>
                 <p className="text-[8px] text-text-secondary mt-0.5">dias consecutivos</p>
               </div>
             </div>

@@ -154,7 +154,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
     syncToNotion('create-brain-dump', data);
   };
 
-  const projectNotes = notes.filter(n => !n.projectId || n.projectId === activeProjectId);
+  const projectNotes = (notes ?? []).filter(n => !n.projectId || n.projectId === activeProjectId);
   const selected = projectNotes.find(n => n.id === selectedId);
 
   const createNote = () => {
@@ -174,7 +174,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   }, [selectedId, setNotes]);
 
   const deleteNote = (id: string) => {
-    setNotes(prev => prev.filter(n => n.id !== id));
+    setNotes(prev => (prev ?? []).filter(n => n.id !== id));
     if (selectedId === id) setSelectedId(null);
   };
 

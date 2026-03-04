@@ -25,12 +25,15 @@ interface AgentCommandCenterProps {
 }
 
 export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCommandCenterProps) {
-  const { agents } = useAgents();
-  const allTasks = useKanban();
-  const allExecutions = useExecutions();
-  const tokenUsages = useTokenUsages();
-  const { dispatch: sendDispatch } = useDispatch();
-  const { dispatchMission } = useOpenClaw();
+  const agentsData = useAgents();
+  const agents = agentsData?.agents ?? [];
+  const allTasks = useKanban() ?? [];
+  const allExecutions = useExecutions() ?? [];
+  const tokenUsages = useTokenUsages() ?? [];
+  const dispatchHook = useDispatch();
+  const sendDispatch = dispatchHook?.dispatch;
+  const openClaw = useOpenClaw();
+  const dispatchMission = openClaw?.dispatchMission;
   const { isLive } = useConnectionState();
 
   // Dispatch form
@@ -44,8 +47,8 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
     setIsDispatching(true);
     try {
       // Try API dispatch first (returns bool), fall back to gateway dispatch
-      const ok = await dispatchMission(selectedAgent, missionText, missionPriority);
-      if (!ok) {
+      const ok = dispatchMission ? await dispatchMission(selectedAgent, missionText, missionPriority) : false;
+      if (!ok && sendDispatch) {
         // API not configured or failed — fall back to gateway
         await sendDispatch(selectedAgent, missionText, missionPriority);
       }
@@ -74,36 +77,39 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
     for (const agent of agents) {
       workload[agent.id] = { backlog: 0, 'em-progresso': 0, revisao: 0, concluido: 0 };
     }
-    for (const t of allTasks) {
-      if (workload[t.agentId]) workload[t.agentId][t.status]++;
+    for (const t of (allTasks ?? [])) {
+      if (workload[t.agentId] && workload[t.agentId][t.status] !== undefined) {
+        workload[t.agentId][t.status]++;
+      }
     }
     return workload;
   }, [agents, allTasks]);
 
   const getAgentTokensToday = (agentId: string) => {
-    const u = tokenUsages.find(t => t.agentId === agentId);
-    return u ? u.todayTokensIn + u.todayTokensOut : 0;
+    const u = (tokenUsages ?? []).find(t => t.agentId === agentId);
+    return u ? (u.todayTokensIn ?? 0) + (u.todayTokensOut ?? 0) : 0;
   };
 
   // Execution pipeline
   const executionPipeline = useMemo(() => {
-    return allExecutions.slice(0, 12).map(exec => {
-      const badge = executionBadge[exec.status];
+    return (allExecutions ?? []).slice(0, 12).map(exec => {
+      const badge = executionBadge[exec.status] ?? { variant: 'neutral' as const, label: exec.status };
       return { ...exec, badge };
     });
   }, [allExecutions]);
 
   // Mission queue (active tasks grouped)
+  const safeTasks = allTasks ?? [];
   const activeMissions = useMemo(() => {
-    return allTasks
+    return safeTasks
       .filter(t => t.status === 'em-progresso' || t.status === 'revisao')
       .slice(0, 8);
-  }, [allTasks]);
+  }, [safeTasks]);
 
-  const backlogCount = useMemo(() => allTasks.filter(t => t.status === 'backlog').length, [allTasks]);
-  const inProgressCount = useMemo(() => allTasks.filter(t => t.status === 'em-progresso').length, [allTasks]);
-  const reviewCount = useMemo(() => allTasks.filter(t => t.status === 'revisao').length, [allTasks]);
-  const doneCount = useMemo(() => allTasks.filter(t => t.status === 'concluido').length, [allTasks]);
+  const backlogCount = useMemo(() => safeTasks.filter(t => t.status === 'backlog').length, [safeTasks]);
+  const inProgressCount = useMemo(() => safeTasks.filter(t => t.status === 'em-progresso').length, [safeTasks]);
+  const reviewCount = useMemo(() => safeTasks.filter(t => t.status === 'revisao').length, [safeTasks]);
+  const doneCount = useMemo(() => safeTasks.filter(t => t.status === 'concluido').length, [safeTasks]);
 
   const priorityColors = {
     high: { bg: 'bg-accent-red/10', border: 'border-accent-red/30', text: 'text-accent-red', label: 'Alta' },
@@ -352,9 +358,9 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
                               {isReview ? 'Revisão' : 'Em Progresso'}
                             </Badge>
                           </div>
-                          {mission.messages.length > 0 && (
+                          {(mission.messages ?? []).length > 0 && (
                             <p className="text-[8px] text-text-secondary mt-1.5 truncate">
-                              {mission.messages[mission.messages.length - 1].content}
+                              {(mission.messages ?? [])[((mission.messages ?? []).length) - 1]?.content}
                             </p>
                           )}
                         </div>

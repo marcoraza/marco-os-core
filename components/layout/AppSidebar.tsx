@@ -3,6 +3,7 @@ import type { View, UptimeView } from '../../lib/appTypes';
 import type { Agent } from '../../types/agents';
 import { Icon, SectionLabel, StatusDot } from '../ui';
 import { cn } from '../../utils/cn';
+import { useProjectContext } from '../../contexts/ProjectContext';
 
 interface AppSidebarProps {
   currentView: View;
@@ -67,6 +68,12 @@ export default function AppSidebar({
     return `${Math.floor(total / 3600)}h ${Math.floor((total % 3600) / 60)}m`;
   };
 
+  // Project context — filter nav items by visibleSections when a project is active
+  const projectCtx = useProjectContext();
+  const filteredNavItems = projectCtx.isPersonal
+    ? NAV_ITEMS
+    : NAV_ITEMS.filter(item => projectCtx.visibleSections.includes(item.id));
+
   if (currentView === 'mission-detail') return null;
 
   return (
@@ -75,7 +82,7 @@ export default function AppSidebar({
         <div className="px-4 mb-8">
           <SectionLabel className="mb-4 px-3">NAVEGAÇÃO</SectionLabel>
           <nav className="space-y-1">
-            {NAV_ITEMS.map(item => (
+            {filteredNavItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id as View)}

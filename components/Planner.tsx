@@ -79,12 +79,13 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
 
   // Load plan history on mount & when project changes
   useEffect(() => {
-    loadPlans().then(setHistory);
+    loadPlans().then(plans => setHistory(plans ?? [])).catch(() => setHistory([]));
   }, []);
 
   const persistPlan = async (plan: StoredPlan) => {
     await putPlan(plan);
-    setHistory(await loadPlans());
+    const plans = await loadPlans();
+    setHistory(plans ?? []);
   };
 
   const handleGenerate = async () => {
@@ -102,12 +103,12 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
       updatedAt: now,
     };
     setActivePlan(plan);
-    setSteps(plan.steps.map(s => ({ ...s })));
+    setSteps((plan.steps ?? []).map(s => ({ ...s })));
     await persistPlan(plan);
   };
 
   const toggleStep = async (idx: number) => {
-    const newSteps = steps.map((s, i) => i === idx ? { ...s, done: !s.done } : s);
+    const newSteps = (steps ?? []).map((s, i) => i === idx ? { ...s, done: !s.done } : s);
     setSteps(newSteps);
     if (activePlan) {
       const updated = { ...activePlan, steps: newSteps, updatedAt: new Date().toISOString() };
@@ -118,7 +119,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
 
   const handleExportKanban = async () => {
     if (!activePlan) return;
-    const newTasks: Omit<Task, 'id'>[] = activePlan.suggestedTasks.map(st => ({
+    const newTasks: Omit<Task, 'id'>[] = (activePlan.suggestedTasks ?? []).map(st => ({
       title: st.title,
       tag: st.tag,
       projectId,
@@ -145,16 +146,17 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
 
   const handleLoadPlan = (plan: StoredPlan) => {
     setActivePlan(plan);
-    setSteps(plan.steps.map(s => ({ ...s })));
-    setTitle(plan.title);
-    setContext(plan.context);
-    setProjectId(plan.projectId);
+    setSteps((plan.steps ?? []).map(s => ({ ...s })));
+    setTitle(plan.title ?? '');
+    setContext(plan.context ?? '');
+    setProjectId(plan.projectId ?? activeProjectId);
     setShowHistory(false);
   };
 
   const handleDeletePlan = async (id: string) => {
     await deletePlan(id);
-    setHistory(await loadPlans());
+    const plans = await loadPlans();
+    setHistory(plans ?? []);
     if (activePlan?.id === id) handleReset();
   };
 
@@ -203,7 +205,8 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     return 'text-text-secondary';
   };
 
-  const stepsProgress = steps.length > 0 ? Math.round((steps.filter(s => s.done).length / steps.length) * 100) : 0;
+  const safeSteps = steps ?? [];
+  const stepsProgress = safeSteps.length > 0 ? Math.round((safeSteps.filter(s => s.done).length / safeSteps.length) * 100) : 0;
 
   return (
     <>
@@ -280,10 +283,11 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
             <p className="text-xs text-text-secondary mt-3">Nenhum plano salvo ainda.</p>
           ) : (
             <div className="mt-3 space-y-2">
-              {history.map(plan => {
-                const proj = projects.find(p => p.id === plan.projectId);
-                const progress = plan.steps.length > 0
-                  ? Math.round((plan.steps.filter(s => s.done).length / plan.steps.length) * 100)
+              {(history ?? []).map(plan => {
+                const proj = (projects ?? []).find(p => p.id === plan.projectId);
+                const planSteps = plan.steps ?? [];
+                const progress = planSteps.length > 0
+                  ? Math.round((planSteps.filter(s => s.done).length / planSteps.length) * 100)
                   : 0;
                 return (
                   <div
@@ -394,7 +398,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
                 onChange={e => setProjectId(e.target.value)}
                 className="w-full bg-bg-base border border-border-panel rounded px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
               >
-                {projects.map(p => (
+                {(projects ?? []).map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
@@ -445,7 +449,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <div className="bg-surface border border-border-panel rounded-sm p-4">
             <SectionLabel>Objetivos</SectionLabel>
             <ul className="mt-2 space-y-1.5">
-              {activePlan.objectives.map((obj, i) => (
+              {(activePlan.objectives ?? []).map((obj, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-text-primary">
                   <Icon name="target" size="sm" className="text-accent-blue mt-0.5 shrink-0" />
                   {obj}
@@ -458,7 +462,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <div className="bg-surface border border-border-panel rounded-sm p-4">
             <SectionLabel>Passos</SectionLabel>
             <ol className="mt-2 space-y-2">
-              {steps.map((step, i) => (
+              {safeSteps.map((step, i) => (
                 <li
                   key={i}
                   onClick={() => toggleStep(i)}
@@ -487,7 +491,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <div className="bg-surface border border-border-panel rounded-sm p-4">
             <SectionLabel>RISCOS E MITIGAÇÕES</SectionLabel>
             <div className="mt-2 space-y-3">
-              {activePlan.risks.map((r, i) => (
+              {(activePlan.risks ?? []).map((r, i) => (
                 <div key={i} className="text-sm">
                   <div className="flex items-start gap-2">
                     <Icon name="warning" size="sm" className="text-accent-orange mt-0.5 shrink-0" />
@@ -506,7 +510,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <div className="bg-surface border border-border-panel rounded-sm p-4">
             <SectionLabel>Checklist Final</SectionLabel>
             <ul className="mt-2 space-y-1.5">
-              {activePlan.checklist.map((item, i) => (
+              {(activePlan.checklist ?? []).map((item, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm text-text-primary">
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-blue shrink-0" />
                   {item}
@@ -519,7 +523,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <div className="bg-surface border border-border-panel rounded-sm p-4">
             <SectionLabel>Tasks Sugeridas</SectionLabel>
             <div className="mt-2 space-y-2">
-              {activePlan.suggestedTasks.map((t, i) => (
+              {(activePlan.suggestedTasks ?? []).map((t, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-2 rounded bg-bg-base border border-border-panel">
                   <div className="flex items-center gap-2">
                     <span className={cn('text-xs font-bold uppercase', priorityColor(t.priority))}>{t.priority[0]}</span>

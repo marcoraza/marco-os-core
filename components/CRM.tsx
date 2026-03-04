@@ -131,12 +131,13 @@ const CRM: React.FC = () => {
   }, [refresh]);
 
   /* ─── Derived ───────────────────────────────────────────────────────────── */
-  const allTags = ['Todos', ...Array.from(new Set(contacts.flatMap(c => c.tags)))];
+  const allTags = ['Todos', ...Array.from(new Set((contacts ?? []).flatMap(c => c.tags ?? [])))];
 
-  const filteredContacts = contacts.filter(c => {
+  const filteredContacts = (contacts ?? []).filter(c => {
     const q = searchQuery.toLowerCase();
-    const matchesSearch = !q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q) || c.tags.some(t => t.toLowerCase().includes(q));
-    const matchesTag = activeTag === 'Todos' || c.tags.includes(activeTag);
+    const tags = c.tags ?? [];
+    const matchesSearch = !q || (c.name ?? '').toLowerCase().includes(q) || (c.company ?? '').toLowerCase().includes(q) || tags.some(t => t.toLowerCase().includes(q));
+    const matchesTag = activeTag === 'Todos' || tags.includes(activeTag);
     return matchesSearch && matchesTag;
   });
 
@@ -161,13 +162,13 @@ const CRM: React.FC = () => {
   function openEditModal(contact: StoredContact) {
     setEditingContact(contact);
     setForm({
-      name: contact.name,
-      role: contact.role,
-      company: contact.company,
-      email: contact.email,
-      phone: contact.phone,
-      status: contact.status,
-      tags: contact.tags.join(', '),
+      name: contact.name ?? '',
+      role: contact.role ?? '',
+      company: contact.company ?? '',
+      email: contact.email ?? '',
+      phone: contact.phone ?? '',
+      status: contact.status ?? 'warm',
+      tags: (contact.tags ?? []).join(', '),
       image: contact.image || '',
       notes: contact.notes || '',
     });
@@ -372,7 +373,7 @@ const CRM: React.FC = () => {
                       <h3 className="text-lg font-bold text-text-primary group-hover:text-accent-blue transition-colors">{contact.name}</h3>
                       <p className="text-xs text-text-secondary">{contact.role} @ {contact.company}</p>
                       <div className="mt-2 flex gap-2">
-                        {contact.tags.map(tag => (
+                        {(contact.tags ?? []).map(tag => (
                           <Badge key={tag} variant="neutral">{tag}</Badge>
                         ))}
                       </div>
@@ -509,7 +510,7 @@ const CRM: React.FC = () => {
                     <h2 className="text-lg font-bold text-text-primary leading-tight">{selectedContact.name}</h2>
                     <p className="text-text-secondary font-medium text-sm">{selectedContact.role} @ {selectedContact.company}</p>
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {selectedContact.tags.map(tag => (
+                      {(selectedContact.tags ?? []).map(tag => (
                          <Badge key={tag} variant="blue">{tag}</Badge>
                       ))}
                     </div>
