@@ -134,12 +134,16 @@ export function SectionJourney({
     setIsSubmitting(true);
     try {
       if (step.onStepComplete) {
-        await step.onStepComplete(allValues);
+        await Promise.race([
+          step.onStepComplete(allValues),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
+        ]);
       }
     } catch {
       // Data is fire-and-forget, continue anyway
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
 
     // Advance
     if (currentStep < totalSteps - 1) {
@@ -149,7 +153,10 @@ export function SectionJourney({
       // Last step -> completion
       if (config.onJourneyComplete) {
         try {
-          await config.onJourneyComplete(allValues);
+          await Promise.race([
+            config.onJourneyComplete(allValues),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
+          ]);
         } catch {
           // fire-and-forget
         }
