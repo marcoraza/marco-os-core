@@ -72,7 +72,7 @@ export function DeepWorkPanel({ isOpen, onClose, flowState, tasks = [] }: DeepWo
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="fixed right-0 top-0 h-full w-[320px] z-40 bg-surface border-l border-border-panel flex flex-col"
+          className="fixed right-0 top-0 h-full w-full sm:w-[320px] z-40 bg-surface border-l border-border-panel flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-panel shrink-0">

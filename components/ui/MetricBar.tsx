@@ -17,7 +17,7 @@ interface MetricBarProps {
 
 export function MetricBar({ metrics, className }: MetricBarProps) {
   return (
-    <div className={cn('flex gap-6 py-2 px-4 border-b border-border-panel bg-bg-base', className)}>
+    <div className={cn('flex flex-wrap gap-x-4 gap-y-2 py-2 px-4 border-b border-border-panel bg-bg-base', className)}>
       {metrics.map((metric, i) => (
         <div key={i} className="flex items-center gap-1.5">
           {metric.icon && (

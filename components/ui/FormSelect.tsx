@@ -37,6 +37,8 @@ export function FormSelect({
           value={value}
           onChange={onChange}
           required={required}
+          aria-required={required ? 'true' : undefined}
+          aria-invalid={error ? 'true' : undefined}
           className={cn(
             'appearance-none bg-bg-base border border-border-panel rounded-sm px-3 py-2 text-sm text-text-primary',
             'focus:border-brand-mint/50 focus:ring-1 focus:ring-brand-mint/30 focus:outline-none',

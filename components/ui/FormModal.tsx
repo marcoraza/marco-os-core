@@ -123,7 +123,7 @@ export function FormModal({ title, fields, onSubmit, onClose, isOpen }: FormModa
         >
           <motion.div
             key="modal-card"
-            className="bg-surface border border-border-panel rounded-sm w-[480px] max-w-[90vw] p-4"
+            className="bg-surface border border-border-panel rounded-sm w-full sm:w-[480px] mx-4 sm:mx-0 p-4"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}

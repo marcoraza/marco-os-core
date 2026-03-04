@@ -6,7 +6,6 @@ import { useGhostMode } from './hooks/useGhostMode';
 import type { StoredAgent, StoredContact, StoredEvent, StoredNote } from './data/models';
 import { bootstrapIfEmpty, bootstrapAgentsIfEmpty, loadAll, loadAgents, loadContacts, putAgent, saveEvents, saveNotes, saveProjects, saveTasks } from './data/repository';
 import { defaultAgents } from './data/agentsSeed';
-import Dashboard from './components/Dashboard';
 import type { Agent } from './types/agents';
 import type { View, Theme, Project, Task } from './lib/appTypes';
 
@@ -21,6 +20,7 @@ const DeepWorkPanel = lazy(() => import('./components/focus/DeepWorkPanel').then
 const QuickCaptureModal = lazy(() => import('./components/capture/QuickCaptureModal').then(m => ({ default: m.QuickCaptureModal })));
 
 // Lazy-loaded pages (code-split)
+const Dashboard = lazy(() => import('./components/Dashboard'));
 const Finance = lazy(() => import('./components/Finance'));
 const Health = lazy(() => import('./components/Health'));
 const Learning = lazy(() => import('./components/Learning'));
