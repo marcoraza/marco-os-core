@@ -1,8 +1,10 @@
 import React, { useState, useRef, useCallback, Suspense } from 'react';
 import type { StoredNote } from '../data/models';
-import { Icon, Card, SectionLabel, TabNav } from './ui';
+import { Icon, Card, SectionLabel, TabNav, FormModal, showToast } from './ui';
 import { cn } from '../utils/cn';
 import { AtomicNoteRenderer } from './notes/AtomicNoteRenderer';
+import { braindumpConfig } from '../lib/formConfigs';
+import { syncToNotion } from '../lib/notionSync';
 
 const BrainDumpView = React.lazy(() => import('./notes/BrainDumpView').then(m => ({ default: m.BrainDumpView })));
 
@@ -133,6 +135,12 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   const [newTitle, setNewTitle] = useState('');
   const [showListMobile, setShowListMobile] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
+  const [showBrainDumpForm, setShowBrainDumpForm] = useState(false);
+
+  const handleBrainDumpSubmit = async (data: Record<string, unknown>) => {
+    syncToNotion('braindump', data);
+    showToast('Brain dump salvo');
+  };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const projectNotes = notes.filter(n => !n.projectId || n.projectId === activeProjectId);
@@ -173,6 +181,16 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
       {/* Brain Dump Tab */}
       {activeTab === 'braindump' && (
         <div className="flex-1 overflow-y-auto">
+          <div className="flex justify-end px-4 pt-3">
+            <button
+              onClick={() => setShowBrainDumpForm(true)}
+              className="flex items-center gap-1 px-3 py-1.5 min-h-[44px] rounded-sm text-[9px] font-bold uppercase tracking-widest bg-brand-mint/10 border border-brand-mint/30 text-brand-mint hover:bg-brand-mint/20 transition-colors focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none"
+              aria-label="Novo brain dump"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>add</span>
+              Novo
+            </button>
+          </div>
           <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-24 w-full m-4" />}>
             <BrainDumpView />
           </Suspense>
@@ -354,6 +372,14 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
       </div>
       </div>
       )} {/* end editor tab */}
+
+      <FormModal
+        title={braindumpConfig.title}
+        fields={braindumpConfig.fields}
+        isOpen={showBrainDumpForm}
+        onClose={() => setShowBrainDumpForm(false)}
+        onSubmit={handleBrainDumpSubmit}
+      />
     </div>
   );
 };

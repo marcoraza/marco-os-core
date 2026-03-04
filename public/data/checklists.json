@@ -2,8 +2,8 @@
   "_meta": {
     "db_id": "30fb72d5-042d-81d2-bc6b-e2515ca8d3e2",
     "db_name": "checklists",
-    "synced_at": "2026-03-03T23:30:28.980870+00:00",
-    "count": 14
+    "synced_at": "2026-03-04T00:30:08.091661+00:00",
+    "count": 15
   },
   "items": [
     {
@@ -311,6 +311,27 @@
       "Prazo": null,
       "Total": 17,
       "Name": "Revisão Crons 02/03/2026"
+    },
+    {
+      "_id": "318b72d5-042d-81bb-b191-daf098332785",
+      "_created_time": "2026-03-03T23:45:00.000Z",
+      "_edited_time": "2026-03-03T23:45:00.000Z",
+      "_url": "https://www.notion.so/Revis-o-Crons-03-03-2026-318b72d5042d81bbb191daf098332785",
+      "Responsável": null,
+      "Contexto": "15 execuções/dia | 1 com erro | 2 desativados",
+      "Prioridade": null,
+      "Progresso": 93,
+      "Data": "2026-03-03",
+      "Tipo": "Diário",
+      "Status": "Parcial",
+      "Projeto": null,
+      "Tags": [
+        "Cron"
+      ],
+      "Feitos": 14,
+      "Prazo": null,
+      "Total": 15,
+      "Name": "Revisão Crons 03/03/2026"
     }
   ]
 }

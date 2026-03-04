@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, TabNav, AlertBanner, SourceBadge } from './ui';
+import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, TabNav, AlertBanner, SourceBadge, FormModal } from './ui';
 import { useNotionData } from '../contexts/NotionDataContext';
+import { reunioesConfig } from '../lib/formConfigs';
+import { syncToNotion } from '../lib/notionSync';
+import { putReuniao } from '../data/repository';
+import type { StoredReuniao } from '../data/models';
 
 const ReunioesView = React.lazy(() => import('./crm/ReunioesView').then(m => ({ default: m.ReunioesView })));
 import type { StoredContact } from '../data/models';
@@ -83,6 +87,22 @@ const CRM: React.FC = () => {
   // ─── Notion data + tab state ─────────────────────────────────────────────
   const { reunioes } = useNotionData();
   const [activeTab, setActiveTab] = useState<'contatos' | 'reunioes'>('contatos');
+  const [showReuniaoForm, setShowReuniaoForm] = useState(false);
+
+  const handleReuniaoSubmit = async (data: Record<string, unknown>) => {
+    const entry: StoredReuniao = {
+      id: crypto.randomUUID(),
+      name: String(data.name ?? ''),
+      date: String(data.date ?? ''),
+      participants: String(data.participants ?? ''),
+      objective: String(data.objective ?? ''),
+      status: String(data.status ?? ''),
+      createdAt: new Date().toISOString(),
+    };
+    await putReuniao(entry);
+    syncToNotion('meeting', data);
+    showToast('Reunião salva');
+  };
   const crmTabs = [
     { id: 'contatos', label: 'Contatos' },
     { id: 'reunioes', label: 'Reuniões' },
@@ -251,12 +271,24 @@ const CRM: React.FC = () => {
       )}
 
       {/* ─── Tab Navigation ────────────────────────────────────────────── */}
-      <div className="shrink-0">
-        <TabNav
-          tabs={crmTabs}
-          activeTab={activeTab}
-          onTabChange={(id) => setActiveTab(id as any)}
-        />
+      <div className="shrink-0 flex items-center gap-2 pr-4">
+        <div className="flex-1">
+          <TabNav
+            tabs={crmTabs}
+            activeTab={activeTab}
+            onTabChange={(id) => setActiveTab(id as any)}
+          />
+        </div>
+        {activeTab === 'reunioes' && (
+          <button
+            onClick={() => setShowReuniaoForm(true)}
+            className="flex items-center gap-1 px-3 py-1.5 min-h-[44px] rounded-sm text-[9px] font-bold uppercase tracking-widest bg-brand-mint/10 border border-brand-mint/30 text-brand-mint hover:bg-brand-mint/20 transition-colors focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none shrink-0"
+            aria-label="Nova reunião"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>add</span>
+            Reunião
+          </button>
+        )}
       </div>
 
       {/* ─── Reuniões Tab ──────────────────────────────────────────────── */}
@@ -779,6 +811,14 @@ const CRM: React.FC = () => {
           </div>
         </div>
       )}
+
+      <FormModal
+        title={reunioesConfig.title}
+        fields={reunioesConfig.fields}
+        isOpen={showReuniaoForm}
+        onClose={() => setShowReuniaoForm(false)}
+        onSubmit={handleReuniaoSubmit}
+      />
     </div>
   );
 };

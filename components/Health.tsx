@@ -4,7 +4,11 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, ResponsiveContainer
 } from 'recharts';
-import { Icon, SectionLabel, StatusDot, TabNav, Badge } from './ui';
+import { Icon, SectionLabel, StatusDot, TabNav, Badge, FormModal, showToast } from './ui';
+import { healthConfig } from '../lib/formConfigs';
+import { syncToNotion } from '../lib/notionSync';
+import { putHealthEntry } from '../data/repository';
+import type { StoredHealthEntry } from '../data/models';
 
 const ActivitiesView = React.lazy(() => import('./health/ActivitiesView').then(m => ({ default: m.ActivitiesView })));
 
@@ -59,6 +63,23 @@ const HealthTooltip = ({ active, payload, label }: any) => {
 
 const Health: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'daily' | 'trends' | 'activities'>('daily');
+  const [showForm, setShowForm] = useState(false);
+
+  const handleHealthSubmit = async (data: Record<string, unknown>) => {
+    const entry: StoredHealthEntry = {
+      id: crypto.randomUUID(),
+      name: String(data.name ?? ''),
+      tipo: String(data.tipo ?? ''),
+      valor: String(data.valor ?? ''),
+      duracao: String(data.duracao ?? ''),
+      data: String(data.data ?? ''),
+      notas: String(data.notas ?? ''),
+      createdAt: new Date().toISOString(),
+    };
+    await putHealthEntry(entry);
+    syncToNotion('saude', data);
+    showToast('Atividade salva');
+  };
   
   // Daily Log State — persisted to localStorage per date
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -110,8 +131,16 @@ const Health: React.FC = () => {
             accentColor="orange" 
         />
         
-        {/* Status Badge - Positioned absolutely to align with TabNav */}
-        <div className="absolute top-0 right-6 h-full flex items-center pointer-events-none">
+        {/* Status Badge + NOVO button */}
+        <div className="absolute top-0 right-6 h-full flex items-center gap-2 pointer-events-none">
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-1 px-2 py-1 min-h-[32px] rounded-sm text-[9px] font-bold uppercase tracking-widest bg-brand-mint/10 border border-brand-mint/30 text-brand-mint hover:bg-brand-mint/20 transition-colors focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none pointer-events-auto"
+              aria-label="Nova atividade"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>add</span>
+              Novo
+            </button>
             <div className="flex items-center gap-2 bg-surface px-2 py-1 rounded border border-border-panel pointer-events-auto">
                 <StatusDot 
                     color={activeTab === 'trends' ? 'mint' : 'orange'} 
@@ -468,6 +497,14 @@ const Health: React.FC = () => {
         )}
 
       </div>
+
+      <FormModal
+        title={healthConfig.title}
+        fields={healthConfig.fields}
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSubmit={handleHealthSubmit}
+      />
     </div>
   );
 };

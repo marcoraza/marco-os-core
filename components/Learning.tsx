@@ -1,6 +1,10 @@
 import React, { useState, Suspense } from 'react';
-import { Icon, Badge, SectionLabel, TabNav, EmptyState, SyncBadge } from './ui';
+import { Icon, Badge, SectionLabel, TabNav, EmptyState, SyncBadge, FormModal, showToast } from './ui';
 import { useNotionData } from '../contexts/NotionDataContext';
+import { skillsConfig } from '../lib/formConfigs';
+import { syncToNotion } from '../lib/notionSync';
+import { putSkill } from '../data/repository';
+import type { StoredSkill } from '../data/models';
 
 const LearningExploration = React.lazy(() => import('./learning/LearningExploration').then(m => ({ default: m.LearningExploration })));
 const CreatorsRoster = React.lazy(() => import('./learning/CreatorsRoster').then(m => ({ default: m.CreatorsRoster })));
@@ -30,6 +34,22 @@ const Learning: React.FC = () => {
   const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [knowledgeSearch, setKnowledgeSearch] = useState('');
   const { research } = useNotionData();
+  const [showSkillForm, setShowSkillForm] = useState(false);
+
+  const handleSkillSubmit = async (data: Record<string, unknown>) => {
+    const entry: StoredSkill = {
+      id: crypto.randomUUID(),
+      name: String(data.name ?? ''),
+      categoria: String(data.categoria ?? ''),
+      nivel: String(data.nivel ?? ''),
+      progresso: String(data.progresso ?? ''),
+      notas: String(data.notas ?? ''),
+      createdAt: new Date().toISOString(),
+    };
+    await putSkill(entry);
+    syncToNotion('skill', data);
+    showToast('Skill salva');
+  };
 
   const tabs = [
     { id: 'curriculum', label: 'Currículo' },
@@ -202,7 +222,18 @@ const Learning: React.FC = () => {
                     </div>
                 </div>
                 {/* SkillsWidget — Sprint A addition */}
-                <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-12 w-full mt-6" />}>
+                <div className="flex items-center justify-between mt-6 mb-2">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Skills</span>
+                  <button
+                    onClick={() => setShowSkillForm(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 min-h-[44px] rounded-sm text-[9px] font-bold uppercase tracking-widest bg-brand-mint/10 border border-brand-mint/30 text-brand-mint hover:bg-brand-mint/20 transition-colors focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none"
+                    aria-label="Nova skill"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>add</span>
+                    Skill
+                  </button>
+                </div>
+                <Suspense fallback={<div className="animate-pulse bg-border-panel rounded-sm h-12 w-full" />}>
                   <SkillsWidget />
                 </Suspense>
             </div>
@@ -572,6 +603,14 @@ const Learning: React.FC = () => {
           )}
         </aside>
       </main>
+
+      <FormModal
+        title={skillsConfig.title}
+        fields={skillsConfig.fields}
+        isOpen={showSkillForm}
+        onClose={() => setShowSkillForm(false)}
+        onSubmit={handleSkillSubmit}
+      />
     </div>
   );
 };

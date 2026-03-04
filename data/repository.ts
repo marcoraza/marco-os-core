@@ -1,4 +1,4 @@
-import type { StoredAgent, StoredAgentRun, StoredContact, StoredEvent, StoredNote, StoredPlan, StoredProject, StoredTask } from './models';
+import type { StoredAgent, StoredAgentRun, StoredContact, StoredEvent, StoredFinanceEntry, StoredHealthEntry, StoredNote, StoredPlan, StoredProject, StoredReuniao, StoredSkill, StoredTask } from './models';
 import { getDb } from './db';
 
 export type BootstrapPayload = {
@@ -219,4 +219,80 @@ export async function bootstrapAgentsIfEmpty(agents: StoredAgent[]) {
     for (const a of agents) await tx.store.put(a);
     await tx.done;
   }
+}
+
+// ─── Finance Entries CRUD ─────────────────────────────────────────────────────
+
+export async function loadFinanceEntries(): Promise<StoredFinanceEntry[]> {
+  const db = await getDb();
+  const all = await db.getAll('financeEntries');
+  all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return all;
+}
+
+export async function putFinanceEntry(entry: StoredFinanceEntry): Promise<void> {
+  const db = await getDb();
+  await db.put('financeEntries', entry);
+}
+
+export async function deleteFinanceEntry(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete('financeEntries', id);
+}
+
+// ─── Health Entries CRUD ──────────────────────────────────────────────────────
+
+export async function loadHealthEntries(): Promise<StoredHealthEntry[]> {
+  const db = await getDb();
+  const all = await db.getAll('healthEntries');
+  all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return all;
+}
+
+export async function putHealthEntry(entry: StoredHealthEntry): Promise<void> {
+  const db = await getDb();
+  await db.put('healthEntries', entry);
+}
+
+export async function deleteHealthEntry(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete('healthEntries', id);
+}
+
+// ─── Reunioes CRUD ────────────────────────────────────────────────────────────
+
+export async function loadReunioes(): Promise<StoredReuniao[]> {
+  const db = await getDb();
+  const all = await db.getAll('reunioes');
+  all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return all;
+}
+
+export async function putReuniao(reuniao: StoredReuniao): Promise<void> {
+  const db = await getDb();
+  await db.put('reunioes', reuniao);
+}
+
+export async function deleteReuniao(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete('reunioes', id);
+}
+
+// ─── Skills CRUD ──────────────────────────────────────────────────────────────
+
+export async function loadSkills(): Promise<StoredSkill[]> {
+  const db = await getDb();
+  const all = await db.getAll('skills');
+  all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return all;
+}
+
+export async function putSkill(skill: StoredSkill): Promise<void> {
+  const db = await getDb();
+  await db.put('skills', skill);
+}
+
+export async function deleteSkill(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete('skills', id);
 }
