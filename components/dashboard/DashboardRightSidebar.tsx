@@ -1,8 +1,10 @@
+import React, { useCallback } from 'react';
 import type { Task } from '../../lib/appTypes';
 import type { StoredEvent } from '../../data/models';
-import { Icon, Badge, Card } from '../ui';
+import { Icon, Badge, Card, showToast } from '../ui';
 import { cn } from '../../utils/cn';
 import AgendaWidget from '../AgendaWidget';
+import { useSupabaseData } from '../../contexts/SupabaseDataContext';
 
 interface DashboardRightSidebarProps {
   criticalMission: Task | undefined;
@@ -10,29 +12,25 @@ interface DashboardRightSidebarProps {
   events: StoredEvent[];
   setEvents: React.Dispatch<React.SetStateAction<StoredEvent[]>>;
   activeProjectId: string;
+  onNavigate?: (view: string) => void;
 }
 
-const QUICK_ACTIONS = [
-  { icon: 'summarize',     label: 'BRIEFING DIÁRIO', desc: 'Resumo do dia pelo Frank' },
-  { icon: 'mail',          label: 'Triar Inbox',      desc: 'Escanear emails pendentes' },
-  { icon: 'monitor_heart', label: 'Health Check',     desc: 'Checar status dos sistemas' },
-  { icon: 'sync',          label: 'SYNC MEMÓRIA',     desc: 'Destilar memórias recentes' },
-  { icon: 'bolt',          label: 'TASK RÁPIDA',      desc: 'Criar e delegar tarefa' },
-] as const;
+const API_URL = (import.meta.env.VITE_FORM_API_URL as string | undefined) ?? 'https://api.clawdia.com.br/api';
+const API_TOKEN = (import.meta.env.VITE_FORM_API_TOKEN as string | undefined) ?? '';
 
 const NOTIFICATIONS = [
-  { icon: 'warning',    color: 'text-accent-orange', text: 'Lint com alertas — QA verificando',      time: '2min' },
-  { icon: 'check_circle', color: 'text-brand-mint',  text: 'Build #42 passou com sucesso',           time: '8min' },
-  { icon: 'mail',       color: 'text-accent-blue',   text: '3 emails novos triados pelo Frank',      time: '15min' },
-  { icon: 'psychology', color: 'text-accent-purple', text: 'Planner atualizou roadmap Q1',           time: '22min' },
-  { icon: 'payments',   color: 'text-accent-red',    text: 'Fatura cartão vence amanhã',             time: '1h' },
+  { icon: 'warning',      color: 'text-accent-orange', text: 'Lint com alertas — QA verificando',   time: '2min',  section: 'agents-overview' },
+  { icon: 'check_circle', color: 'text-brand-mint',    text: 'Build #42 passou com sucesso',        time: '8min',  section: 'agents-overview' },
+  { icon: 'mail',         color: 'text-accent-blue',   text: '3 emails novos triados pelo Frank',   time: '15min', section: 'agents-overview' },
+  { icon: 'psychology',   color: 'text-accent-purple', text: 'Planner atualizou roadmap Q1',        time: '22min', section: 'planner'         },
+  { icon: 'payments',     color: 'text-accent-red',    text: 'Fatura cartão vence amanhã',          time: '1h',    section: 'finance'         },
 ] as const;
 
 const ACTIVITY_LOG = [
-  { time: '14:32', user: 'Frank', action: 'Atualizou status de infraestrutura', type: 'system' },
-  { time: '12:15', user: 'MA',    action: 'Concluiu "Revisão de PR"',           type: 'user' },
-  { time: '09:45', user: 'Agente E2', action: 'Novo lead qualificado no CRM',   type: 'agent' },
-  { time: '08:00', user: 'System',    action: 'Backup diário realizado',         type: 'system' },
+  { time: '14:32', user: 'Frank',     action: 'Atualizou status de infraestrutura', type: 'system' },
+  { time: '12:15', user: 'MA',        action: 'Concluiu "Revisão de PR"',           type: 'user'   },
+  { time: '09:45', user: 'Agente E2', action: 'Novo lead qualificado no CRM',       type: 'agent'  },
+  { time: '08:00', user: 'System',    action: 'Backup diário realizado',             type: 'system' },
 ] as const;
 
 export default function DashboardRightSidebar({
@@ -41,7 +39,54 @@ export default function DashboardRightSidebar({
   events,
   setEvents,
   activeProjectId,
+  onNavigate,
 }: DashboardRightSidebarProps) {
+  const { refetch } = useSupabaseData();
+
+  // ─── Quick Action handlers ────────────────────────────────────────────────
+
+  const handleBriefingDiario = useCallback(async () => {
+    showToast('Buscando briefing...');
+    try {
+      const res = await fetch(`${API_URL}/standup`, {
+        headers: API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {},
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json() as { summary?: string; message?: string };
+      const msg = data.summary ?? data.message ?? 'Briefing carregado com sucesso';
+      showToast(msg.slice(0, 120));
+    } catch {
+      showToast('Briefing indisponível no momento. Tente mais tarde.');
+    }
+  }, []);
+
+  const handleTriarInbox = useCallback(() => {
+    onNavigate?.('notes');
+  }, [onNavigate]);
+
+  const handleHealthCheck = useCallback(() => {
+    onNavigate?.('health');
+  }, [onNavigate]);
+
+  const handleSyncMemoria = useCallback(async () => {
+    showToast('Sincronizando dados...');
+    await refetch();
+    showToast('Dados sincronizados');
+  }, [refetch]);
+
+  const handleTaskRapida = useCallback(() => {
+    onNavigate?.('dashboard');
+    showToast('Use o Quick Capture no topo do kanban para criar tarefas');
+  }, [onNavigate]);
+
+  const QUICK_ACTIONS = [
+    { icon: 'summarize',     label: 'BRIEFING DIÁRIO', desc: 'Resumo do dia pelo Frank',    handler: handleBriefingDiario },
+    { icon: 'mail',          label: 'Triar Inbox',     desc: 'Escanear emails pendentes',   handler: handleTriarInbox    },
+    { icon: 'monitor_heart', label: 'Health Check',    desc: 'Checar status dos sistemas',  handler: handleHealthCheck   },
+    { icon: 'sync',          label: 'SYNC MEMÓRIA',    desc: 'Destilar memórias recentes',  handler: handleSyncMemoria   },
+    { icon: 'bolt',          label: 'TASK RÁPIDA',     desc: 'Criar e delegar tarefa',      handler: handleTaskRapida    },
+  ] as const;
+
   return (
     <aside className="w-72 border-l border-border-panel bg-header-bg flex flex-col shrink-0 z-10 hidden xl:flex overflow-hidden">
 
@@ -52,9 +97,10 @@ export default function DashboardRightSidebar({
           AÇÕES RÁPIDAS
         </span>
         <div className="space-y-1">
-          {QUICK_ACTIONS.map((fn, i) => (
+          {QUICK_ACTIONS.map((fn) => (
             <button
-              key={i}
+              key={fn.label}
+              onClick={fn.handler}
               className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-sm hover:bg-surface border border-transparent hover:border-border-panel transition-all group text-left"
             >
               <div className="size-7 rounded-sm bg-brand-mint/5 border border-brand-mint/10 flex items-center justify-center shrink-0 group-hover:border-brand-mint/30 transition-colors">
@@ -104,13 +150,17 @@ export default function DashboardRightSidebar({
         </span>
         <div className="space-y-1.5">
           {NOTIFICATIONS.map((n, i) => (
-            <div key={i} className="flex items-start gap-2 px-2 py-1.5 rounded-sm hover:bg-surface transition-colors cursor-pointer">
+            <button
+              key={i}
+              onClick={() => onNavigate?.(n.section)}
+              className="w-full flex items-start gap-2 px-2 py-1.5 rounded-sm hover:bg-surface transition-colors cursor-pointer text-left"
+            >
               <Icon name={n.icon} size="xs" className={cn('shrink-0 mt-0.5', n.color)} />
               <div className="min-w-0 flex-1">
                 <p className="text-[9px] text-text-primary leading-tight">{n.text}</p>
                 <p className="text-[7px] font-mono text-text-secondary mt-0.5">{n.time}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

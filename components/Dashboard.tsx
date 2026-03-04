@@ -25,10 +25,11 @@ interface DashboardProps {
   onAddTask?: () => void;
   events: StoredEvent[];
   setEvents: React.Dispatch<React.SetStateAction<StoredEvent[]>>;
+  onNavigate?: (view: string) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
-  tasks, setTasks, onTaskClick, activeProjectId, projects, onAddTask, events, setEvents,
+  tasks, setTasks, onTaskClick, activeProjectId, projects, onAddTask, events, setEvents, onNavigate,
 }) => {
   const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -232,6 +233,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         events={events}
         setEvents={setEvents}
         activeProjectId={activeProjectId}
+        onNavigate={onNavigate}
       />
     </div>
   );

@@ -24,3 +24,4 @@ export { SectionJourney } from './SectionJourney';
 export { FilterPills } from './FilterPills';
 export { JourneyOverlay } from './JourneyOverlay';
 export { JourneyTriggerButton } from './JourneyTriggerButton';
+export { DataBadge } from './DataBadge';

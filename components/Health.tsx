@@ -4,7 +4,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, ResponsiveContainer
 } from 'recharts';
-import { Icon, SectionLabel, StatusDot, TabNav, Badge, JourneyOverlay, JourneyTriggerButton } from './ui';
+import { Icon, SectionLabel, StatusDot, TabNav, Badge, JourneyOverlay, JourneyTriggerButton, DataBadge } from './ui';
 import { useTabSetup } from '../hooks/useTabSetup';
 import { healthDailyJourney, healthTrendsJourney } from '../lib/journeyConfigs/health';
 
@@ -150,6 +150,9 @@ const Health: React.FC = () => {
     <div className="flex flex-col h-full bg-bg-base font-sans text-text-primary overflow-hidden">
       {/* Navigation Tabs (Replaces Header) */}
       <div className="relative bg-bg-base shrink-0">
+        <div className="absolute top-2 right-4 z-10">
+          <DataBadge isReal={false} />
+        </div>
         <TabNav
             tabs={tabs}
             activeTab={activeTab}

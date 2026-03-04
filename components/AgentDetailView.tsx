@@ -12,6 +12,7 @@ import AgentHeartbeat from './agents/AgentHeartbeat';
 import AgentMemory from './agents/AgentMemory';
 import AgentConfig from './agents/AgentConfig';
 import TokenUsageCard from './agents/TokenUsageCard';
+import AgentDataActions from './agents/AgentDataActions';
 
 const AgentStandup = lazy(() => import('./agents/AgentStandup'));
 const ActivityFeed = lazy(() => import('./agents/ActivityFeed'));
@@ -44,6 +45,7 @@ const agentTabs: Tab[] = [
   { id: 'heartbeat', label: 'Heartbeat', icon: 'monitor_heart' },
   { id: 'memoria', label: 'Memória', icon: 'memory' },
   { id: 'config', label: 'Config', icon: 'settings' },
+  { id: 'dados', label: 'Dados', icon: 'database' },
   { id: 'standup', label: 'Standup', icon: 'summarize' },
   { id: 'atividade', label: 'Atividade', icon: 'timeline' },
   { id: 'chat', label: 'Chat', icon: 'chat' },
@@ -158,6 +160,7 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
         {activeTab === 'heartbeat' && <AgentHeartbeat agentId={agentId} />}
         {activeTab === 'memoria' && <AgentMemory agentId={agentId} />}
         {activeTab === 'config' && <AgentConfig agentId={agentId} />}
+        {activeTab === 'dados' && <AgentDataActions agentId={agentId} agentName={agent.name} />}
         {activeTab === 'standup' && (
           <Suspense fallback={<TabFallback />}>
             <AgentStandup />

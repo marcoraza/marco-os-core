@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Icon, Card, SectionLabel } from '../ui';
+import { Icon, Card, SectionLabel, DataBadge } from '../ui';
 import { detailedTransactions, pieData, PIE_COLORS, cashflowData } from './data';
 import { formatBRL } from './utils';
 import { loadFinanceEntries } from '../../data/repository';
@@ -44,6 +44,11 @@ export default function FinanceOverview({ refreshKey = 0 }: FinanceOverviewProps
     : detailedTransactions.slice(0, 5);
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-300 h-full overflow-hidden">
+
+      {/* Data badge */}
+      <div className="flex justify-end shrink-0">
+        <DataBadge isReal={hasRealData} lastSync={hasRealData ? new Date().toISOString() : null} />
+      </div>
 
       {/* ROW 1: Metrics + Revenue Goal */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 shrink-0">

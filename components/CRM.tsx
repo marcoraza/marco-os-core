@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, FormModal, JourneyOverlay, JourneyTriggerButton } from './ui';
+import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, FormModal, JourneyOverlay, JourneyTriggerButton, DataBadge } from './ui';
 import type { StoredContact, StoredReuniao } from '../data/models';
 import { loadContacts, putContact, deleteContact as deleteContactDb, bootstrapContactsIfEmpty, putReuniao } from '../data/repository';
 import { reunioesFields } from '../lib/formConfigs';
@@ -271,6 +271,7 @@ const CRM: React.FC = () => {
             <p className="text-xs text-text-secondary mt-1">Gerencie conexões estratégicas e mantenha sua rede ativa.</p>
           </div>
           <div className="flex items-center gap-4">
+            <DataBadge isReal={contacts.length > SEED_CONTACTS.length} />
             <JourneyTriggerButton
               isConfigured={isSetupDone}
               onClick={() => setShowJourney(true)}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Icon, Card, SectionLabel, FormModal, JourneyOverlay, JourneyTriggerButton } from './ui';
+import { Icon, Card, SectionLabel, FormModal, JourneyOverlay, JourneyTriggerButton, DataBadge } from './ui';
 import type { Project, Task } from '../lib/appTypes';
 import type { StoredPlan, StoredPlanStep, StoredContentEntry, StoredProjectEntry } from '../data/models';
 import { loadPlans, putPlan, deletePlan, putContentEntry, putProjetosEntry } from '../data/repository';
@@ -224,6 +224,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
           <p className="text-xs text-text-secondary mt-0.5">Ideia &rarr; Plano &rarr; Tarefas &rarr; Execução</p>
         </div>
         <div className="flex items-center gap-2">
+          <DataBadge isReal={history.length > 0} lastSync={history.length > 0 ? history[0]?.updatedAt ?? null : null} />
           <JourneyTriggerButton
             isConfigured={isSetupDone}
             onClick={() => setShowJourney(true)}

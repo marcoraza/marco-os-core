@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Icon, Badge, SectionLabel, TabNav, EmptyState, JourneyOverlay, JourneyTriggerButton } from './ui';
+import { Icon, Badge, SectionLabel, TabNav, EmptyState, JourneyOverlay, JourneyTriggerButton, DataBadge } from './ui';
 import { useTabSetup } from '../hooks/useTabSetup';
 import { learningCurriculumJourney, learningKnowledgeJourney, learningResourcesJourney } from '../lib/journeyConfigs/learning';
 
@@ -78,7 +78,8 @@ const Learning: React.FC = () => {
               if (setup) setup.reset();
             }}
         />
-        <div className="absolute top-0 right-6 h-full flex items-center pointer-events-none">
+        <div className="absolute top-0 right-6 h-full flex items-center gap-3 pointer-events-none">
+          <DataBadge isReal={false} className="pointer-events-auto" />
           <JourneyTriggerButton
             isConfigured={activeSetup.isSetupDone}
             onClick={() => setShowJourney(true)}

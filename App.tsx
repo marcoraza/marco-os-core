@@ -499,6 +499,7 @@ const App: React.FC = () => {
                     onAddTask={() => setIsMissionModalOpen(true)}
                     events={events}
                     setEvents={setEvents}
+                    onNavigate={navigate}
                   />
                 )}
                 {currentView === 'finance'         && <Finance />}

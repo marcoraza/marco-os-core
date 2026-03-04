@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import type { StoredNote } from '../data/models';
-import { Icon, Card, SectionLabel, FormModal, showToast, JourneyOverlay, JourneyTriggerButton } from './ui';
+import { Icon, Card, SectionLabel, FormModal, showToast, JourneyOverlay, JourneyTriggerButton, DataBadge } from './ui';
 import { cn } from '../utils/cn';
 import { braindumpFields } from '../lib/formConfigs';
 import { syncToNotion } from '../lib/notionSync';
@@ -199,10 +199,13 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
             <p className="text-[9px] text-text-secondary font-bold uppercase tracking-widest">{projectNotes.length} notas</p>
           </div>
         </div>
-        <JourneyTriggerButton
-          isConfigured={isSetupDone}
-          onClick={() => setShowJourney(true)}
-        />
+        <div className="flex items-center gap-2">
+          <DataBadge isReal={projectNotes.length > 0} lastSync={selected?.updatedAt ?? null} />
+          <JourneyTriggerButton
+            isConfigured={isSetupDone}
+            onClick={() => setShowJourney(true)}
+          />
+        </div>
       </div>
 
       {/* Create */}
