@@ -22,12 +22,14 @@ import {
   cronJobs as mockCronJobs,
   kanbanTasks as mockKanbanTasks,
   tokenUsages as mockTokenUsages,
+  memoryArtifacts as mockMemoryArtifacts,
   type Agent,
   type Execution,
   type HeartbeatEvent,
   type CronJob as MockCronJob,
   type KanbanTask as MockKanbanTask,
   type TokenUsage,
+  type MemoryArtifact,
 } from '../data/agentMockData';
 
 // ─── CROSS-DOMAIN SUMMARY TYPE ──────────────────────────────────────────────
@@ -85,6 +87,10 @@ interface OpenClawContextType {
   // Token Usage
   tokenUsages: TokenUsage[];
 
+  // Memory Artifacts
+  memoryArtifacts: MemoryArtifact[];
+  fetchMemoryContent: (path: string) => Promise<string>;
+
   // Cross-Domain
   crossDomainSummary: CrossDomainSummary;
 
@@ -122,11 +128,14 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
   const [liveHeartbeats, setLiveHeartbeats] = useState<HeartbeatEvent[]>([]);
   const [liveCronJobs, setLiveCronJobs] = useState<MockCronJob[]>([]);
   const [liveKanbanTasks, setLiveKanbanTasks] = useState<MockKanbanTask[]>([]);
+  const [liveTokenUsages, setLiveTokenUsages] = useState<TokenUsage[]>([]);
+  const [liveMemory, setLiveMemory] = useState<MemoryArtifact[]>([]);
 
   // Use live data when available, mock data as final fallback
   const agents = liveAgents.length > 0 ? liveAgents : mockAgents;
   const executions = liveExecutions.length > 0 ? liveExecutions : mockExecutions;
-  const heartbeats = isLive && liveHeartbeats.length > 0 ? liveHeartbeats : mockHeartbeats;
+  const heartbeats = liveHeartbeats.length > 0 ? liveHeartbeats : mockHeartbeats;
+  const tokenUsages = liveTokenUsages.length > 0 ? liveTokenUsages : mockTokenUsages;
   // Cron jobs: live gateway > static JSON polling > mock fallback
   const cronJobs = liveCronJobs.length > 0 ? liveCronJobs : mockCronJobs;
   // Kanban: live gateway > static JSON polling > mock fallback
@@ -344,10 +353,56 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
       } catch { /* keep current state */ }
     };
 
+    const pollHeartbeats = async () => {
+      try {
+        const res = await fetch(`${API_URL}/heartbeats`, { headers });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (data.ok && data.heartbeats?.length > 0) {
+          setLiveHeartbeats(data.heartbeats);
+        }
+      } catch { /* keep current */ }
+    };
+
+    const pollTokens = async () => {
+      try {
+        const res = await fetch(`${API_URL}/tokens`, { headers });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (data.ok && data.tokens?.length > 0) {
+          setLiveTokenUsages(data.tokens.map((t: any) => ({
+            agentId: t.agentId,
+            model: t.model || 'unknown',
+            totalTokensIn: t.totalIn || 0,
+            totalTokensOut: t.totalOut || 0,
+            todayTokensIn: t.todayIn || 0,
+            todayTokensOut: t.todayOut || 0,
+            estimatedCostUSD: t.estimatedCostUSD || 0,
+            todayCostUSD: t.todayCostUSD || 0,
+            last7Days: t.last7Days || [],
+          })));
+        }
+      } catch { /* keep current */ }
+    };
+
+    const pollMemory = async () => {
+      try {
+        const res = await fetch(`${API_URL}/memory`, { headers });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (data.ok && data.memory?.length > 0) {
+          setLiveMemory(data.memory);
+        }
+      } catch { /* keep current */ }
+    };
+
     const pollAll = () => {
       pollAgents();
       pollRuns();
       pollCrons();
+      pollHeartbeats();
+      pollTokens();
+      pollMemory();
     };
 
     // Initial fetch immediately
@@ -506,6 +561,23 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
     return httpRef.current.memoryGet(path);
   }, []);
 
+  // ─── FETCH MEMORY CONTENT ────────────────────────────────────────────────
+
+  const fetchMemoryContent = useCallback(async (path: string): Promise<string> => {
+    const _API_URL = import.meta.env.VITE_FORM_API_URL || '';
+    const _API_TOKEN = import.meta.env.VITE_FORM_API_TOKEN || '';
+    if (!_API_URL) return '';
+    try {
+      const res = await fetch(`${_API_URL}/memory/content?path=${encodeURIComponent(path)}`, {
+        headers: { 'Authorization': `Bearer ${_API_TOKEN}` },
+      });
+      const data = await res.json();
+      return data.ok ? data.content : '';
+    } catch {
+      return '';
+    }
+  }, []);
+
   // ─── CONTEXT VALUE ───────────────────────────────────────────────────────
 
   const value: OpenClawContextType = {
@@ -526,7 +598,9 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
     deleteCronJob,
     kanbanTasks,
     getTasksForAgent,
-    tokenUsages: mockTokenUsages,
+    tokenUsages,
+    memoryArtifacts: liveMemory.length > 0 ? liveMemory : mockMemoryArtifacts,
+    fetchMemoryContent,
     crossDomainSummary: defaultCrossDomain,
     dispatch,
     memorySearch,

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Badge, Card, Icon, SectionLabel, StatusDot } from '../ui';
 import { cn } from '../../utils/cn';
 import { getTokenUsageForAgent, formatTokens } from '../../data/agentMockData';
+import { useOpenClaw } from '../../contexts/OpenClawContext';
 
 interface TokenUsageCardProps {
   agentId: string;
@@ -9,7 +10,11 @@ interface TokenUsageCardProps {
 }
 
 export default function TokenUsageCard({ agentId, compact }: TokenUsageCardProps) {
-  const usage = useMemo(() => getTokenUsageForAgent(agentId), [agentId]);
+  const { tokenUsages } = useOpenClaw();
+  const usage = useMemo(
+    () => tokenUsages.find(t => t.agentId === agentId) ?? getTokenUsageForAgent(agentId),
+    [agentId, tokenUsages]
+  );
 
   if (!usage) {
     if (compact) {

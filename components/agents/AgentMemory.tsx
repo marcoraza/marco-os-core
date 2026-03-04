@@ -3,6 +3,7 @@ import { Badge, Card, Icon, SectionLabel } from '../ui';
 import { useOpenClaw } from '../../contexts/OpenClawContext';
 import { getMemoryForAgent } from '../../data/agentMockData';
 import type { MemoryArtifact } from '../../data/agentMockData';
+// getMemoryForAgent is kept as fallback; primary source is context memoryArtifacts
 
 interface AgentMemoryProps {
   agentId: string;
@@ -23,13 +24,13 @@ function pathToKind(path: string): MemoryArtifact['kind'] {
 }
 
 export default function AgentMemory({ agentId }: AgentMemoryProps) {
-  const { memorySearch, isLive } = useOpenClaw();
+  const { memorySearch, memoryArtifacts, isLive } = useOpenClaw();
   const [liveArtifacts, setLiveArtifacts] = useState<MemoryArtifact[] | null>(null);
   const [query, setQuery] = useState('');
   const [activeKind, setActiveKind] = useState<MemoryArtifact['kind'] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Busca live via memorySearch quando conectado
+  // Busca live via memorySearch quando conectado (gateway path)
   useEffect(() => {
     if (!isLive) return;
     setLoading(true);
@@ -57,7 +58,11 @@ export default function AgentMemory({ agentId }: AgentMemoryProps) {
     return () => clearTimeout(t);
   }, [debouncedQuery]);
 
-  const allArtifacts = liveArtifacts ?? getMemoryForAgent(agentId);
+  // Priority: gateway live search > Bridge API polling > mock fallback
+  const contextArtifacts = memoryArtifacts.filter(
+    a => !agentId || a.agentId === agentId || agentId === 'main'
+  );
+  const allArtifacts = liveArtifacts ?? (contextArtifacts.length > 0 ? contextArtifacts : getMemoryForAgent(agentId));
 
   const filtered = useMemo(() => {
     return activeKind ? allArtifacts.filter(a => a.kind === activeKind) : allArtifacts;
