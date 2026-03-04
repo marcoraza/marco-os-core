@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, TabNav, AlertBanner, SourceBadge, FormModal } from './ui';
+import { Icon, Badge, Card, SectionLabel, StatusDot, EmptyState, showToast, TabNav, AlertBanner, SourceBadge, FormModal, SearchBar } from './ui';
 import { useNotionData } from '../contexts/NotionDataContext';
 import { reunioesConfig } from '../lib/formConfigs';
 import { syncToNotion } from '../lib/notionSync';
@@ -326,14 +326,11 @@ const CRM: React.FC = () => {
 
         {/* Filters */}
         <Card className="p-4 flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-sm" />
-            <input
-              type="text"
+          <div className="flex-1 min-w-[200px]">
+            <SearchBar
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={setSearchQuery}
               placeholder="Buscar por nome, empresa ou tag..."
-              className="w-full bg-header-bg border border-border-panel rounded-md py-2 pl-9 pr-4 text-base md:text-xs text-text-primary focus:border-accent-blue focus:outline-none transition-colors"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">

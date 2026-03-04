@@ -4,7 +4,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, ResponsiveContainer
 } from 'recharts';
-import { Icon, SectionLabel, StatusDot, TabNav, Badge, FormModal, showToast } from './ui';
+import { Icon, SectionLabel, StatusDot, TabNav, Badge, FormModal, showToast, Ring } from './ui';
 import { healthConfig } from '../lib/formConfigs';
 import { syncToNotion } from '../lib/notionSync';
 import { putHealthEntry } from '../data/repository';
@@ -259,6 +259,10 @@ const Health: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="bg-header-bg border border-border-panel p-6 flex flex-col items-center gap-3">
+                  <SectionLabel className="text-[10px] w-full">Recuperacao</SectionLabel>
+                  <Ring value={metrics.recovery * 10} size={80} strokeWidth={5} color="orange" label="Recovery" />
                 </div>
                 <div className="bg-header-bg border border-border-panel p-6">
                   <SectionLabel className="text-[10px] mb-4">Dica de Performance</SectionLabel>

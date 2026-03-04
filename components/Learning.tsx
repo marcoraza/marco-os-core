@@ -1,5 +1,5 @@
 import React, { useState, Suspense } from 'react';
-import { Icon, Badge, SectionLabel, TabNav, EmptyState, SyncBadge, FormModal, showToast } from './ui';
+import { Icon, Badge, SectionLabel, TabNav, EmptyState, SyncBadge, FormModal, showToast, SearchBar } from './ui';
 import { useNotionData } from '../contexts/NotionDataContext';
 import { skillsConfig } from '../lib/formConfigs';
 import { syncToNotion } from '../lib/notionSync';
@@ -244,16 +244,11 @@ const Learning: React.FC = () => {
                 {/* Controls Toolbar */}
                 <div className="bg-surface rounded-md p-4 shadow-sm border border-border-panel flex flex-col sm:flex-row gap-4 justify-between items-center sticky top-0 z-40 transition-shadow hover:shadow-md">
                     {/* Search */}
-                    <div className="relative w-full sm:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Icon name="search" className="text-text-secondary text-xl" />
-                        </div>
-                        <input
+                    <div className="w-full sm:w-64">
+                        <SearchBar
                           value={knowledgeSearch}
-                          onChange={e => setKnowledgeSearch(e.target.value)}
-                          className="block w-full pl-10 pr-3 py-2 border border-border-panel rounded-md leading-5 bg-header-bg text-text-primary placeholder-text-secondary focus:outline-none focus:placeholder-text-secondary focus:ring-1 focus:ring-accent-purple focus:border-accent-purple text-base md:text-sm transition-colors"
-                          placeholder="Buscar anotações..."
-                          type="text"
+                          onChange={setKnowledgeSearch}
+                          placeholder="Buscar anotacoes..."
                         />
                     </div>
                     {/* Filters Group */}

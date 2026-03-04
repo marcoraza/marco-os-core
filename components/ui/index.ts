@@ -26,3 +26,7 @@ export { FormTextarea } from './FormTextarea';
 export { FormToggle } from './FormToggle';
 export { FormModal } from './FormModal';
 export type { FieldDef, FormModalProps } from './FormModal';
+export { MetricDelta } from './MetricDelta';
+export { Ring } from './Ring';
+export type { RingColor } from './Ring';
+export { SearchBar } from './SearchBar';

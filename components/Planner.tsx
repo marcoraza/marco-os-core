@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Icon, Card, SectionLabel, TabNav } from './ui';
+import ContentCalendar from './planner/ContentCalendar';
 
 const NotionProjectsView = React.lazy(() => import('./planner/NotionProjectsView').then(m => ({ default: m.NotionProjectsView })));
 import type { Project, Task } from '../lib/appTypes';
@@ -514,6 +515,10 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
       </div>
       </div>
       )}
+
+      <div className="mt-6">
+        <ContentCalendar />
+      </div>
     </div>
   );
 };

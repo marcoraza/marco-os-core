@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, Suspense } from 'react';
 import type { StoredNote } from '../data/models';
-import { Icon, Card, SectionLabel, TabNav, FormModal, showToast } from './ui';
+import { Icon, Card, SectionLabel, TabNav, FormModal, showToast, SearchBar } from './ui';
 import { cn } from '../utils/cn';
 import { AtomicNoteRenderer } from './notes/AtomicNoteRenderer';
 import { braindumpConfig } from '../lib/formConfigs';
@@ -136,6 +136,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   const [showListMobile, setShowListMobile] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
   const [showBrainDumpForm, setShowBrainDumpForm] = useState(false);
+  const [noteSearch, setNoteSearch] = useState('');
 
   const handleBrainDumpSubmit = async (data: Record<string, unknown>) => {
     syncToNotion('braindump', data);
@@ -143,7 +144,10 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const projectNotes = notes.filter(n => !n.projectId || n.projectId === activeProjectId);
+  const allProjectNotes = notes.filter(n => !n.projectId || n.projectId === activeProjectId);
+  const projectNotes = noteSearch.trim()
+    ? allProjectNotes.filter(n => n.title.toLowerCase().includes(noteSearch.toLowerCase()) || n.body.toLowerCase().includes(noteSearch.toLowerCase()))
+    : allProjectNotes;
   const selected = projectNotes.find(n => n.id === selectedId);
 
   const createNote = () => {
@@ -210,6 +214,9 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
           </div>
         </div>
       </div>
+
+      {/* Search */}
+      <SearchBar value={noteSearch} onChange={setNoteSearch} placeholder="Buscar notas..." className="shrink-0" />
 
       {/* Create */}
       <div className="flex gap-2 shrink-0">

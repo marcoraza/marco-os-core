@@ -85,6 +85,11 @@ export const cashflowData: CashflowDataItem[] = [
   { month: 'Fev', income: 19000, expenses: 9000 },
 ];
 
+export const netWorthMonthly: number[] = [
+  85000, 88000, 91500, 87000, 93000, 96000,
+  99500, 102000, 105000, 108000, 112000, 118000,
+];
+
 export const financeTabs: Tab[] = [
   { id: 'overview', label: 'Visão Geral', icon: 'dashboard' },
   { id: 'transactions', label: 'Transações', icon: 'receipt_long' },

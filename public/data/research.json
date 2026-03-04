@@ -2,8 +2,8 @@
   "_meta": {
     "db_id": "30bb72d5-042d-8176-a902-deaef821c5f2",
     "db_name": "research",
-    "synced_at": "2026-03-04T00:30:02.395569+00:00",
-    "count": 44
+    "synced_at": "2026-03-04T14:30:02.518505+00:00",
+    "count": 45
   },
   "items": [
     {
@@ -1422,6 +1422,32 @@
       ],
       "Link Original": "https://www.youtube.com/watch?v=lhl0jgb0siI",
       "Name": "Criando uma marca PREMIUM com IA (Sem ser bom de design)"
+    },
+    {
+      "_id": "319b72d5-042d-81b6-b232-ed27387044f1",
+      "_created_time": "2026-03-04T13:39:00.000Z",
+      "_edited_time": "2026-03-04T14:01:00.000Z",
+      "_url": "https://www.notion.so/AIOX-Squad-Construa-seu-Ex-rcito-de-IA-e-Escale-seus-Lucros-em-at-10x-319b72d5042d81b6b232ed27387044f1",
+      "Resumo": "### Contexto  \nNa live, Alan, Pedro e Thiago apresentam atualizações do IOX (antes “AIOS”), mostram casos práticos e defendem uma mudança de paradigma: humanos devem focar no que é humano (contexto, julgamento, criatividade) e delegar o operacional para agentes/automação. Também citam uma imersão/evento em Florianópolis e respondem dúvidas sobre como a ferramenta funciona.\n\n### Pontos Principais  \n- Evolução acelerada: a cada semana, o que foi feito antes “fica obsoleto” pela velocidade de melhoria e criação de automações.  \n- A ferramenta é usada por times não técnicos (edição, copy, operações) para criar dashboards, automações e fluxos.  \n- Caso prático (Pedro): gestão de 848 criativos (BBB/Mercado Livre) e automação de legendas para reduzir gargalos e “gaps” de aprovação (creator → account → cliente → volta), que transformavam 2 horas em 2 dias.  \n- Estrutura por “tesques” (tarefas) e entidades (projeto, cliente, criativo): regras e outputs viram “fontes da verdade” reutilizáveis em escala.  \n- Journey log: registro detalhado da execução (autor, evento, alertas) para medir saúde do processo e identificar gargalos com evidência, não “achismo”.  \n- Diferenciação de executores: humano vs agente vs worker (automação determinística) vs clone; nem tudo deve ser 100% automatizado por causa de “quality gates”.  \n- Limites da IA: ela não faz bem análise contextual (ex.: detectar passivo-agressividade), nem assume responsabilidade; humano assina e decide.  \n- Demonstração de branding (Alan): rebrand completo do IOX em um fim de semana (brandbook, manifesto, arquétipos, design system, motion, mockups de roupas/itens, editorial), algo que antes custava R$ 60k–120k e levaria meses.  \n- Tese de mercado: tarefas “de apertar botão” tendem a desaparecer; profissionais que entendem negócio/processos se alavancam, não “morrem”.\n\n### Insights Acionáveis  \n- Mapeie seu processo perguntando “quem é o executor?” (humano/agente/worker/clone) e redesenhe o fluxo com handoffs e quality ga",
+      "Reprocessar": false,
+      "Data": "2026-03-04",
+      "Processado por": "Frank",
+      "Deep Dives": null,
+      "Link Drive": "https://drive.google.com/file/d/1whxejQ79OoMvFg5BysF8igCeRDAVUuMz/view?usp=drivesdk",
+      "Plataforma": "YouTube",
+      "Idioma": null,
+      "Qualidade": null,
+      "Tem transcript": false,
+      "Tags": [],
+      "Content (Inspiração)": null,
+      "Place": null,
+      "Tópico": [
+        "video"
+      ],
+      "Criador": null,
+      "Estilo": [],
+      "Link Original": "https://www.youtube.com/live/pqtLLYyztc8",
+      "Name": "AIOX Squad: Construa seu Exército de IA e Escale seus Lucros em até 10x"
     }
   ]
 }
