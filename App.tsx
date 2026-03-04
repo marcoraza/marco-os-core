@@ -4,7 +4,7 @@ import { useHotkeys, useGoKeys } from './hooks/useHotkeys';
 import { useFlowState } from './hooks/useFlowState';
 import { useGhostMode } from './hooks/useGhostMode';
 import type { StoredAgent, StoredContact, StoredEvent, StoredNote } from './data/models';
-import { bootstrapIfEmpty, bootstrapAgentsIfEmpty, loadAll, loadAgents, loadContacts, putAgent, saveEvents, saveNotes, saveProjects, saveTasks } from './data/repository';
+import { bootstrapIfEmpty, bootstrapAgentsIfEmpty, loadAll, loadAgents, loadContacts, putAgent, deleteAgent, saveEvents, saveNotes, saveProjects, saveTasks } from './data/repository';
 import { defaultAgents } from './data/agentsSeed';
 import type { Agent } from './types/agents';
 import type { View, Theme, Project, Task } from './lib/appTypes';
@@ -230,7 +230,15 @@ const App: React.FC = () => {
         // Force re-bootstrap if stored agents don't include the real IDs
         const existingAgents = await loadAgents();
         const hasRealIds = existingAgents.some(a => a.id === 'main');
-        if (!hasRealIds) {
+        const hasOldIds = existingAgents.some(a => ['frank', 'head-code', 'planner', 'qa'].includes(a.id));
+        if (!hasRealIds || hasOldIds) {
+          // Remove old mock agents
+          for (const old of existingAgents) {
+            if (['frank', 'head-code', 'planner', 'qa'].includes(old.id)) {
+              await deleteAgent(old.id);
+            }
+          }
+          // Add real agents
           for (const agent of defaultAgents) {
             await putAgent(agent);
           }
