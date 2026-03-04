@@ -1,8 +1,17 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { Badge, Card, Icon, SectionLabel } from '../ui';
 import { cn } from '../../utils/cn';
 import { kanbanColumns, KANBAN_ORDER, KanbanStatus } from '../../data/agentMockData';
 import { useKanban, useAgents, useOpenClaw } from '../../contexts/OpenClawContext';
+
+interface TaskComment {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
+const API_URL = import.meta.env.VITE_FORM_API_URL || '';
+const API_TOKEN = import.meta.env.VITE_FORM_API_TOKEN || '';
 
 interface AgentKanbanProps {
   agentId: string;
@@ -30,6 +39,62 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
   const [collapsed, setCollapsed] = useState<Set<KanbanStatus>>(new Set());
   const dragTaskId = useRef<string | null>(null);
   const dragFromStatus = useRef<KanbanStatus | null>(null);
+
+  // Comments state
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [commentsByTask, setCommentsByTask] = useState<Record<string, TaskComment[]>>({});
+  const [loadingComments, setLoadingComments] = useState<string | null>(null);
+  const [commentInput, setCommentInput] = useState('');
+  const [postingComment, setPostingComment] = useState(false);
+
+  const fetchComments = useCallback(async (taskId: string) => {
+    if (!API_URL) return;
+    setLoadingComments(taskId);
+    try {
+      const res = await fetch(`${API_URL}/tasks/${taskId}/comments`, {
+        headers: { Authorization: `Bearer ${API_TOKEN}` },
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      const list = json.ok ? (json.comments ?? json.data ?? []) : [];
+      setCommentsByTask(prev => ({ ...prev, [taskId]: Array.isArray(list) ? list : [] }));
+    } catch { /* ignore */ } finally {
+      setLoadingComments(null);
+    }
+  }, []);
+
+  const handleTaskExpand = useCallback((taskId: string) => {
+    if (expandedTaskId === taskId) {
+      setExpandedTaskId(null);
+    } else {
+      setExpandedTaskId(taskId);
+      if (!commentsByTask[taskId]) {
+        fetchComments(taskId);
+      }
+    }
+  }, [expandedTaskId, commentsByTask, fetchComments]);
+
+  const handlePostComment = useCallback(async (taskId: string) => {
+    const text = commentInput.trim();
+    if (!text || postingComment || !API_URL) return;
+    setPostingComment(true);
+    try {
+      const res = await fetch(`${API_URL}/tasks/${taskId}/comments`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        setCommentInput('');
+        fetchComments(taskId);
+      }
+    } catch { /* ignore */ } finally {
+      setPostingComment(false);
+    }
+  }, [commentInput, postingComment, fetchComments]);
 
   const handleDragStart = (taskId: string, fromStatus: KanbanStatus) => {
     dragTaskId.current = taskId;
@@ -149,6 +214,8 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
                   columnTasks.map((task) => {
                     const prio = priorityMap[task.priority];
                     const lastMessages = task.messages.slice(-2);
+                    const isExpanded = expandedTaskId === task.id;
+                    const comments = commentsByTask[task.id] ?? [];
 
                     return (
                       <Card
@@ -177,9 +244,63 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
                           </div>
                         )}
 
-                        <div className="text-[8px] font-mono text-text-secondary">
-                          {task.createdAt}
+                        <div className="flex items-center justify-between">
+                          <div className="text-[8px] font-mono text-text-secondary">
+                            {task.createdAt}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleTaskExpand(task.id); }}
+                            className="flex items-center gap-1 text-[9px] text-text-secondary hover:text-brand-mint transition-colors"
+                          >
+                            <Icon name="comment" size="xs" />
+                            <span>Comentários</span>
+                            <Icon name={isExpanded ? 'expand_less' : 'expand_more'} size="xs" />
+                          </button>
                         </div>
+
+                        {/* Comments section */}
+                        {isExpanded && (
+                          <div
+                            className="border-t border-border-panel pt-2 space-y-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {loadingComments === task.id ? (
+                              <div className="flex items-center gap-2 text-text-secondary py-1">
+                                <Icon name="hourglass_empty" size="xs" className="animate-spin" />
+                                <span className="text-[9px]">Carregando...</span>
+                              </div>
+                            ) : comments.length === 0 ? (
+                              <p className="text-[9px] text-text-secondary py-1">Nenhum comentário ainda</p>
+                            ) : (
+                              <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                                {comments.map((c) => (
+                                  <div key={c.id} className="bg-bg-base rounded-sm p-2 space-y-0.5">
+                                    <p className="text-[10px] text-text-primary leading-snug">{c.text}</p>
+                                    <p className="text-[8px] font-mono text-text-secondary">{c.createdAt}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="flex gap-1.5">
+                              <input
+                                type="text"
+                                value={commentInput}
+                                onChange={e => setCommentInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handlePostComment(task.id)}
+                                placeholder="Adicionar comentário..."
+                                className="flex-1 bg-bg-base border border-border-panel rounded-sm px-2 py-1 text-[10px] text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-brand-mint/50 transition-colors"
+                              />
+                              <button
+                                onClick={() => handlePostComment(task.id)}
+                                disabled={!commentInput.trim() || postingComment}
+                                className="p-1.5 rounded-sm bg-brand-mint/10 border border-brand-mint/20 text-brand-mint hover:bg-brand-mint/20 transition-colors disabled:opacity-40"
+                              >
+                                <Icon name="send" size="xs" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </Card>
                     );
                   })

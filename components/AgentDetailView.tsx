@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Badge, Icon, SectionLabel, StatusDot } from './ui';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
+import { Badge, Icon, SectionLabel, StatusDot, Skeleton } from './ui';
 import { TabNav } from './ui/TabNav';
 import type { Tab } from './ui/TabNav';
 import { cn } from '../utils/cn';
@@ -13,6 +13,20 @@ import AgentMemory from './agents/AgentMemory';
 import AgentConfig from './agents/AgentConfig';
 import TokenUsageCard from './agents/TokenUsageCard';
 
+const AgentStandup = lazy(() => import('./agents/AgentStandup'));
+const ActivityFeed = lazy(() => import('./agents/ActivityFeed'));
+const AgentChat = lazy(() => import('./agents/AgentChat'));
+const GitHubIssues = lazy(() => import('./agents/GitHubIssues'));
+
+function TabFallback() {
+  return (
+    <div className="space-y-3">
+      <Skeleton variant="card" />
+      <Skeleton variant="card" />
+    </div>
+  );
+}
+
 interface AgentDetailViewProps {
   agentId: string;
   onBack: () => void;
@@ -25,6 +39,10 @@ const agentTabs: Tab[] = [
   { id: 'heartbeat', label: 'Heartbeat', icon: 'monitor_heart' },
   { id: 'memoria', label: 'Memória', icon: 'memory' },
   { id: 'config', label: 'Config', icon: 'settings' },
+  { id: 'standup', label: 'Standup', icon: 'summarize' },
+  { id: 'atividade', label: 'Atividade', icon: 'timeline' },
+  { id: 'chat', label: 'Chat', icon: 'chat' },
+  { id: 'github', label: 'GitHub', icon: 'code' },
 ];
 
 export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProps) {
@@ -130,6 +148,26 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
         {activeTab === 'heartbeat' && <AgentHeartbeat agentId={agentId} />}
         {activeTab === 'memoria' && <AgentMemory agentId={agentId} />}
         {activeTab === 'config' && <AgentConfig agentId={agentId} />}
+        {activeTab === 'standup' && (
+          <Suspense fallback={<TabFallback />}>
+            <AgentStandup />
+          </Suspense>
+        )}
+        {activeTab === 'atividade' && (
+          <Suspense fallback={<TabFallback />}>
+            <ActivityFeed />
+          </Suspense>
+        )}
+        {activeTab === 'chat' && (
+          <Suspense fallback={<TabFallback />}>
+            <AgentChat agentId={agentId} />
+          </Suspense>
+        )}
+        {activeTab === 'github' && (
+          <Suspense fallback={<TabFallback />}>
+            <GitHubIssues />
+          </Suspense>
+        )}
       </div>
     </div>
   );

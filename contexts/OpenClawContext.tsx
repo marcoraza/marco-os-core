@@ -111,6 +111,14 @@ interface OpenClawContextType {
 
   // HTTP client for direct tool invocations
   http: OpenClawHttp | null;
+
+  // New Bridge API functions
+  sendAgentMessage: (agentId: string, message: string) => Promise<boolean>;
+  fetchStandup: () => Promise<any>;
+  fetchActivities: (limit?: number) => Promise<any[]>;
+  fetchTaskComments: (taskId: string) => Promise<any[]>;
+  addTaskComment: (taskId: string, text: string) => Promise<boolean>;
+  fetchGitHubIssues: () => Promise<any[]>;
 }
 
 const OpenClawContext = createContext<OpenClawContextType | undefined>(undefined);
@@ -706,6 +714,99 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
     return httpRef.current.memoryGet(path);
   }, []);
 
+  // ─── NEW BRIDGE API FUNCTIONS ────────────────────────────────────────────
+
+  const sendAgentMessage = useCallback(async (agentId: string, message: string): Promise<boolean> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+      'Content-Type': 'application/json',
+    };
+    if (!bridgeBase) return false;
+    try {
+      const res = await fetch(`${bridgeBase}/chat`, {
+        method: 'POST',
+        headers: bridgeHeaders,
+        body: JSON.stringify({ agentId, message }),
+      });
+      const data = await res.json();
+      return data.ok || false;
+    } catch { return false; }
+  }, []);
+
+  const fetchStandup = useCallback(async (): Promise<any> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+    };
+    if (!bridgeBase) return null;
+    try {
+      const res = await fetch(`${bridgeBase}/standup`, { headers: bridgeHeaders });
+      const data = await res.json();
+      return data.ok ? (data.data ?? data) : null;
+    } catch { return null; }
+  }, []);
+
+  const fetchActivities = useCallback(async (limit = 30): Promise<any[]> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+    };
+    if (!bridgeBase) return [];
+    try {
+      const res = await fetch(`${bridgeBase}/activities?limit=${limit}`, { headers: bridgeHeaders });
+      const data = await res.json();
+      const list = data.ok ? (data.activities ?? data.data ?? []) : [];
+      return Array.isArray(list) ? list : [];
+    } catch { return []; }
+  }, []);
+
+  const fetchTaskComments = useCallback(async (taskId: string): Promise<any[]> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+    };
+    if (!bridgeBase) return [];
+    try {
+      const res = await fetch(`${bridgeBase}/tasks/${taskId}/comments`, { headers: bridgeHeaders });
+      const data = await res.json();
+      const list = data.ok ? (data.comments ?? data.data ?? []) : [];
+      return Array.isArray(list) ? list : [];
+    } catch { return []; }
+  }, []);
+
+  const addTaskComment = useCallback(async (taskId: string, text: string): Promise<boolean> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+      'Content-Type': 'application/json',
+    };
+    if (!bridgeBase) return false;
+    try {
+      const res = await fetch(`${bridgeBase}/tasks/${taskId}/comments`, {
+        method: 'POST',
+        headers: bridgeHeaders,
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      return data.ok || false;
+    } catch { return false; }
+  }, []);
+
+  const fetchGitHubIssues = useCallback(async (): Promise<any[]> => {
+    const bridgeBase = import.meta.env.VITE_FORM_API_URL || '';
+    const bridgeHeaders: Record<string, string> = {
+      'Authorization': `Bearer ${import.meta.env.VITE_FORM_API_TOKEN || ''}`,
+    };
+    if (!bridgeBase) return [];
+    try {
+      const res = await fetch(`${bridgeBase}/github/issues`, { headers: bridgeHeaders });
+      const data = await res.json();
+      const list = data.ok ? (data.issues ?? data.data ?? []) : [];
+      return Array.isArray(list) ? list : [];
+    } catch { return []; }
+  }, []);
+
   // ─── FETCH MEMORY CONTENT ────────────────────────────────────────────────
 
   const fetchMemoryContent = useCallback(async (path: string): Promise<string> => {
@@ -757,6 +858,12 @@ export function OpenClawProvider({ children, config: configOverride, autoConnect
     deleteCronJobApi,
     updateAgentConfig,
     http: httpRef.current,
+    sendAgentMessage,
+    fetchStandup,
+    fetchActivities,
+    fetchTaskComments,
+    addTaskComment,
+    fetchGitHubIssues,
   };
 
   return (

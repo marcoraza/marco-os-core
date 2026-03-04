@@ -24,6 +24,9 @@ export function getDayKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** Alias for formatRelative — used by newer components */
+export const formatRelativeTime = formatRelative;
+
 export function groupByWeek<T>(items: T[], getDate: (item: T) => Date): Map<string, T[]> {
   const groups = new Map<string, T[]>();
   items.forEach(item => {
