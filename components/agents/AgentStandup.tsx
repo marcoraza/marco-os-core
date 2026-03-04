@@ -6,29 +6,27 @@ import { formatRelativeTime } from '../../utils/dateUtils';
 interface StandupAgent {
   id: string;
   name: string;
-  sessionCount: number;
-  lastActiveAt: string;
+  sessionsCount: number;
+  lastActive: string;
 }
 
 interface StandupCron {
-  id: string;
   name: string;
-  status: 'success' | 'error';
-  ranAt: string;
+  status: string;
+  lastRunAt: string;
 }
 
 interface StandupTask {
-  id: string;
   title: string;
-  fromStatus: string;
-  toStatus: string;
+  from: string;
+  to: string;
   movedAt: string;
 }
 
 interface StandupData {
   agents: StandupAgent[];
-  crons: StandupCron[];
-  tasks: StandupTask[];
+  cronsRan: StandupCron[];
+  tasksMoved: StandupTask[];
   summary: string;
 }
 
@@ -49,7 +47,7 @@ export default function AgentStandup() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      setData(json.ok ? json.data ?? json : null);
+      setData(json);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao carregar standup');
     } finally {
@@ -110,10 +108,10 @@ export default function AgentStandup() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant="neutral" size="xs">
-                        <span className="font-mono">{agent.sessionCount}</span> sessões
+                        <span className="font-mono">{agent.sessionsCount}</span> sessões
                       </Badge>
                       <span className="text-[9px] font-mono text-text-secondary">
-                        {formatRelativeTime(agent.lastActiveAt)}
+                        {formatRelativeTime(agent.lastActive)}
                       </span>
                     </div>
                   </div>
@@ -127,25 +125,25 @@ export default function AgentStandup() {
             <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary">
               Cron Jobs Executados
             </span>
-            {data.crons.length === 0 ? (
+            {data.cronsRan.length === 0 ? (
               <p className="text-[11px] text-text-secondary">Nenhum cron executado</p>
             ) : (
               <div className="space-y-2">
-                {data.crons.map((cron) => (
-                  <div key={cron.id} className="flex items-center justify-between">
+                {data.cronsRan.map((cron, i) => (
+                  <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon name="schedule" size="xs" className="text-text-secondary" />
                       <span className="text-[11px] text-text-primary">{cron.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge
-                        variant={cron.status === 'success' ? 'mint' : 'red'}
+                        variant={cron.status === 'ok' || cron.status === 'success' ? 'mint' : 'red'}
                         size="xs"
                       >
-                        {cron.status === 'success' ? 'OK' : 'ERRO'}
+                        {cron.status === 'ok' || cron.status === 'success' ? 'OK' : 'ERRO'}
                       </Badge>
                       <span className="text-[9px] font-mono text-text-secondary">
-                        {formatRelativeTime(cron.ranAt)}
+                        {cron.lastRunAt ? formatRelativeTime(cron.lastRunAt) : '—'}
                       </span>
                     </div>
                   </div>
@@ -159,20 +157,20 @@ export default function AgentStandup() {
             <span className="text-[9px] font-black uppercase tracking-widest text-text-secondary">
               Tarefas Movidas
             </span>
-            {data.tasks.length === 0 ? (
+            {data.tasksMoved.length === 0 ? (
               <p className="text-[11px] text-text-secondary">Nenhuma tarefa movida</p>
             ) : (
               <div className="space-y-2">
-                {data.tasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between">
+                {data.tasksMoved.map((task, i) => (
+                  <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                       <Icon name="task_alt" size="xs" className="text-text-secondary shrink-0" />
                       <span className="text-[11px] text-text-primary truncate">{task.title}</span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      <Badge variant="neutral" size="xs">{task.fromStatus}</Badge>
+                      <Badge variant="neutral" size="xs">{task.from}</Badge>
                       <Icon name="arrow_forward" size="xs" className="text-text-secondary" />
-                      <Badge variant="mint" size="xs">{task.toStatus}</Badge>
+                      <Badge variant="mint" size="xs">{task.to}</Badge>
                     </div>
                   </div>
                 ))}
