@@ -197,7 +197,9 @@ export default function KanbanBoard({
                         </div>
 
                         <div className="space-y-0.5">
-                          <p className="text-[11px] text-text-secondary leading-relaxed">{task.tag}</p>
+                          {task.tag && task.tag !== '[]' && task.tag !== '' && (
+                            <p className="text-[11px] text-text-secondary leading-relaxed">{task.tag}</p>
+                          )}
                           {task.deadline && task.deadline !== 'A definir' && (
                             <p className={cn('text-[11px] leading-relaxed', getDeadlineColor(task.deadline))}>
                               {task.deadline === 'Hoje' ? 'Prazo: Hoje — urgente'

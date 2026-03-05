@@ -24,9 +24,15 @@ export const getDeadlineColor = (deadline: string): string => {
 };
 
 export const getTaskTimestamp = (task: Task): string => {
-  const base = new Date('2026-02-16T20:00:00Z');
-  base.setMinutes(base.getMinutes() + task.id * 17);
-  return base.toISOString().replace(/\.\d{3}Z/, 'Z');
+  // Use real prazo/due_date if available
+  const raw = (task as any).prazo || (task as any).due_date;
+  if (raw) {
+    try {
+      const d = new Date(raw);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch { /* fallback */ }
+  }
+  return '';
 };
 
 export const chartTooltipStyle = {
