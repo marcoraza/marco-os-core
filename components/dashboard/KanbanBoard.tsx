@@ -135,7 +135,7 @@ export default function KanbanBoard({
               <div
                 className="flex flex-col gap-2 overflow-y-auto"
                 style={{
-                  maxHeight: '140px',
+                  maxHeight: '280px',
                   scrollbarWidth: 'thin',
                   scrollbarColor: 'var(--color-border-panel) transparent',
                 }}
@@ -151,7 +151,7 @@ export default function KanbanBoard({
                     return (
                       <Card
                         key={task.id}
-                        className="p-3 space-y-1.5 cursor-grab active:cursor-grabbing relative group rounded-sm"
+                        className="p-2 space-y-0.5 cursor-grab active:cursor-grabbing relative group rounded-sm"
                         draggable
                         onDragStart={(e) => onDragStart(e, task.id)}
                         onClick={() => delState === 'idle' && onTaskClick(task.id)}
