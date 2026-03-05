@@ -191,7 +191,20 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error: err } = await supabase.from(table).select('*')
       if (err) throw new Error(err.message)
-      const rows = (data ?? []) as unknown[]
+      // Map Supabase column names to frontend interface names
+      const rows = (data ?? []).map((row: Record<string, unknown>) => {
+        if (table === 'tasks') {
+          return {
+            ...row,
+            responsavel: row.assigned_to ?? '',
+            prioridade: row.priority ?? '',
+            prazo: row.due_date ? String(row.due_date).split('T')[0] : '',
+            projeto: row.project ?? '',
+            progresso: 0,
+          }
+        }
+        return row
+      }) as unknown[]
       cacheRef.current.set(key, {
         data: rows,
         lastSync: latestSyncedAt(rows),
