@@ -53,6 +53,7 @@ export function useAppDomainActions({
       dependencies: 0,
     }));
     setTasks((prev) => [...prev, ...adapted]);
+    return adapted;
   }, [setTasks]);
 
   const createTaskFromPalette = useCallback((title: string) => {

@@ -24,7 +24,7 @@ interface AppContentRouterProps {
   onAddTask: () => void;
   events: StoredEvent[];
   setEvents: React.Dispatch<React.SetStateAction<StoredEvent[]>>;
-  addTasks: (tasks: Omit<Task, 'id' | 'assignee' | 'dependencies'>[]) => void;
+  addTasks: (tasks: Omit<Task, 'id' | 'assignee' | 'dependencies'>[]) => Task[];
   notes: StoredNote[];
   setNotes: React.Dispatch<React.SetStateAction<StoredNote[]>>;
   onAgentClick: (agentId: string) => void;
@@ -74,7 +74,7 @@ export default function AppContentRouter({
   if (currentView === 'health') return <Health />;
   if (currentView === 'learning') return <Learning />;
   if (currentView === 'planner') {
-    return <Planner projects={projects} activeProjectId={activeProjectId} addTasks={addTasks} />;
+    return <Planner projects={projects} activeProjectId={activeProjectId} addTasks={addTasks} tasks={tasks} />;
   }
   if (currentView === 'notes') {
     return <NotesPanel notes={notes} setNotes={setNotes} activeProjectId={activeProjectId} />;

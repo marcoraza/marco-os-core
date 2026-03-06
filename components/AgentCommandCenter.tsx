@@ -157,6 +157,20 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
     });
   }, [agents, agentFilter, agentQuery]);
 
+  const agentOps = useMemo(() => {
+    return filteredAgents.map((agent) => {
+      const executions = allExecutions.filter((execution) => execution.agentId === agent.id);
+      const latestDispatch = recentDispatches.find((dispatch) => dispatch.agentId === agent.id) ?? null;
+      return {
+        agent,
+        running: executions.filter((execution) => execution.status === 'running').length,
+        failed: executions.filter((execution) => execution.status === 'failed').length,
+        completed: executions.filter((execution) => execution.status === 'completed').length,
+        latestDispatch,
+      };
+    });
+  }, [allExecutions, filteredAgents, recentDispatches]);
+
   const getAgentTokensToday = (agentId: string) => {
     const u = (tokenUsages ?? []).find(t => t.agentId === agentId);
     return u ? (u.todayTokensIn ?? 0) + (u.todayTokensOut ?? 0) : 0;
@@ -472,6 +486,53 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
                 </Card>
               );
             })}
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <SectionLabel icon="assistant_navigation">OPERAÇÃO DO DIA</SectionLabel>
+            <Badge variant="neutral" size="xs">{agentOps.length}</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {agentOps.map(({ agent, running, failed, completed, latestDispatch }) => (
+              <Card
+                key={`ops-${agent.id}`}
+                className="p-3 space-y-3 cursor-pointer hover:border-brand-mint/20 transition-colors"
+                onClick={() => onAgentClick(agent.id)}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black text-text-primary">{agent.name}</p>
+                    <p className="text-[8px] font-mono text-text-secondary">{agent.currentMission || 'Sem missao ativa'}</p>
+                  </div>
+                  <StatusDot color={statusDot[agent.status].color} glow={agent.status !== 'offline'} />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2 py-1.5">
+                    <p className="text-[7px] font-black uppercase tracking-widest text-text-secondary">Rodando</p>
+                    <p className="mt-1 text-[11px] font-black font-mono text-accent-blue">{running}</p>
+                  </div>
+                  <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2 py-1.5">
+                    <p className="text-[7px] font-black uppercase tracking-widest text-text-secondary">Feitas</p>
+                    <p className="mt-1 text-[11px] font-black font-mono text-brand-mint">{completed}</p>
+                  </div>
+                  <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2 py-1.5">
+                    <p className="text-[7px] font-black uppercase tracking-widest text-text-secondary">Falhas</p>
+                    <p className="mt-1 text-[11px] font-black font-mono text-accent-red">{failed}</p>
+                  </div>
+                </div>
+                <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                  <p className="text-[7px] font-black uppercase tracking-widest text-text-secondary">Último dispatch</p>
+                  <p className="mt-1 truncate text-[10px] text-text-primary">
+                    {latestDispatch?.mission ?? 'Nenhum envio recente'}
+                  </p>
+                  <p className="mt-0.5 text-[8px] font-mono text-text-secondary">
+                    {latestDispatch ? `${latestDispatch.createdAt} · ${priorityColors[latestDispatch.priority].label}` : 'Pronto para nova missão'}
+                  </p>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Icon, Card, SectionLabel, FormModal, JourneyOverlay, JourneyTriggerButton, DataBadge, Badge, EmptyState } from './ui';
 import type { Project, Task } from '../lib/appTypes';
 import type { StoredPlan, StoredPlanStep, StoredContentEntry, StoredProjectEntry } from '../data/models';
@@ -10,13 +10,17 @@ import { useSectionSetup } from '../hooks/useSectionSetup';
 import { plannerJourneyConfig } from '../lib/journeyConfigs/planner';
 import { useSupabaseData } from '../contexts/SupabaseDataContext';
 import { showToast } from './ui';
+import { buildPlanExportTasks, getPlannerResumeTarget, summarizePlanExecution } from '../lib/plannerWorkflows';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 interface PlannerProps {
   projects: Project[];
   activeProjectId: string;
-  addTasks: (tasks: Omit<Task, 'id'>[]) => void;
+  tasks: Task[];
+  addTasks: (tasks: Omit<Task, 'id' | 'assignee' | 'dependencies'>[]) => Task[];
 }
+
+const PLANNER_DRAFT_KEY = 'planner-draft';
 
 // ─── Task status mapping ─────────────────────────────────────────────────────
 type TaskColumn = 'Aberto' | 'Em progresso' | 'Revisão' | 'Concluído';
@@ -711,7 +715,7 @@ const TasksTab: React.FC<TasksTabProps> = ({ projects, openForm, onOpenForm, onC
 };
 
 // ─── Main Planner Component ───────────────────────────────────────────────────
-const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }) => {
+const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, tasks, addTasks }) => {
   // Tab state
   const [activeTab, setActiveTab] = useState<'planos' | 'tarefas' | 'projetos'>('planos');
   const [novaTarefaOpen, setNovaTarefaOpen] = useState(false);
@@ -748,11 +752,39 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     setProjectId(activeProjectId);
   }, [activeProjectId]);
 
+  useEffect(() => {
+    try {
+      const rawDraft = localStorage.getItem(PLANNER_DRAFT_KEY);
+      if (!rawDraft) return;
+      const draft = JSON.parse(rawDraft) as {
+        title?: string;
+        context?: string;
+        deadlineMode?: 'hoje' | 'semana' | 'custom';
+        customDeadline?: string;
+        projectId?: string;
+      };
+      if (draft.title) setTitle(draft.title);
+      if (draft.context) setContext(draft.context);
+      if (draft.deadlineMode) setDeadlineMode(draft.deadlineMode);
+      if (draft.customDeadline) setCustomDeadline(draft.customDeadline);
+      if (draft.projectId) setProjectId(draft.projectId);
+    } catch {
+      // Ignore invalid draft state.
+    }
+  }, []);
+
+  useEffect(() => {
+    const draft = { title, context, deadlineMode, customDeadline, projectId };
+    localStorage.setItem(PLANNER_DRAFT_KEY, JSON.stringify(draft));
+  }, [title, context, deadlineMode, customDeadline, projectId]);
+
   const persistPlan = async (plan: StoredPlan) => {
     await putPlan(plan);
     const plans = await loadPlans();
     setHistory(plans ?? []);
   };
+
+  const resumePlan = useMemo(() => getPlannerResumeTarget(history), [history]);
 
   const handleGenerate = async () => {
     if (!title.trim()) return;
@@ -765,6 +797,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
       context: context.trim(),
       projectId,
       exported: false,
+      lastOpenedAt: now,
       createdAt: now,
       updatedAt: now,
     };
@@ -786,18 +819,16 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
 
   const handleExportKanban = async () => {
     if (!activePlan) return;
-    const newTasks: Omit<Task, 'id'>[] = (activePlan.suggestedTasks ?? []).map(st => ({
-      title: st.title,
-      tag: st.tag,
-      projectId,
-      status: 'assigned' as const,
-      priority: st.priority,
-      deadline: st.deadline,
-      assignee: 'MA',
-      dependencies: 0,
-    }));
-    addTasks(newTasks);
-    const updated = { ...activePlan, exported: true, updatedAt: new Date().toISOString() };
+    const exportedTasks = addTasks(buildPlanExportTasks(activePlan, projectId));
+    const now = new Date().toISOString();
+    const updated = {
+      ...activePlan,
+      exported: true,
+      exportedAt: now,
+      exportedTaskIds: exportedTasks.map((task) => task.id),
+      lastOpenedAt: now,
+      updatedAt: now,
+    };
     setActivePlan(updated);
     await persistPlan(updated);
     setActiveTab('tarefas');
@@ -815,12 +846,14 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
   };
 
   const handleLoadPlan = (plan: StoredPlan) => {
-    setActivePlan(plan);
+    const updatedPlan = { ...plan, lastOpenedAt: new Date().toISOString() };
+    setActivePlan(updatedPlan);
     setSteps((plan.steps ?? []).map(s => ({ ...s })));
     setTitle(plan.title ?? '');
     setContext(plan.context ?? '');
     setProjectId(plan.projectId ?? activeProjectId);
     setShowHistory(false);
+    void persistPlan(updatedPlan);
     showToast('Plano carregado');
   };
 
@@ -879,6 +912,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
 
   const safeSteps = steps ?? [];
   const stepsProgress = safeSteps.length > 0 ? Math.round((safeSteps.filter(s => s.done).length / safeSteps.length) * 100) : 0;
+  const planExecution = activePlan ? summarizePlanExecution(activePlan, tasks) : { total: 0, done: 0, inProgress: 0, open: 0 };
 
   const TABS = [
     { id: 'planos' as const, label: 'Planos', icon: 'auto_awesome' },
@@ -1041,14 +1075,17 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
             {!activePlan && (
               <div className="bg-surface border border-border-panel rounded-sm p-5 space-y-4">
                 <SectionLabel>ENTRADA DA MISSÃO</SectionLabel>
-                {history.length > 0 && (
+                {resumePlan && (
                   <button
-                    onClick={() => handleLoadPlan(history[0])}
+                    onClick={() => handleLoadPlan(resumePlan)}
                     className="w-full flex items-center justify-between gap-3 rounded-sm border border-border-panel bg-bg-base px-3 py-2 text-left hover:border-accent-blue/30 transition-colors"
                   >
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Continuar ultimo plano</p>
-                      <p className="mt-1 text-sm text-text-primary">{history[0].title}</p>
+                      <p className="mt-1 text-sm text-text-primary">{resumePlan.title}</p>
+                      <p className="mt-1 text-[9px] text-text-secondary">
+                        {resumePlan.exported ? 'Ja exportado para tarefas' : 'Pronto para exportar'}
+                      </p>
                     </div>
                     <Icon name="history" size="sm" className="text-accent-blue" />
                   </button>
@@ -1237,6 +1274,41 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div className="bg-surface border border-border-panel rounded-sm p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <SectionLabel>Execução Vinculada</SectionLabel>
+                    <button
+                      onClick={() => setActiveTab('tarefas')}
+                      className="rounded-sm border border-border-panel px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-text-primary hover:border-text-secondary/40 transition-colors"
+                    >
+                      Abrir tarefas
+                    </button>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-4">
+                    <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Mapeadas</p>
+                      <p className="mt-1 text-sm font-black font-mono text-text-primary">{planExecution.total}</p>
+                    </div>
+                    <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Em progresso</p>
+                      <p className="mt-1 text-sm font-black font-mono text-accent-blue">{planExecution.inProgress}</p>
+                    </div>
+                    <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Abertas</p>
+                      <p className="mt-1 text-sm font-black font-mono text-accent-orange">{planExecution.open}</p>
+                    </div>
+                    <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                      <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Concluídas</p>
+                      <p className="mt-1 text-sm font-black font-mono text-brand-mint">{planExecution.done}</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-[10px] text-text-secondary">
+                    {activePlan.exported
+                      ? `Ultima exportacao em ${new Date(activePlan.exportedAt ?? activePlan.updatedAt).toLocaleString('pt-BR')}.`
+                      : 'Este plano ainda nao foi exportado para a fila de tarefas.'}
+                  </p>
                 </div>
 
                 <div className="flex gap-3">

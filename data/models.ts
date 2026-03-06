@@ -89,6 +89,9 @@ export interface StoredPlan {
   checklist: string[];
   suggestedTasks: StoredPlanSuggestedTask[];
   exported: boolean;
+  exportedAt?: string;
+  exportedTaskIds?: number[];
+  lastOpenedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
