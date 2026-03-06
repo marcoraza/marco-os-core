@@ -9,6 +9,13 @@ interface ProjectSwitcherProps {
   projects: Project[];
   activeProjectId: string;
   activeTaskCounts: Record<string, number>;
+  projectControl: {
+    open: number;
+    critical: number;
+    done: number;
+    notes: number;
+    upcomingEvents: number;
+  };
   onProjectChange: (id: string) => void;
   onAddProject: (name: string) => void;
   theme: Theme;
@@ -19,6 +26,7 @@ export default function ProjectSwitcher({
   projects,
   activeProjectId,
   activeTaskCounts,
+  projectControl,
   onProjectChange,
   onAddProject,
   theme,
@@ -157,7 +165,21 @@ export default function ProjectSwitcher({
         </div>
       </div>
 
-      <div className="hidden md:flex items-center gap-8 shrink-0">
+      <div className="hidden md:flex items-center gap-4 shrink-0">
+        <div className="grid grid-cols-5 gap-2 rounded-md border border-border-panel bg-bg-base px-3 py-2">
+          {[
+            { label: 'Abertas', value: projectControl.open, color: 'text-text-primary' },
+            { label: 'Críticas', value: projectControl.critical, color: 'text-accent-red' },
+            { label: 'Feitas', value: projectControl.done, color: 'text-brand-mint' },
+            { label: 'Notas', value: projectControl.notes, color: 'text-accent-blue' },
+            { label: 'Agenda', value: projectControl.upcomingEvents, color: 'text-accent-orange' },
+          ].map((item) => (
+            <div key={item.label} className="min-w-[58px] text-center">
+              <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">{item.label}</p>
+              <p className={cn('mt-1 text-[11px] font-black font-mono', item.color)}>{item.value}</p>
+            </div>
+          ))}
+        </div>
         <p className="text-[9px] text-text-secondary/40 font-black tracking-[0.3em] uppercase">MARCO OS • V1.2</p>
       </div>
 

@@ -41,6 +41,7 @@ import {
   buildProjectIdMap,
 } from './utils/taskMappings';
 import { createQuickCaptureNote, createQuickCaptureTask } from './data/domainFactories';
+import { summarizeProjectControl } from './lib/projectControl';
 
 // Layout components
 import AppHeader from './components/layout/AppHeader';
@@ -354,6 +355,14 @@ const AppContent: React.FC = () => {
     acc[proj.id] = tasks.filter(t => t.projectId === proj.id && t.status !== 'done').length;
     return acc;
   }, {} as Record<string, number>), [projects, tasks]);
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === activeProjectId),
+    [activeProjectId, projects]
+  );
+  const projectControl = useMemo(
+    () => summarizeProjectControl(activeProject, tasks, notes, events),
+    [activeProject, events, notes, tasks]
+  );
   const handleOpenPalette = useCallback(() => setIsPaletteOpen(true), []);
   const handleOpenQuickCapture = useCallback(() => setQuickCaptureOpen(true), []);
   const handleOpenMissionModal = useCallback(() => setIsMissionModalOpen(true), []);
@@ -487,11 +496,12 @@ const AppContent: React.FC = () => {
                 projects={projects}
                 activeProjectId={activeProjectId}
                 activeTaskCounts={activeTaskCounts}
-                onProjectChange={setActiveProjectId}
-                onAddProject={addProject}
-                theme={theme}
-                onThemeChange={setTheme}
-              />
+              onProjectChange={setActiveProjectId}
+              onAddProject={addProject}
+              projectControl={projectControl}
+              theme={theme}
+              onThemeChange={setTheme}
+            />
             </Suspense>
           )}
         </div>

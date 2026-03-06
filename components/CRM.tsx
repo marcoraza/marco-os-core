@@ -20,6 +20,7 @@ const SEED_CONTACTS: StoredContact[] = [
     status: 'warm',
     tags: ['Música', 'Parceiro'],
     lastContact: 'Há 45 dias',
+    nextFollowUp: '2026-03-12',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -34,6 +35,7 @@ const SEED_CONTACTS: StoredContact[] = [
     status: 'hot',
     tags: ['Tech', 'Cliente'],
     lastContact: 'Há 2 dias',
+    nextFollowUp: '2026-03-08',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -48,6 +50,7 @@ const SEED_CONTACTS: StoredContact[] = [
     status: 'warm',
     tags: ['Investidor'],
     lastContact: 'Há 60 dias',
+    nextFollowUp: '2026-03-15',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -62,6 +65,7 @@ const SEED_CONTACTS: StoredContact[] = [
     status: 'cold',
     tags: ['Design', 'Prospect'],
     lastContact: 'Há 15 dias',
+    nextFollowUp: '2026-03-20',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -132,6 +136,10 @@ const CRM: React.FC = () => {
 
   /* ─── Derived ───────────────────────────────────────────────────────────── */
   const allTags = ['Todos', ...Array.from(new Set((contacts ?? []).flatMap(c => c.tags ?? [])))];
+  const reconnectQueue = [...contacts]
+    .filter((contact) => contact.nextFollowUp)
+    .sort((left, right) => (left.nextFollowUp ?? '').localeCompare(right.nextFollowUp ?? ''))
+    .slice(0, 3);
 
   const filteredContacts = (contacts ?? []).filter(c => {
     const q = searchQuery.toLowerCase();
@@ -202,6 +210,7 @@ const CRM: React.FC = () => {
         image: form.image.trim() || undefined,
         initials: form.image.trim() ? undefined : generateInitials(form.name.trim()),
         notes: form.notes.trim() || undefined,
+        interactionLog: editingContact.interactionLog ?? [],
         updatedAt: now,
       };
       await putContact(updated);
@@ -225,6 +234,8 @@ const CRM: React.FC = () => {
         initials: form.image.trim() ? undefined : generateInitials(form.name.trim()),
         lastContact: 'Agora',
         notes: form.notes.trim() || undefined,
+        nextFollowUp: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+        interactionLog: [],
         createdAt: now,
         updatedAt: now,
       };
@@ -407,9 +418,12 @@ const CRM: React.FC = () => {
               </div>
               <div className="p-4 space-y-4">
                 {[
-                  { name: 'André Luiz', time: '3 meses', img: 'https://i.pravatar.cc/150?u=3' },
-                  { name: 'Sarah Jones', time: '45 dias', img: 'https://i.pravatar.cc/150?u=4' },
-                  { name: 'Ricardo M.', time: '60 dias', initials: 'RM' },
+                  ...reconnectQueue.map((contact) => ({
+                    name: contact.name,
+                    time: contact.nextFollowUp ?? contact.lastContact,
+                    img: contact.image,
+                    initials: contact.initials,
+                  })),
                 ].map((contact, i) => (
                   <div key={i} className="flex items-center justify-between group">
                     <div className="flex items-center gap-3">
@@ -420,7 +434,7 @@ const CRM: React.FC = () => {
                       )}
                       <div>
                         <p className="text-xs font-bold text-text-primary">{contact.name}</p>
-                        <p className="text-[9px] text-accent-red">Inativo: {contact.time}</p>
+                        <p className="text-[9px] text-accent-red">Follow-up: {contact.time}</p>
                       </div>
                     </div>
                     {/* Enhanced touch target for mobile */}
@@ -429,6 +443,11 @@ const CRM: React.FC = () => {
                     </button>
                   </div>
                 ))}
+                {reconnectQueue.length === 0 && (
+                  <div className="rounded-sm border border-border-panel bg-bg-base px-3 py-3 text-[10px] text-text-secondary">
+                    Nenhum follow-up pendente na fila.
+                  </div>
+                )}
                 <button className="w-full py-2 mt-2 border border-border-panel rounded-sm text-[10px] font-bold text-text-secondary uppercase hover:text-text-primary hover:border-text-secondary transition-colors">
                   Ver Fila Completa
                 </button>
@@ -514,6 +533,11 @@ const CRM: React.FC = () => {
                          <Badge key={tag} variant="blue">{tag}</Badge>
                       ))}
                     </div>
+                    {selectedContact.nextFollowUp && (
+                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-accent-orange">
+                        Próximo follow-up: {selectedContact.nextFollowUp}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -561,27 +585,23 @@ const CRM: React.FC = () => {
                 <div className="relative pl-4 space-y-6">
                   <div className="absolute left-4 top-2 bottom-4 w-0.5 bg-border-panel"></div>
 
-                  <div className="relative pl-6">
-                    <div className="absolute left-[11px] top-1.5 w-3 h-3 rounded-full bg-accent-blue border-2 border-surface z-10"></div>
-                    <div className="bg-header-bg p-3 rounded-sm border border-border-panel">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-sm text-text-primary">Email Enviado</span>
-                        <span className="text-xs text-text-secondary">Hoje, 10:30</span>
+                  {(selectedContact.interactionLog && selectedContact.interactionLog.length > 0
+                    ? selectedContact.interactionLog
+                    : [
+                        { id: 'seed-email', type: 'email' as const, title: 'Email enviado', happenedAt: selectedContact.updatedAt },
+                        { id: 'seed-note', type: 'note' as const, title: 'Nota operacional atualizada', happenedAt: selectedContact.createdAt },
+                      ]).map((entry) => (
+                    <div key={entry.id} className="relative pl-6">
+                      <div className="absolute left-[11px] top-1.5 w-3 h-3 rounded-full bg-accent-blue border-2 border-surface z-10"></div>
+                      <div className="bg-header-bg p-3 rounded-sm border border-border-panel">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-semibold text-sm text-text-primary">{entry.title}</span>
+                          <span className="text-xs text-text-secondary">{new Date(entry.happenedAt).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                        <p className="text-xs text-text-secondary uppercase tracking-widest">{entry.type}</p>
                       </div>
-                      <p className="text-xs text-text-secondary">Envio da proposta revisada.</p>
                     </div>
-                  </div>
-
-                  <div className="relative pl-6">
-                    <div className="absolute left-[11px] top-1.5 w-3 h-3 rounded-full bg-text-secondary border-2 border-surface z-10"></div>
-                    <div className="bg-header-bg p-3 rounded-sm border border-border-panel">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-sm text-text-primary">Chamada</span>
-                        <span className="text-xs text-text-secondary">Ontem, 14:00</span>
-                      </div>
-                      <p className="text-xs text-text-secondary">Alinhamento de expectativas.</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>

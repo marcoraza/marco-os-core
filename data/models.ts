@@ -58,6 +58,13 @@ export interface StoredContact {
   tags: string[];
   lastContact: string;
   notes?: string;
+  nextFollowUp?: string;
+  interactionLog?: Array<{
+    id: string;
+    type: 'email' | 'call' | 'meeting' | 'note';
+    title: string;
+    happenedAt: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }

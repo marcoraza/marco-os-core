@@ -11,6 +11,7 @@ import { plannerJourneyConfig } from '../lib/journeyConfigs/planner';
 import { useSupabaseData } from '../contexts/SupabaseDataContext';
 import { showToast } from './ui';
 import { buildPlanExportTasks, getPlanExportCandidates, getPlannerResumeTarget, summarizePlanDrift, summarizePlanExecution } from '../lib/plannerWorkflows';
+import { derivePlanMilestones } from '../lib/projectControl';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 interface PlannerProps {
@@ -928,6 +929,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, tasks, add
   const planExecution = activePlan ? summarizePlanExecution(activePlan, tasks) : { total: 0, done: 0, inProgress: 0, open: 0 };
   const planDrift = activePlan ? summarizePlanDrift(activePlan, tasks) : { missing: [], extra: [] };
   const exportCandidates = activePlan ? getPlanExportCandidates(activePlan, tasks, projectId) : [];
+  const milestones = activePlan ? derivePlanMilestones(activePlan.title, (activePlan.suggestedTasks ?? []).map((task) => task.deadline)) : [];
 
   const TABS = [
     { id: 'planos' as const, label: 'Planos', icon: 'auto_awesome' },
@@ -1290,6 +1292,20 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, tasks, add
                     ))}
                   </div>
                 </div>
+
+                {milestones.length > 0 && (
+                  <div className="bg-surface border border-border-panel rounded-sm p-4">
+                    <SectionLabel>Milestones</SectionLabel>
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {milestones.map((milestone) => (
+                        <div key={milestone.id} className="rounded-sm border border-border-panel bg-bg-base px-3 py-2">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">{milestone.label}</p>
+                          <p className="mt-1 text-[10px] font-medium text-text-primary">{milestone.deadline}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {(planDrift.missing.length > 0 || planDrift.extra.length > 0) && (
                   <div className="bg-surface border border-border-panel rounded-sm p-4 space-y-3">

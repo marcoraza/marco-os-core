@@ -80,6 +80,20 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
     () => agentExecutions.find((execution) => execution.status === 'failed'),
     [agentExecutions]
   );
+  const recentDispatches = useMemo(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = JSON.parse(window.localStorage.getItem('agent-recent-dispatches') || '[]') as Array<{
+        agentId: string;
+        mission: string;
+        priority: 'high' | 'medium' | 'low';
+        createdAt: string;
+      }>;
+      return stored.filter((dispatch) => dispatch.agentId === agentId).slice(0, 3);
+    } catch {
+      return [];
+    }
+  }, [agentId]);
 
   if (!agent) {
     return (
@@ -208,6 +222,22 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
               </div>
               <p className="mt-1 text-[10px] text-text-primary">{latestFailure.task}</p>
               <p className="mt-0.5 text-[8px] font-mono text-text-secondary">{latestFailure.startedAt}</p>
+            </div>
+          )}
+          {recentDispatches.length > 0 && (
+            <div className="mt-3 rounded-sm border border-border-panel/70 bg-bg-base px-3 py-2">
+              <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-text-secondary">
+                <Icon name="history" size="xs" />
+                <span>Últimos dispatches</span>
+              </div>
+              <div className="mt-2 space-y-1.5">
+                {recentDispatches.map((dispatch) => (
+                  <div key={`${dispatch.createdAt}-${dispatch.mission}`} className="rounded-sm border border-border-panel/60 px-2.5 py-2">
+                    <p className="text-[10px] text-text-primary">{dispatch.mission}</p>
+                    <p className="mt-0.5 text-[8px] font-mono text-text-secondary">{dispatch.createdAt}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
           <div className="mt-3 flex flex-wrap gap-2">

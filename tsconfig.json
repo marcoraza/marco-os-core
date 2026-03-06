@@ -46,6 +46,9 @@
   ],
   "exclude": [
     "dist",
-    "node_modules"
+    "node_modules",
+    "**/* 2.ts",
+    "**/* 2.tsx",
+    "**/* 2.json"
   ]
 }
