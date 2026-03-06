@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import type { StoredEvent, StoredNote } from '../data/models';
 import type { Project, Task, View } from '../lib/appTypes';
 import { createPaletteEvent, createPaletteNote, createPaletteTask, createProject, createTaskFromInput } from '../data/domainFactories';
+import { showToast } from '../components/ui';
 
 interface AppDomainActionsParams {
   activeProjectId: string;
@@ -41,6 +42,7 @@ export function useAppDomainActions({
     const adapted = createTaskFromInput(newTask, activeProjectId);
     setTasks((prev) => [...prev, adapted]);
     setIsMissionModalOpen(false);
+    showToast('Missao criada');
   }, [activeProjectId, setIsMissionModalOpen, setTasks]);
 
   const addTasks = useCallback((newTasks: Omit<Task, 'id' | 'assignee' | 'dependencies'>[]) => {
@@ -55,21 +57,27 @@ export function useAppDomainActions({
 
   const createTaskFromPalette = useCallback((title: string) => {
     const trimmed = title.trim();
-    if (!trimmed) return;
-    setTasks((prev) => [...prev, createPaletteTask(trimmed, activeProjectId)]);
+    if (!trimmed) return null;
+    const task = createPaletteTask(trimmed, activeProjectId);
+    setTasks((prev) => [...prev, task]);
     setCurrentView('dashboard');
+    return task;
   }, [activeProjectId, setCurrentView, setTasks]);
 
   const createNoteFromPalette = useCallback((title: string) => {
     const trimmed = title.trim();
-    if (!trimmed) return;
-    setNotes((prev) => [createPaletteNote(trimmed, activeProjectId), ...prev]);
+    if (!trimmed) return null;
+    const note = createPaletteNote(trimmed, activeProjectId);
+    setNotes((prev) => [note, ...prev]);
+    return note;
   }, [activeProjectId, setNotes]);
 
   const createEventFromPalette = useCallback((title: string) => {
     const trimmed = title.trim();
-    if (!trimmed) return;
-    setEvents((prev) => [createPaletteEvent(trimmed, activeProjectId), ...prev]);
+    if (!trimmed) return null;
+    const event = createPaletteEvent(trimmed, activeProjectId);
+    setEvents((prev) => [event, ...prev]);
+    return event;
   }, [activeProjectId, setEvents]);
 
   const openTaskFromPalette = useCallback((_taskId: number, projectId: string) => {

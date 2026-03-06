@@ -12,10 +12,16 @@ const MissionModal: React.FC<MissionModalProps> = ({ onClose, onSave }) => {
   const [priority, setPriority] = useState('normal');
   const [energy, setEnergy] = useState('medium');
   const [points, setPoints] = useState(3);
+  const [showValidation, setShowValidation] = useState(false);
+  const isValid = title.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ title, priority, energy, points, tag: 'GERAL' });
+    if (!isValid) {
+      setShowValidation(true);
+      return;
+    }
+    onSave({ title: title.trim(), priority, energy, points, tag: 'GERAL' });
   };
 
   return (
@@ -57,11 +63,17 @@ const MissionModal: React.FC<MissionModalProps> = ({ onClose, onSave }) => {
               <label className="block text-[10px] font-black uppercase tracking-wider text-text-secondary">TÍTULO DA MISSÃO</label>
               <input 
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (showValidation && e.target.value.trim()) setShowValidation(false);
+                }}
                 type="text" 
                 placeholder="Ex: Finalizar relatório financeiro Q3" 
                 className="w-full bg-header-bg border border-border-panel rounded-md px-4 py-3 text-base md:text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors placeholder-text-secondary focus:ring-1 focus:ring-accent-blue"
               />
+              {showValidation && !isValid && (
+                <p className="text-[10px] font-medium text-accent-red">Informe um título para criar a missão.</p>
+              )}
             </div>
 
             {/* Description */}
@@ -215,7 +227,12 @@ const MissionModal: React.FC<MissionModalProps> = ({ onClose, onSave }) => {
           </button>
           <button 
             onClick={handleSubmit}
-            className="px-6 py-2.5 rounded-sm text-sm font-bold bg-accent-blue hover:bg-accent-blue-dim text-white shadow-lg shadow-blue-500/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+            disabled={!isValid}
+            className={`px-6 py-2.5 rounded-sm text-sm font-bold transition-all flex items-center gap-2 ${
+              isValid
+                ? 'bg-accent-blue hover:bg-accent-blue-dim text-white shadow-lg shadow-blue-500/20 transform hover:-translate-y-0.5'
+                : 'bg-border-panel text-text-secondary cursor-not-allowed'
+            }`}
           >
             <Icon name="rocket_launch" size="sm" />
             CRIAR MISSÃO

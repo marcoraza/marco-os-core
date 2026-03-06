@@ -129,6 +129,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   const [showListMobile, setShowListMobile] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
   const [isBrainDumpFormOpen, setIsBrainDumpFormOpen] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const { isSetupDone, markDone } = useSectionSetup('notes');
   const [showJourney, setShowJourney] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -170,8 +171,27 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
 
   const updateBody = useCallback((body: string) => {
     if (!selectedId) return;
+    setSaveState('saving');
     setNotes(prev => prev.map(n => n.id === selectedId ? { ...n, body, updatedAt: new Date().toISOString() } : n));
   }, [selectedId, setNotes]);
+
+  const updateTitle = useCallback((title: string) => {
+    if (!selectedId) return;
+    setSaveState('saving');
+    setNotes(prev => prev.map(n => n.id === selectedId ? { ...n, title, updatedAt: new Date().toISOString() } : n));
+  }, [selectedId, setNotes]);
+
+  React.useEffect(() => {
+    if (saveState !== 'saving') return;
+    const timer = window.setTimeout(() => setSaveState('saved'), 350);
+    return () => window.clearTimeout(timer);
+  }, [saveState]);
+
+  React.useEffect(() => {
+    if (saveState !== 'saved') return;
+    const timer = window.setTimeout(() => setSaveState('idle'), 1200);
+    return () => window.clearTimeout(timer);
+  }, [saveState]);
 
   const deleteNote = (id: string) => {
     setNotes(prev => (prev ?? []).filter(n => n.id !== id));
@@ -285,10 +305,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
                 <input
                   type="text"
                   value={selected.title}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setNotes(prev => prev.map(n => n.id === selectedId ? { ...n, title: val, updatedAt: new Date().toISOString() } : n));
-                  }}
+                  onChange={e => updateTitle(e.target.value)}
                   className="flex-1 bg-transparent border-none text-sm font-bold text-text-primary focus:outline-none"
                 />
                 {/* Edit/Preview toggle */}
@@ -312,7 +329,9 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
                     Preview
                   </button>
                 </div>
-                <span className="text-[8px] text-text-secondary/50 shrink-0">autosave</span>
+                <span className="text-[8px] text-text-secondary/50 shrink-0">
+                  {saveState === 'saving' ? 'salvando...' : saveState === 'saved' ? 'salvo' : 'autosave'}
+                </span>
               </div>
 
               {/* Toolbar (edit mode only) */}

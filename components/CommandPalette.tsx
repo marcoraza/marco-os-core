@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Task, View } from '../lib/appTypes';
 import type { StoredEvent, StoredNote, StoredContact } from '../data/models';
-import { Icon, SectionLabel } from './ui';
+import { Icon, SectionLabel, showToast } from './ui';
 import { cn } from '../utils/cn';
 
 type PaletteItem =
@@ -24,12 +24,12 @@ interface CommandPaletteProps {
   events: StoredEvent[];
   contacts?: StoredContact[];
   onOpenTask?: (taskId: number, projectId: string) => void;
-  onOpenNote?: (noteId: string) => void;
-  onNavigate?: (view: View) => void;
-  onCreateTask: (title: string) => void;
-  onCreateNote: (title: string) => void;
-  onCreateEvent: (title: string) => void;
-  onQuickAction?: (actionId: string) => void;
+  onOpenNote?: (noteId: string) => void | Promise<void>;
+  onNavigate?: (view: View) => void | Promise<void>;
+  onCreateTask: (title: string) => unknown;
+  onCreateNote: (title: string) => unknown;
+  onCreateEvent: (title: string) => unknown;
+  onQuickAction?: (actionId: string) => void | Promise<void>;
 }
 
 const NAV_COMMANDS: { id: View; icon: string; label: string; subtitle: string }[] = [
@@ -63,12 +63,16 @@ export default function CommandPalette(props: CommandPaletteProps) {
 
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
     setQuery('');
     setActiveIndex(0);
+    setIsExecuting(false);
+    setErrorMessage(null);
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [open]);
 
@@ -145,44 +149,49 @@ export default function CommandPalette(props: CommandPaletteProps) {
     return [...create, ...(q ? [] : navItems), ...(q ? [] : quickActions), ...taskItems, ...noteItems, ...eventItems, ...contactItems, ...(q ? quickActions : []), ...(q ? navItems : [])];
   }, [query, tasks, notes, events, contacts]);
 
-  const executeItem = (item: PaletteItem) => {
-    switch (item.kind) {
-      case 'nav':
-        onNavigate?.(item.view);
-        onClose();
-        break;
-      case 'task':
-        onOpenTask?.(item.id, item.projectId);
-        onClose();
-        break;
-      case 'note':
-        onOpenNote?.(item.id);
-        onClose();
-        break;
-      case 'event':
-        // Events don't have a dedicated view yet, but navigate to dashboard
-        onClose();
-        break;
-      case 'contact':
-        onNavigate?.('crm');
-        onClose();
-        break;
-      case 'create-task':
-        onCreateTask(item.title);
-        onClose();
-        break;
-      case 'create-note':
-        onCreateNote(item.title);
-        onClose();
-        break;
-      case 'create-event':
-        onCreateEvent(item.title);
-        onClose();
-        break;
-      case 'action':
-        onQuickAction?.(item.id);
-        onClose();
-        break;
+  const executeItem = async (item: PaletteItem) => {
+    if (isExecuting) return;
+    setIsExecuting(true);
+    setErrorMessage(null);
+    try {
+      switch (item.kind) {
+        case 'nav':
+          await onNavigate?.(item.view);
+          break;
+        case 'task':
+          onOpenTask?.(item.id, item.projectId);
+          break;
+        case 'note':
+          await onOpenNote?.(item.id);
+          break;
+        case 'event':
+          await onNavigate?.('planner');
+          showToast('Evento disponivel no planejador');
+          break;
+        case 'contact':
+          await onNavigate?.('crm');
+          break;
+        case 'create-task':
+          if (!onCreateTask(item.title)) throw new Error('Nao foi possivel criar a tarefa');
+          showToast('Tarefa criada');
+          break;
+        case 'create-note':
+          if (!onCreateNote(item.title)) throw new Error('Nao foi possivel criar a nota');
+          showToast('Nota criada');
+          break;
+        case 'create-event':
+          if (!onCreateEvent(item.title)) throw new Error('Nao foi possivel criar o evento');
+          showToast('Evento criado');
+          break;
+        case 'action':
+          await onQuickAction?.(item.id);
+          break;
+      }
+      onClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Acao falhou');
+    } finally {
+      setIsExecuting(false);
     }
   };
 
@@ -208,7 +217,7 @@ export default function CommandPalette(props: CommandPaletteProps) {
       if (e.key === 'Enter') {
         e.preventDefault();
         const item = items[activeIndex];
-        if (item) executeItem(item);
+        if (item) void executeItem(item);
       }
     };
 
@@ -309,12 +318,14 @@ export default function CommandPalette(props: CommandPaletteProps) {
                   <button
                     key={`${item.kind}-${'id' in item ? (item as any).id : item.title}-${idx}`}
                     onMouseEnter={() => setActiveIndex(idx)}
-                    onClick={() => executeItem(item)}
+                    onClick={() => void executeItem(item)}
+                    disabled={isExecuting}
                     className={cn(
                       'w-full flex items-start gap-3 px-3 py-2 rounded-md border transition-colors text-left',
                       idx === activeIndex
                         ? 'bg-bg-base border-brand-mint/30'
-                        : 'bg-surface border-transparent hover:bg-surface-hover'
+                        : 'bg-surface border-transparent hover:bg-surface-hover',
+                      isExecuting && 'opacity-70'
                     )}
                   >
                     <div className="mt-0.5">{renderIcon(item.kind, item)}</div>
@@ -340,10 +351,15 @@ export default function CommandPalette(props: CommandPaletteProps) {
 
           <div className="px-4 py-3 border-t border-border-panel bg-header-bg flex items-center justify-between">
             <div className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">
-              Cmd/Ctrl+K para abrir • ↑/↓ navegar • Enter confirmar
+              {isExecuting ? 'Executando comando...' : 'Cmd/Ctrl+K para abrir • ↑/↓ navegar • Enter confirmar'}
             </div>
             <div className="text-[9px] font-black text-text-secondary/50 uppercase tracking-[0.3em]">PALETTE</div>
           </div>
+          {errorMessage && (
+            <div className="px-4 py-2 border-t border-accent-red/20 bg-accent-red/10 text-[10px] font-medium text-accent-red">
+              {errorMessage}
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 
 interface DataBadgeProps {
   /** true = real Supabase data, false = mock/seed data */
@@ -12,7 +12,7 @@ interface DataBadgeProps {
  * DataBadge — shows "Dados de exemplo" when mock, "Sincronizado há Xmin" when real.
  * Render near section headers to communicate data freshness.
  */
-export function DataBadge({ isReal, lastSync, className = '' }: DataBadgeProps) {
+function DataBadgeComponent({ isReal, lastSync, className = '' }: DataBadgeProps) {
   const [, forceUpdate] = useState(0);
 
   useEffect(() => {
@@ -31,6 +31,7 @@ export function DataBadge({ isReal, lastSync, className = '' }: DataBadgeProps) 
         ].join(' ')}
         title="Exibindo dados de exemplo — conecte suas fontes de dados"
       >
+        <span className="h-1.5 w-1.5 rounded-full bg-accent-orange" />
         Dados de exemplo
       </span>
     );
@@ -38,7 +39,10 @@ export function DataBadge({ isReal, lastSync, className = '' }: DataBadgeProps) 
 
   if (!lastSync) {
     return (
-      <span className={`text-[8px] font-mono text-accent-orange ${className}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-mono leading-none bg-accent-red/10 border border-accent-red/20 text-accent-red ${className}`}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-accent-red" />
         Sem dados
       </span>
     );
@@ -67,10 +71,17 @@ export function DataBadge({ isReal, lastSync, className = '' }: DataBadgeProps) 
 
   return (
     <span
-      className={`text-[8px] font-mono ${stale ? 'text-accent-orange' : 'text-text-secondary'} ${className}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-mono leading-none border ${
+        stale
+          ? 'bg-accent-orange/10 border-accent-orange/20 text-accent-orange'
+          : 'bg-brand-mint/10 border-brand-mint/20 text-brand-mint'
+      } ${className}`}
       title={lastSync ?? 'Nunca sincronizado'}
     >
+      <span className={`h-1.5 w-1.5 rounded-full ${stale ? 'bg-accent-orange' : 'bg-brand-mint'}`} />
       Sincronizado {label}
     </span>
   );
 }
+
+export const DataBadge = memo(DataBadgeComponent);

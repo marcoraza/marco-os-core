@@ -14,7 +14,6 @@ import {
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type {
-  DataProvider,
   ResearchItem,
   DeepDiveItem,
   CriadorItem,
@@ -31,6 +30,15 @@ import type {
   CalendarEvent,
   GitHubRepo,
 } from '../lib/dataProvider'
+import {
+  buildProvider,
+  latestSyncedAt,
+  type NotionDataContextValue,
+  NOTION_DB_KEYS,
+  type NotionDbKey,
+  type ProviderCache,
+  type ProviderErrorMap,
+} from '../lib/notionDataContract'
 
 // ─── Table → tier mapping ─────────────────────────────────────────────────
 
@@ -64,9 +72,10 @@ type RealtimeTableName = (typeof REALTIME_TABLES)[number]
 type WarmTableName = (typeof WARM_TABLES)[number]
 type ColdTableName = (typeof COLD_TABLES)[number]
 type SupabaseTableName = RealtimeTableName | WarmTableName | ColdTableName
+type SupabaseRow = Record<string, unknown>
 
 /** Maps Supabase table name → context key used in NotionDataContextValue */
-const TABLE_TO_KEY: Record<SupabaseTableName, DBKey> = {
+const TABLE_TO_KEY: Record<SupabaseTableName, NotionDbKey> = {
   tasks: 'checklist',
   agent_events: 'research',        // agent_events → research slot (closest match; adjust if needed)
   notifications: 'brain_dump',     // notifications → brain_dump slot
@@ -83,100 +92,33 @@ const TABLE_TO_KEY: Record<SupabaseTableName, DBKey> = {
   brain_dump: 'brain_dump',
 }
 
-// ─── DB keys (mirrors NotionDataContext) ─────────────────────────────────────
-
-const DB_KEYS = [
-  'research',
-  'deep_dives',
-  'criadores',
-  'projetos',
-  'checklist',
-  'reunioes',
-  'pessoas',
-  'content',
-  'brain_dump',
-  'financas',
-  'saude',
-  'skills',
-  'decisions',
-  'calendar',
-  'github',
-] as const
-
-type DBKey = (typeof DB_KEYS)[number]
-
-// ─── Context shape (identical to NotionDataContext) ───────────────────────────
-
-interface NotionDataContextValue {
-  research: DataProvider<ResearchItem>
-  deep_dives: DataProvider<DeepDiveItem>
-  criadores: DataProvider<CriadorItem>
-  projetos: DataProvider<ProjetoItem>
-  checklist: DataProvider<ChecklistItem>
-  reunioes: DataProvider<ReuniaoItem>
-  pessoas: DataProvider<PessoaItem>
-  content: DataProvider<ContentItem>
-  brain_dump: DataProvider<BrainDumpItem>
-  financas: DataProvider<FinancaItem>
-  saude: DataProvider<SaudeItem>
-  skills: DataProvider<SkillItem>
-  decisions: DataProvider<DecisionItem>
-  calendar: DataProvider<CalendarEvent>
-  github: DataProvider<GitHubRepo>
-  isLoading: boolean
-  lastSync: string | null
-  error: string | null
-  refetch: () => Promise<void>
-}
-
-// ─── Internal cache ───────────────────────────────────────────────────────────
-
-type CacheEntry = { data: unknown[]; lastSync: string | null }
-type Cache = Map<DBKey, CacheEntry>
-type ErrorMap = Map<DBKey, string | null>
-
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 const SupabaseDataContext = createContext<NotionDataContextValue | null>(null)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildProvider<T>(
-  key: DBKey,
-  cache: Cache,
-  errors: ErrorMap,
-  isLoading: boolean,
-  refetch: () => Promise<void>,
-): DataProvider<T> {
-  const entry = cache.get(key)
-  return {
-    items: (entry?.data ?? []) as T[],
-    isLoading,
-    lastSync: entry?.lastSync ?? null,
-    error: errors.get(key) ?? null,
-    refetch,
-  }
-}
-
-/** Extract the most recent `synced_at` from an array of rows (if present). */
-function latestSyncedAt(rows: unknown[]): string | null {
-  if (rows.length === 0) return null
-  let latest: string | null = null
-  for (const row of rows) {
-    const r = row as Record<string, unknown>
-    const s = r['synced_at']
-    if (typeof s === 'string') {
-      if (!latest || s > latest) latest = s
+function mapSupabaseRows(table: SupabaseTableName, data: SupabaseRow[]): unknown[] {
+  return data.map((row) => {
+    if (table === 'tasks') {
+      return {
+        ...row,
+        responsavel: row.assigned_to ?? '',
+        prioridade: row.priority ?? '',
+        prazo: row.due_date ? String(row.due_date).split('T')[0] : '',
+        projeto: row.project ?? '',
+        progresso: 0,
+      }
     }
-  }
-  return latest ?? new Date().toISOString()
+    return row
+  })
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function SupabaseDataProvider({ children }: { children: ReactNode }) {
-  const cacheRef = useRef<Cache>(new Map())
-  const errorsRef = useRef<ErrorMap>(new Map())
+  const cacheRef = useRef<ProviderCache>(new Map())
+  const errorsRef = useRef<ProviderErrorMap>(new Map())
   const channelsRef = useRef<RealtimeChannel[]>([])
   const [tick, setTick] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -192,19 +134,7 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
       const { data, error: err } = await supabase.from(table).select('*')
       if (err) throw new Error(err.message)
       // Map Supabase column names to frontend interface names
-      const rows = (data ?? []).map((row: Record<string, unknown>) => {
-        if (table === 'tasks') {
-          return {
-            ...row,
-            responsavel: row.assigned_to ?? '',
-            prioridade: row.priority ?? '',
-            prazo: row.due_date ? String(row.due_date).split('T')[0] : '',
-            projeto: row.project ?? '',
-            progresso: 0,
-          }
-        }
-        return row
-      }) as unknown[]
+      const rows = mapSupabaseRows(table, (data ?? []) as SupabaseRow[])
       cacheRef.current.set(key, {
         data: rows,
         lastSync: latestSyncedAt(rows),
@@ -292,7 +222,7 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
 
   void tick // consumed to trigger re-render
 
-  const makeProvider = <T,>(key: DBKey) =>
+  const makeProvider = <T,>(key: NotionDbKey) =>
     buildProvider<T>(key, cache, errors, isLoading, refetch)
 
   const value: NotionDataContextValue = {

@@ -9,94 +9,30 @@ import {
   ReactNode,
 } from "react";
 import type {
-  DataProvider,
-  ResearchItem,
-  DeepDiveItem,
-  CriadorItem,
-  ProjetoItem,
-  ChecklistItem,
-  ReuniaoItem,
-  PessoaItem,
-  ContentItem,
   BrainDumpItem,
+  CalendarEvent,
+  ChecklistItem,
+  ContentItem,
+  CriadorItem,
+  DecisionItem,
+  DeepDiveItem,
   FinancaItem,
+  GitHubRepo,
+  PessoaItem,
+  ProjetoItem,
+  ResearchItem,
+  ReuniaoItem,
   SaudeItem,
   SkillItem,
-  DecisionItem,
-  CalendarEvent,
-  GitHubRepo,
 } from "../lib/dataProvider";
-
-// ─── DB name → JSON filename mapping ────────────────────────────────────────
-
-const DB_FILES = [
-  "research",
-  "deep_dives",
-  "criadores",
-  "projetos",
-  "checklist",
-  "reunioes",
-  "pessoas",
-  "content",
-  "brain_dump",
-  "financas",
-  "saude",
-  "skills",
-  "decisions",
-  "calendar",
-  "github",
-] as const;
-
-type DBName = (typeof DB_FILES)[number];
-
-// Maps DB key → actual JSON filename (hyphens/plurals differ from key names)
-const DB_FILENAME: Record<DBName, string> = {
-  research: "research",
-  deep_dives: "deep-dives",
-  criadores: "criadores",
-  projetos: "projetos",
-  checklist: "checklists",
-  reunioes: "reunioes",
-  pessoas: "pessoas",
-  content: "content",
-  brain_dump: "brain-dump",
-  financas: "financas",
-  saude: "saude",
-  skills: "skills",
-  decisions: "decisions",
-  calendar: "calendar",
-  github: "github",
-};
-
-// ─── Context shape ───────────────────────────────────────────────────────────
-
-interface NotionDataContextValue {
-  research: DataProvider<ResearchItem>;
-  deep_dives: DataProvider<DeepDiveItem>;
-  criadores: DataProvider<CriadorItem>;
-  projetos: DataProvider<ProjetoItem>;
-  checklist: DataProvider<ChecklistItem>;
-  reunioes: DataProvider<ReuniaoItem>;
-  pessoas: DataProvider<PessoaItem>;
-  content: DataProvider<ContentItem>;
-  brain_dump: DataProvider<BrainDumpItem>;
-  financas: DataProvider<FinancaItem>;
-  saude: DataProvider<SaudeItem>;
-  skills: DataProvider<SkillItem>;
-  decisions: DataProvider<DecisionItem>;
-  calendar: DataProvider<CalendarEvent>;
-  github: DataProvider<GitHubRepo>;
-  isLoading: boolean;
-  lastSync: string | null;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
-
-// ─── Cache ───────────────────────────────────────────────────────────────────
-
-type CacheEntry = { data: unknown[]; fetchedAt: number };
-type Cache = Map<DBName, CacheEntry>;
-type ErrorMap = Map<DBName, string | null>;
+import {
+  buildProvider,
+  type NotionDataContextValue,
+  NOTION_DB_FILENAMES,
+  NOTION_DB_KEYS,
+  type ProviderCache,
+  type ProviderErrorMap,
+} from "../lib/notionDataContract";
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
@@ -106,28 +42,11 @@ const NotionDataContext = createContext<NotionDataContextValue | null>(null);
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-function buildProvider<T>(
-  name: DBName,
-  cache: Cache,
-  errors: ErrorMap,
-  isLoading: boolean,
-  lastSync: string | null,
-  refetch: () => Promise<void>
-): DataProvider<T> {
-  return {
-    items: (cache.get(name)?.data ?? []) as T[],
-    isLoading,
-    lastSync,
-    error: errors.get(name) ?? null,
-    refetch,
-  };
-}
-
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 export function NotionDataProvider({ children }: { children: ReactNode }) {
-  const cacheRef = useRef<Cache>(new Map());
-  const errorsRef = useRef<ErrorMap>(new Map());
+  const cacheRef = useRef<ProviderCache>(new Map());
+  const errorsRef = useRef<ProviderErrorMap>(new Map());
   const [tick, setTick] = useState(0); // bump to trigger re-render after fetch
   const [isLoading, setIsLoading] = useState(true);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -139,15 +58,15 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
     fetchingRef.current = true;
     let anyError: string | null = null;
 
-    for (let i = 0; i < DB_FILES.length; i++) {
-      const name = DB_FILES[i];
+    for (let i = 0; i < NOTION_DB_KEYS.length; i++) {
+      const name = NOTION_DB_KEYS[i];
       try {
         const base = import.meta.env.BASE_URL ?? '/';
-        const filename = DB_FILENAME[name];
+        const filename = NOTION_DB_FILENAMES[name];
         const res = await fetch(`${base}data/${filename}.json`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: unknown[] = await res.json();
-        cacheRef.current.set(name, { data, fetchedAt: Date.now() });
+        cacheRef.current.set(name, { data, lastSync: new Date().toISOString() });
         errorsRef.current.set(name, null); // clear per-DB error on success
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -155,7 +74,7 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
         anyError = msg;
         // keep previous cache entry — no update needed, it stays
       }
-      if (i < DB_FILES.length - 1) await sleep(100);
+      if (i < NOTION_DB_KEYS.length - 1) await sleep(100);
     }
 
     setError(anyError);
@@ -179,24 +98,22 @@ export function NotionDataProvider({ children }: { children: ReactNode }) {
   // Rebuild context value on every tick
   const cache = cacheRef.current;
   const errors = errorsRef.current;
-  const sharedArgs = [errors, isLoading, lastSync, refetch] as const;
-
   const value: NotionDataContextValue = {
-    research: buildProvider<ResearchItem>("research", cache, ...sharedArgs),
-    deep_dives: buildProvider<DeepDiveItem>("deep_dives", cache, ...sharedArgs),
-    criadores: buildProvider<CriadorItem>("criadores", cache, ...sharedArgs),
-    projetos: buildProvider<ProjetoItem>("projetos", cache, ...sharedArgs),
-    checklist: buildProvider<ChecklistItem>("checklist", cache, ...sharedArgs),
-    reunioes: buildProvider<ReuniaoItem>("reunioes", cache, ...sharedArgs),
-    pessoas: buildProvider<PessoaItem>("pessoas", cache, ...sharedArgs),
-    content: buildProvider<ContentItem>("content", cache, ...sharedArgs),
-    brain_dump: buildProvider<BrainDumpItem>("brain_dump", cache, ...sharedArgs),
-    financas: buildProvider<FinancaItem>("financas", cache, ...sharedArgs),
-    saude: buildProvider<SaudeItem>("saude", cache, ...sharedArgs),
-    skills: buildProvider<SkillItem>("skills", cache, ...sharedArgs),
-    decisions: buildProvider<DecisionItem>("decisions", cache, ...sharedArgs),
-    calendar: buildProvider<CalendarEvent>("calendar", cache, ...sharedArgs),
-    github: buildProvider<GitHubRepo>("github", cache, ...sharedArgs),
+    research: buildProvider<ResearchItem>("research", cache, errors, isLoading, refetch),
+    deep_dives: buildProvider<DeepDiveItem>("deep_dives", cache, errors, isLoading, refetch),
+    criadores: buildProvider<CriadorItem>("criadores", cache, errors, isLoading, refetch),
+    projetos: buildProvider<ProjetoItem>("projetos", cache, errors, isLoading, refetch),
+    checklist: buildProvider<ChecklistItem>("checklist", cache, errors, isLoading, refetch),
+    reunioes: buildProvider<ReuniaoItem>("reunioes", cache, errors, isLoading, refetch),
+    pessoas: buildProvider<PessoaItem>("pessoas", cache, errors, isLoading, refetch),
+    content: buildProvider<ContentItem>("content", cache, errors, isLoading, refetch),
+    brain_dump: buildProvider<BrainDumpItem>("brain_dump", cache, errors, isLoading, refetch),
+    financas: buildProvider<FinancaItem>("financas", cache, errors, isLoading, refetch),
+    saude: buildProvider<SaudeItem>("saude", cache, errors, isLoading, refetch),
+    skills: buildProvider<SkillItem>("skills", cache, errors, isLoading, refetch),
+    decisions: buildProvider<DecisionItem>("decisions", cache, errors, isLoading, refetch),
+    calendar: buildProvider<CalendarEvent>("calendar", cache, errors, isLoading, refetch),
+    github: buildProvider<GitHubRepo>("github", cache, errors, isLoading, refetch),
     isLoading,
     lastSync,
     error,
