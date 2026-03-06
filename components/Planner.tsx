@@ -533,11 +533,32 @@ const TasksTab: React.FC<TasksTabProps> = ({ projects, openForm, onOpenForm, onC
     'Revisão': 'text-accent-orange',
     'Concluído': 'text-brand-mint',
   };
+  const totalFilteredTasks = filteredTasks.length;
+  const hasActiveFilters = filters.owner !== 'Marco' || filters.priority !== '' || filters.statuses.length !== STATUS_COLUMNS.length;
 
   return (
     <div className="space-y-4">
       {/* ─── Filter Bar ───────────────────────────────────────────────── */}
       <div className="bg-surface border border-border-panel rounded-sm p-3 space-y-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <p className="text-[10px] font-bold text-text-primary">Fila do planner</p>
+            <p className="text-[9px] text-text-secondary">
+              {totalFilteredTasks} tarefa{totalFilteredTasks !== 1 ? 's' : ''} visiveis
+            </p>
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={() => {
+                saveFilters(DEFAULT_FILTERS);
+                setFilters({ ...DEFAULT_FILTERS, owner: 'Marco' });
+              }}
+              className="rounded-sm border border-border-panel px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-text-primary hover:border-text-secondary/40 transition-colors"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
         {/* Owner pills */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[8px] font-bold uppercase tracking-widest text-text-secondary/60 shrink-0">Pessoa:</span>
@@ -637,6 +658,12 @@ const TasksTab: React.FC<TasksTabProps> = ({ projects, openForm, onOpenForm, onC
           <Icon name="task_alt" size="lg" className="text-text-secondary/40 mx-auto mb-2" />
           <p className="text-sm text-text-secondary">Nenhuma tarefa encontrada</p>
           <p className="text-xs text-text-secondary/60 mt-1">Conecte o Supabase ou adicione tarefas via Notion</p>
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="bg-surface border border-border-panel rounded-sm p-8 text-center">
+          <Icon name="filter_alt_off" size="lg" className="text-text-secondary/40 mx-auto mb-2" />
+          <p className="text-sm text-text-secondary">Nenhuma tarefa bate com os filtros</p>
+          <p className="text-xs text-text-secondary/60 mt-1">Ajuste pessoa, prioridade ou status para ampliar a fila.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

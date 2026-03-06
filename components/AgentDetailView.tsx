@@ -83,6 +83,11 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
     : agent.role === 'integration' ? 'bg-accent-blue/10 border-accent-blue/20 text-accent-blue'
     : 'bg-brand-mint/10 border-brand-mint/20 text-brand-mint';
   const roleLabel = agent.role === 'coordinator' ? 'COORDENADOR' : agent.role === 'integration' ? 'INTEGRAÇÃO' : 'SUB-AGENTE';
+  const statusMessage = agent.currentMission
+    ? agent.currentMission
+    : isOnline
+      ? 'Sem missao ativa no momento.'
+      : 'Agente offline. Conexao aguardando retomada.';
 
   return (
     <div className="flex flex-col h-full overflow-hidden animate-in fade-in duration-200" key={agentId}>
@@ -146,6 +151,15 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
           <div className="hidden lg:block shrink-0">
             <TokenUsageCard agentId={agentId} compact />
           </div>
+        </div>
+        <div className="mt-4 rounded-md border border-border-panel bg-surface/40 px-3 py-2">
+          <div className="flex items-center gap-2 text-[9px] uppercase tracking-widest text-text-secondary">
+            <Icon name={isOnline ? 'assistant_navigation' : 'wifi_off'} size="xs" />
+            <span>Resumo Operacional</span>
+          </div>
+          <p className="mt-1 text-[11px] text-text-primary">
+            {statusMessage}
+          </p>
         </div>
       </div>
 

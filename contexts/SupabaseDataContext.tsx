@@ -12,7 +12,7 @@ import {
   ReactNode,
 } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import type {
   ResearchItem,
   DeepDiveItem,
@@ -130,6 +130,10 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
   // ── Fetch a single Supabase table ─────────────────────────────────────────
   const fetchTable = useCallback(async (table: SupabaseTableName): Promise<boolean> => {
     const key = TABLE_TO_KEY[table]
+    if (!isSupabaseConfigured) {
+      errorsRef.current.set(key, 'Supabase nao configurado')
+      return false
+    }
     try {
       const { data, error: err } = await supabase.from(table).select('*')
       if (err) throw new Error(err.message)
@@ -167,6 +171,7 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
 
   // ── Realtime subscriptions ────────────────────────────────────────────────
   const setupRealtime = useCallback(() => {
+    if (!isSupabaseConfigured) return
     // Clean up existing channels first
     channelsRef.current.forEach((ch) => {
       void supabase.removeChannel(ch)
@@ -190,6 +195,11 @@ export function SupabaseDataProvider({ children }: { children: ReactNode }) {
 
   // ── Initial load + polling intervals ─────────────────────────────────────
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError('Supabase nao configurado')
+      setIsLoading(false)
+      return
+    }
     void fetchAll()
     setupRealtime()
 

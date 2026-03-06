@@ -1,15 +1,7 @@
 // hooks/useFinanceData.ts
 import { useMemo } from 'react';
 import { useNotionData } from '../contexts/NotionDataContext';
-
-// Safe extractor for raw JSON format: {_meta, items}
-function extractItems<T>(raw: unknown): T[] {
-  if (!raw) return [];
-  if (Array.isArray(raw) && raw.length > 0 && (raw[0] as Record<string, unknown>)?._meta) {
-    return ((raw[0] as Record<string, unknown>).items ?? []) as T[];
-  }
-  return Array.isArray(raw) ? (raw as T[]) : [];
-}
+import { extractProviderItems } from '../lib/providerData';
 
 interface RawFinancaItem {
   Titulo?: string;
@@ -40,7 +32,7 @@ export function useFinanceData(): FinancaMetrics {
   const { financas } = useNotionData();
 
   const items = useMemo(
-    () => extractItems<RawFinancaItem>(financas.items),
+    () => extractProviderItems<RawFinancaItem>(financas.items),
     [financas.items]
   );
 

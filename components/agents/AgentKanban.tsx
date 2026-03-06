@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useCallback } from 'react';
-import { Badge, Card, Icon, SectionLabel } from '../ui';
+import { Badge, Card, Icon, SectionLabel, showToast } from '../ui';
 import { cn } from '../../utils/cn';
 import { kanbanColumns, KANBAN_ORDER, KanbanStatus } from '../../data/agentMockData';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
@@ -49,6 +49,7 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
   const [postingComment, setPostingComment] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [commentFeedback, setCommentFeedback] = useState<string | null>(null);
 
   const fetchComments = useCallback(async (taskId: string) => {
     setLoadingComments(taskId);
@@ -79,11 +80,14 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
     if (!text || postingComment) return;
     setPostingComment(true);
     setCommentError(null);
+    setCommentFeedback(null);
     try {
       const ok = await addTaskComment(taskId, text);
       if (ok) {
         setCommentInput('');
         await fetchComments(taskId);
+        setCommentFeedback('Comentario enviado.');
+        showToast('Comentario enviado');
       } else {
         setCommentError('Nao foi possivel enviar comentario.');
       }
@@ -161,6 +165,11 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
             ))}
           </select>
         </div>
+        {statusError && (
+          <div className="rounded border border-accent-red/30 bg-accent-red/10 px-3 py-2 text-[10px] text-accent-red">
+            {statusError}
+          </div>
+        )}
 
         <div
           className="flex flex-col gap-2 min-h-[200px] bg-bg-base rounded-lg border border-border-panel p-2"
@@ -333,6 +342,11 @@ export default function AgentKanban({ agentId }: AgentKanbanProps) {
                             {commentError && (
                               <div className="rounded border border-accent-red/30 bg-accent-red/10 px-2 py-1.5 text-[9px] text-accent-red">
                                 {commentError}
+                              </div>
+                            )}
+                            {commentFeedback && (
+                              <div className="rounded border border-brand-mint/30 bg-brand-mint/10 px-2 py-1.5 text-[9px] text-brand-mint">
+                                {commentFeedback}
                               </div>
                             )}
                             {loadingComments === task.id ? (

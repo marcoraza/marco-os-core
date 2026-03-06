@@ -167,6 +167,8 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
     setSelectedId(id);
     setNewTitle('');
     setPreviewMode(false);
+    setShowListMobile(false);
+    showToast('Nota pronta para editar');
   };
 
   const updateBody = useCallback((body: string) => {
@@ -239,10 +241,22 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
           className="flex-1 bg-bg-base border border-border-panel rounded-md px-3 py-2 text-[11px] text-text-primary focus:outline-none focus:border-accent-orange/50 transition-colors placeholder:text-text-secondary/40"
         />
         <button
+          disabled={!newTitle.trim()}
           onClick={createNote}
-          className="px-3 py-2 bg-accent-orange/10 border border-accent-orange/30 rounded-md text-accent-orange text-[10px] font-bold uppercase hover:bg-accent-orange/20 transition-colors"
+          className={cn(
+            'px-3 py-2 rounded-md text-[10px] font-bold uppercase transition-colors',
+            newTitle.trim()
+              ? 'bg-accent-orange/10 border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/20'
+              : 'bg-surface border border-border-panel text-text-secondary/40 cursor-not-allowed'
+          )}
         >
           <Icon name="add" size="sm" />
+        </button>
+        <button
+          onClick={() => setIsBrainDumpFormOpen(true)}
+          className="px-3 py-2 bg-accent-blue/10 border border-accent-blue/30 rounded-md text-accent-blue text-[10px] font-bold uppercase hover:bg-accent-blue/20 transition-colors"
+        >
+          Brain dump
         </button>
       </div>
 
@@ -373,6 +387,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
             <div className="flex-1 flex flex-col items-center justify-center">
               <Icon name="edit_note" size="lg" className="text-text-secondary/20 mb-2" />
               <p className="text-[10px] text-text-secondary/30 font-bold uppercase tracking-widest">Selecione uma nota</p>
+              <p className="mt-2 text-[10px] text-text-secondary/40">Crie uma nota nova ou abra um brain dump para capturar rapido.</p>
             </div>
           )}
         </div>

@@ -4,15 +4,7 @@ import { useNotionData } from '../contexts/NotionDataContext';
 import { useFinanceData } from './useFinanceData';
 import { calculateHealthScore, getScoreColor } from '../utils/scoreUtils';
 import { getDayKey } from '../utils/dateUtils';
-
-// Safe extractor for raw JSON format: {_meta, items}
-function extractItems<T>(raw: unknown): T[] {
-  if (!raw) return [];
-  if (Array.isArray(raw) && raw.length > 0 && (raw[0] as Record<string, unknown>)?._meta) {
-    return ((raw[0] as Record<string, unknown>).items ?? []) as T[];
-  }
-  return Array.isArray(raw) ? (raw as T[]) : [];
-}
+import { extractProviderItems } from '../lib/providerData';
 
 export interface ScoreDimension {
   label: string;
@@ -33,15 +25,15 @@ export function useHealthScore(): HealthScoreResult {
   const finance = useFinanceData();
 
   const projetosItems = useMemo(
-    () => extractItems<Record<string, unknown>>(projetos.items),
+    () => extractProviderItems<Record<string, unknown>>(projetos.items),
     [projetos.items]
   );
   const saudeItems = useMemo(
-    () => extractItems<Record<string, unknown>>(saude.items),
+    () => extractProviderItems<Record<string, unknown>>(saude.items),
     [saude.items]
   );
   const reunioesItems = useMemo(
-    () => extractItems<Record<string, unknown>>(reunioes.items),
+    () => extractProviderItems<Record<string, unknown>>(reunioes.items),
     [reunioes.items]
   );
 

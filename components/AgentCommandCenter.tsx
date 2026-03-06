@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Badge, Card, Icon, SectionLabel, StatusDot } from './ui';
+import { Badge, Card, Icon, SectionLabel, StatusDot, showToast } from './ui';
 import { cn } from '../utils/cn';
 import {
   statusDot,
@@ -38,10 +38,12 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
   const [selectedAgent, setSelectedAgent] = useState(agents[0]?.id || '');
   const [isDispatching, setIsDispatching] = useState(false);
   const [missionPriority, setMissionPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  const [dispatchFeedback, setDispatchFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleDispatch = async () => {
     if (!missionText.trim()) return;
     setIsDispatching(true);
+    setDispatchFeedback(null);
     try {
       // Try API dispatch first (returns bool), fall back to gateway dispatch
       const ok = await dispatchMission(selectedAgent, missionText, missionPriority);
@@ -49,9 +51,12 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
         // API not configured or failed — fall back to gateway
         await sendDispatch(selectedAgent, missionText, missionPriority);
       }
+      const agentName = agents.find(agent => agent.id === selectedAgent)?.name ?? 'agente';
       setMissionText('');
+      setDispatchFeedback({ type: 'success', message: `Missao enviada para ${agentName}.` });
+      showToast(`Missao enviada para ${agentName}`);
     } catch {
-      // handled silently
+      setDispatchFeedback({ type: 'error', message: 'Nao foi possivel enviar a missao.' });
     } finally {
       setIsDispatching(false);
     }
@@ -212,6 +217,18 @@ export default function AgentCommandCenter({ onAgentClick, onNavigate }: AgentCo
               {isDispatching ? 'Enviando...' : 'Dispatch'}
             </button>
           </div>
+          {dispatchFeedback && (
+            <div
+              className={cn(
+                'rounded-sm border px-3 py-2 text-[10px] font-medium',
+                dispatchFeedback.type === 'success'
+                  ? 'border-brand-mint/30 bg-brand-mint/10 text-brand-mint'
+                  : 'border-accent-red/30 bg-accent-red/10 text-accent-red'
+              )}
+            >
+              {dispatchFeedback.message}
+            </div>
+          )}
         </div>
       </div>
 
