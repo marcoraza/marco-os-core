@@ -96,6 +96,9 @@ export default function AppContentRouter({
         onBack={() => onNavigate('dashboard')}
         onStatusChange={(taskId, newStatus) => {
           setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, status: newStatus } : task)));
+          if (onTaskStatusSync) {
+            void onTaskStatusSync(taskId, newStatus);
+          }
         }}
       />
     );

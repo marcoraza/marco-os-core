@@ -10,6 +10,8 @@ import { MissionControlBar } from './dashboard/MissionControlBar';
 import { MorningBriefCard } from './dashboard/MorningBriefCard';
 import CalendarWidget from './dashboard/CalendarWidget';
 import { useBreakpoint } from '../hooks/useBreakpoint';
+import { createQuickCaptureTask } from '../data/domainFactories';
+import { showToast } from './ui';
 
 const GamificationBar = lazy(() => import('./dashboard/GamificationBar'));
 const HealthScoreWidget = lazy(() => import('./dashboard/HealthScoreWidget').then(m => ({ default: m.HealthScoreWidget })));
@@ -53,18 +55,10 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleQuickCaptureKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && quickCapture.trim()) {
-      setTasks(prev => [...prev, {
-        id: Date.now(),
-        title: quickCapture.trim(),
-        tag: 'GERAL',
-        projectId: activeProjectId,
-        status: 'assigned' as const,
-        priority: 'medium' as const,
-        deadline: 'A definir',
-        assignee: 'MA',
-        dependencies: 0,
-      }]);
+      const task = createQuickCaptureTask(quickCapture.trim(), activeProjectId);
+      setTasks(prev => [task, ...prev]);
       setQuickCapture('');
+      showToast('Tarefa capturada');
     }
   };
 
