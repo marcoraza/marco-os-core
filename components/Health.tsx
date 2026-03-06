@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Icon, SectionLabel, StatusDot, TabNav, Badge, FormModal, SectionJourney, showToast } from './ui';
 import { healthFields } from '../lib/formConfigs';
-import { putHealthEntry } from '../data/repository';
+import { loadHealthEntries, putHealthEntry } from '../data/repository';
 import { syncToNotion } from '../lib/notionSync';
 import type { StoredHealthEntry } from '../data/models';
 import { useTabSetup } from '../hooks/useTabSetup';
 import { healthDailyJourney, healthTrendsJourney } from '../lib/journeyConfigs/health';
+import { calculateHealthCheckinStreak, summarizeWeeklyHealth } from '../lib/dailySystems';
 const HealthTrendsPanel = lazy(() => import('./health/HealthTrendsPanel'));
 
 const HEALTH_TAB_IDS = ['daily', 'trends'] as const;
@@ -60,6 +61,7 @@ const Health: React.FC = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [healthEntries, setHealthEntries] = useState<StoredHealthEntry[]>([]);
 
   // Per-tab journey setup
   const dailySetup = useTabSetup('health', 'daily');
@@ -88,6 +90,10 @@ const Health: React.FC = () => {
     activeSetup.markDone();
     triggerRefresh();
   }, [activeSetup, triggerRefresh]);
+
+  useEffect(() => {
+    loadHealthEntries().then(setHealthEntries).catch(() => setHealthEntries([]));
+  }, [refreshKey]);
 
   const handleHealthSubmit = async (data: Record<string, unknown>) => {
     const now = new Date().toISOString();
@@ -130,6 +136,10 @@ const Health: React.FC = () => {
     { id: 'daily', label: 'Registro Diario' },
     { id: 'trends', label: 'Tendencias & Insights' }
   ];
+  const dailyAverage = Math.round((metrics.energy + metrics.sleep + metrics.focus + metrics.recovery + metrics.mood) / 5);
+  const habitsCompleted = Object.values(habits).filter(Boolean).length;
+  const streak = calculateHealthCheckinStreak(healthEntries);
+  const weeklyHealth = summarizeWeeklyHealth(healthEntries, todayKey);
 
   // If active tab hasn't done its journey, show the journey
   if (!activeSetup.isSetupDone) {
@@ -275,19 +285,29 @@ const Health: React.FC = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-text-primary">Média Biofeedback</span>
-                        <span className="text-xs font-mono font-bold">7.0</span>
+                        <span className="text-xs font-mono font-bold">{dailyAverage.toFixed(1)}</span>
                       </div>
                       <div className="w-full h-1 bg-border-panel">
-                        <div className="w-[70%] h-full bg-accent-orange"></div>
+                        <div className="h-full bg-accent-orange" style={{ width: `${dailyAverage * 10}%` }}></div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mt-6">
                         <div className="bg-bg-base p-4 border border-border-panel">
                           <p className="text-[9px] uppercase font-bold text-text-secondary mb-1">HÁBITOS</p>
-                          <p className="text-lg font-mono font-black text-brand-mint">2/3</p>
+                          <p className="text-lg font-mono font-black text-brand-mint">{habitsCompleted}/3</p>
                         </div>
                         <div className="bg-bg-base p-4 border border-border-panel">
                           <p className="text-[9px] uppercase font-bold text-text-secondary mb-1">Status</p>
-                          <p className="text-lg font-mono font-black text-accent-blue">OTM</p>
+                          <p className="text-lg font-mono font-black text-accent-blue">{dailyAverage >= 8 ? 'OTM' : dailyAverage >= 6 ? 'BOM' : 'ATN'}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-bg-base p-4 border border-border-panel">
+                          <p className="text-[9px] uppercase font-bold text-text-secondary mb-1">CHECK-INS 7D</p>
+                          <p className="text-lg font-mono font-black text-text-primary">{weeklyHealth.totalCheckins}</p>
+                        </div>
+                        <div className="bg-bg-base p-4 border border-border-panel">
+                          <p className="text-[9px] uppercase font-bold text-text-secondary mb-1">MÉDIA 7D</p>
+                          <p className="text-lg font-mono font-black text-accent-orange">{weeklyHealth.averageMood || '--'}</p>
                         </div>
                       </div>
                     </div>
@@ -296,12 +316,16 @@ const Health: React.FC = () => {
                 <div className="bg-header-bg border border-border-panel p-6">
                   <SectionLabel className="text-[10px] mb-4">Dica de Performance</SectionLabel>
                   <p className="text-xs leading-relaxed text-text-secondary">
-                    Seu nível de <span className="text-accent-orange font-bold uppercase">foco cognitivo</span> está acima da média hoje. Considere priorizar tarefas de Deep Work no próximo bloco de 90 minutos.
+                    {metrics.focus >= 8
+                      ? <>Seu nível de <span className="text-accent-orange font-bold uppercase">foco cognitivo</span> está acima da média hoje. Considere priorizar tarefas de Deep Work no próximo bloco de 90 minutos.</>
+                      : <>Seu foco está abaixo do ideal hoje. Reduza troca de contexto, proteja energia e priorize uma entrega menor, mas concluída.</>}
                   </p>
                 </div>
                 <div className="p-6 border border-dashed border-border-panel flex flex-col items-center gap-3">
                   <Icon name="sync" className="text-text-secondary" />
-                  <p className="text-[9px] uppercase font-bold text-text-secondary tracking-widest text-center">ÚLTIMA SINCRONIZAÇÃO COM BIOMETRIC WEARABLE ÀS 08:42 AM</p>
+                  <p className="text-[9px] uppercase font-bold text-text-secondary tracking-widest text-center">
+                    {streak > 0 ? `${streak} dias seguidos de check-in` : 'Nenhum check-in salvo ainda'}
+                  </p>
                 </div>
               </div>
             </main>

@@ -28,6 +28,9 @@ export interface StoredNote {
   createdAt: string; // ISO
   updatedAt: string; // ISO
   projectId?: string;
+  tags?: string[];
+  starred?: boolean;
+  linkedNoteIds?: string[];
 }
 
 export interface StoredEvent {

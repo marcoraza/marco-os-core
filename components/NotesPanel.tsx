@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import type { StoredNote } from '../data/models';
 import { Icon, Card, SectionLabel, FormModal, showToast, JourneyOverlay, JourneyTriggerButton, DataBadge, EmptyState } from './ui';
 import { cn } from '../utils/cn';
@@ -6,6 +6,7 @@ import { braindumpFields } from '../lib/formConfigs';
 import { syncToNotion } from '../lib/notionSync';
 import { useSectionSetup } from '../hooks/useSectionSetup';
 import { notesJourneyConfig } from '../lib/journeyConfigs/notes';
+import { extractNoteTags, filterNotes, getRelatedNotes, type NoteListMode } from '../lib/notesWorkflows';
 
 interface NotesPanelProps {
   notes: StoredNote[];
@@ -127,6 +128,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [listMode, setListMode] = useState<NoteListMode>('all');
   const [showListMobile, setShowListMobile] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
   const [isBrainDumpFormOpen, setIsBrainDumpFormOpen] = useState(false);
@@ -148,6 +150,9 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
       createdAt: now,
       updatedAt: now,
       projectId: activeProjectId,
+      tags: extractNoteTags({ title, body, tags: [] }),
+      starred: false,
+      linkedNoteIds: [],
     };
     setNotes(prev => [note, ...prev]);
     setSelectedId(id);
@@ -156,18 +161,26 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
     syncToNotion('create-brain-dump', data);
   };
 
-  const projectNotes = (notes ?? []).filter(n => !n.projectId || n.projectId === activeProjectId);
-  const filteredNotes = projectNotes.filter((note) => {
-    const haystack = `${note.title} ${note.body}`.toLowerCase();
-    return haystack.includes(searchQuery.trim().toLowerCase());
-  });
+  const projectNotes = useMemo(
+    () => (notes ?? []).filter(n => !n.projectId || n.projectId === activeProjectId),
+    [activeProjectId, notes]
+  );
+  const filteredNotes = useMemo(
+    () => filterNotes(projectNotes, searchQuery, listMode),
+    [listMode, projectNotes, searchQuery]
+  );
   const selected = filteredNotes.find(n => n.id === selectedId) ?? projectNotes.find(n => n.id === selectedId);
+  const selectedTags = selected ? extractNoteTags(selected) : [];
+  const relatedNotes = useMemo(
+    () => (selected ? getRelatedNotes(projectNotes, selected) : []),
+    [projectNotes, selected]
+  );
 
   const createNote = () => {
     const title = newTitle.trim() || 'Nota sem título';
     const now = new Date().toISOString();
     const id = crypto?.randomUUID?.() ?? `note-${Date.now()}`;
-    const note: StoredNote = { id, title, body: '', createdAt: now, updatedAt: now, projectId: activeProjectId };
+    const note: StoredNote = { id, title, body: '', createdAt: now, updatedAt: now, projectId: activeProjectId, tags: [], starred: false, linkedNoteIds: [] };
     setNotes(prev => [note, ...prev]);
     setSelectedId(id);
     setNewTitle('');
@@ -179,13 +192,23 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
   const updateBody = useCallback((body: string) => {
     if (!selectedId) return;
     setSaveState('saving');
-    setNotes(prev => prev.map(n => n.id === selectedId ? { ...n, body, updatedAt: new Date().toISOString() } : n));
+    setNotes(prev => prev.map(n => n.id === selectedId ? {
+      ...n,
+      body,
+      tags: extractNoteTags({ title: n.title, body, tags: n.tags }),
+      updatedAt: new Date().toISOString(),
+    } : n));
   }, [selectedId, setNotes]);
 
   const updateTitle = useCallback((title: string) => {
     if (!selectedId) return;
     setSaveState('saving');
-    setNotes(prev => prev.map(n => n.id === selectedId ? { ...n, title, updatedAt: new Date().toISOString() } : n));
+    setNotes(prev => prev.map(n => n.id === selectedId ? {
+      ...n,
+      title,
+      tags: extractNoteTags({ title, body: n.body, tags: n.tags }),
+      updatedAt: new Date().toISOString(),
+    } : n));
   }, [selectedId, setNotes]);
 
   React.useEffect(() => {
@@ -204,6 +227,10 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
     setNotes(prev => (prev ?? []).filter(n => n.id !== id));
     if (selectedId === id) setSelectedId(null);
   };
+
+  const toggleStar = useCallback((id: string) => {
+    setNotes((prev) => prev.map((note) => note.id === id ? { ...note, starred: !note.starred, updatedAt: new Date().toISOString() } : note));
+  }, [setNotes]);
 
   return (
     <>
@@ -286,6 +313,27 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
         )}
       </div>
 
+      <div className="flex gap-2 shrink-0 flex-wrap">
+        {([
+          { id: 'all', label: 'Todas' },
+          { id: 'starred', label: 'Favoritas' },
+          { id: 'recent', label: 'Recentes' },
+        ] as const).map((mode) => (
+          <button
+            key={mode.id}
+            onClick={() => setListMode(mode.id)}
+            className={cn(
+              'rounded-sm border px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest transition-colors',
+              listMode === mode.id
+                ? 'border-accent-orange/30 bg-accent-orange/10 text-accent-orange'
+                : 'border-border-panel text-text-secondary hover:text-text-primary'
+            )}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 flex gap-4 overflow-hidden min-h-0">
         {/* Notes List */}
         <div className={cn(
@@ -322,10 +370,27 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold text-text-primary truncate">{note.title}</p>
                   <p className="text-[9px] text-text-secondary mt-1 line-clamp-2">{note.body || 'Vazia'}</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {extractNoteTags(note).slice(0, 3).map((tag) => (
+                      <span key={tag} className="rounded-sm border border-border-panel px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-widest text-text-secondary">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
                   <p className="text-[8px] text-text-secondary/50 mt-1">
                     {new Date(note.updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
+                <button
+                  onClick={e => { e.stopPropagation(); toggleStar(note.id); }}
+                  className={cn(
+                    'shrink-0 p-1 transition-colors',
+                    note.starred ? 'text-accent-orange' : 'text-text-secondary hover:text-accent-orange'
+                  )}
+                  aria-label="Favoritar nota"
+                >
+                  <Icon name={note.starred ? 'star' : 'star_outline'} size="sm" />
+                </button>
                 <button
                   onClick={e => { e.stopPropagation(); deleteNote(note.id); }}
                   className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-text-secondary hover:text-accent-red transition-all shrink-0 p-1"
@@ -359,6 +424,16 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
                   onChange={e => updateTitle(e.target.value)}
                   className="flex-1 bg-transparent border-none text-sm font-bold text-text-primary focus:outline-none"
                 />
+                <button
+                  onClick={() => toggleStar(selected.id)}
+                  className={cn(
+                    'p-1.5 rounded-sm transition-colors shrink-0',
+                    selected.starred ? 'text-accent-orange' : 'text-text-secondary hover:text-accent-orange'
+                  )}
+                  aria-label="Favoritar nota selecionada"
+                >
+                  <Icon name={selected.starred ? 'star' : 'star_outline'} size="sm" />
+                </button>
                 {/* Edit/Preview toggle */}
                 <div className="flex items-center p-0.5 bg-bg-base rounded-sm border border-border-panel shrink-0">
                   <button
@@ -384,6 +459,32 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
                   {saveState === 'saving' ? 'salvando...' : saveState === 'saved' ? 'salvo' : 'autosave'}
                 </span>
               </div>
+
+              {(selectedTags.length > 0 || relatedNotes.length > 0) && (
+                <div className="mb-2 flex flex-wrap items-center gap-2 shrink-0">
+                  {selectedTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setSearchQuery(`#${tag}`)}
+                      className="rounded-sm border border-border-panel px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-text-primary"
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                  {relatedNotes.slice(0, 3).map((note) => (
+                    <button
+                      key={note.id}
+                      onClick={() => {
+                        setSelectedId(note.id);
+                        setPreviewMode(false);
+                      }}
+                      className="rounded-sm border border-accent-blue/20 bg-accent-blue/5 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-accent-blue hover:bg-accent-blue/10"
+                    >
+                      [[{note.title}]]
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Toolbar (edit mode only) */}
               {!previewMode && (

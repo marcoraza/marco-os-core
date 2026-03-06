@@ -5,6 +5,7 @@ import { detailedTransactions, pieData, PIE_COLORS, cashflowData } from './data'
 import { formatBRL } from './utils';
 import { loadFinanceEntries } from '../../data/repository';
 import type { StoredFinanceEntry } from '../../data/models';
+import { getUpcomingFinanceEntries, summarizeFinanceMonth } from '../../lib/dailySystems';
 
 interface FinanceOverviewProps {
   refreshKey?: number;
@@ -16,14 +17,15 @@ export default function FinanceOverview({ refreshKey = 0 }: FinanceOverviewProps
 
   const now = new Date();
   const currentMonth = now.toISOString().slice(0, 7);
-  const monthEntries = entries.filter(e => e.data.startsWith(currentMonth));
-  const realIncome = monthEntries.filter(e => e.tipo === 'entrada').reduce((s, e) => s + e.valor, 0);
-  const realExpenses = monthEntries.filter(e => e.tipo === 'saida').reduce((s, e) => s + e.valor, 0);
+  const financeMonth = summarizeFinanceMonth(entries, currentMonth);
+  const realIncome = financeMonth.income;
+  const realExpenses = financeMonth.expenses;
   const hasRealData = entries.length > 0;
+  const upcomingEntries = getUpcomingFinanceEntries(entries, now.toISOString().slice(0, 10));
 
   const displayIncome = hasRealData ? realIncome : 12500;
   const displayExpenses = hasRealData ? realExpenses : 11230;
-  const displayBalance = displayIncome - displayExpenses;
+  const displayBalance = hasRealData ? financeMonth.balance : displayIncome - displayExpenses;
 
   const usedPieData = pieData;
   const pieTotal = usedPieData.reduce((acc, d) => acc + d.value, 0);
@@ -85,6 +87,20 @@ export default function FinanceOverview({ refreshKey = 0 }: FinanceOverviewProps
             <p className="text-[10px] text-text-primary leading-relaxed">
               Você atingiu <span className="text-brand-mint font-bold">25%</span> da sua meta.
             </p>
+            {hasRealData && (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Fechamento</p>
+                  <p className={`mt-1 text-xs font-black font-mono ${displayBalance >= 0 ? 'text-brand-mint' : 'text-accent-red'}`}>
+                    {displayBalance >= 0 ? 'Positivo' : 'Negativo'}
+                  </p>
+                </div>
+                <div className="rounded-sm border border-border-panel/70 bg-bg-base px-2.5 py-2">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-text-secondary">Próximos 14d</p>
+                  <p className="mt-1 text-xs font-black font-mono text-text-primary">{upcomingEntries.length}</p>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       </div>
@@ -224,11 +240,17 @@ export default function FinanceOverview({ refreshKey = 0 }: FinanceOverviewProps
               <SectionLabel className="tracking-[0.1em]">PRÓXIMOS PAGAMENTOS</SectionLabel>
             </div>
             <div className="p-3 space-y-2 flex-grow overflow-y-auto custom-scrollbar">
-              {[
+              {(hasRealData ? upcomingEntries.slice(0, 5).map((entry) => ({
+                month: new Date(entry.data).toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase(),
+                day: new Date(entry.data).toLocaleDateString('pt-BR', { day: '2-digit' }),
+                name: entry.name,
+                type: entry.categoria,
+                value: formatBRL(entry.valor),
+              })) : [
                 { month: 'OUT', day: '10', name: 'Aluguel', type: 'Recorrente', value: 'R$ 2.500' },
                 { month: 'OUT', day: '12', name: 'AWS', type: 'Infra', value: 'R$ 350' },
                 { month: 'OUT', day: '15', name: 'Seguro', type: 'Anual', value: 'R$ 390' },
-              ].map((payment, idx) => (
+              ]).map((payment, idx) => (
                 <React.Fragment key={idx}>
                   {idx > 0 && <div className="w-full h-px bg-border-panel"></div>}
                   <div className="flex items-center justify-between group">
@@ -240,6 +262,11 @@ export default function FinanceOverview({ refreshKey = 0 }: FinanceOverviewProps
                   </div>
                 </React.Fragment>
               ))}
+              {hasRealData && upcomingEntries.length === 0 && (
+                <div className="rounded-sm border border-border-panel/70 bg-bg-base px-3 py-3 text-[10px] text-text-secondary">
+                  Nenhum vencimento registrado para os próximos 14 dias.
+                </div>
+              )}
             </div>
           </Card>
         </div>
