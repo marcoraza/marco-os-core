@@ -744,6 +744,10 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     loadPlans().then(plans => setHistory(plans ?? [])).catch(() => setHistory([]));
   }, []);
 
+  useEffect(() => {
+    setProjectId(activeProjectId);
+  }, [activeProjectId]);
+
   const persistPlan = async (plan: StoredPlan) => {
     await putPlan(plan);
     const plans = await loadPlans();
@@ -767,6 +771,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     setActivePlan(plan);
     setSteps((plan.steps ?? []).map(s => ({ ...s })));
     await persistPlan(plan);
+    showToast('Plano gerado');
   };
 
   const toggleStep = async (idx: number) => {
@@ -795,6 +800,9 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     const updated = { ...activePlan, exported: true, updatedAt: new Date().toISOString() };
     setActivePlan(updated);
     await persistPlan(updated);
+    setActiveTab('tarefas');
+    setNovaTarefaOpen(false);
+    showToast('Plano enviado para tarefas');
   };
 
   const handleReset = () => {
@@ -813,6 +821,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     setContext(plan.context ?? '');
     setProjectId(plan.projectId ?? activeProjectId);
     setShowHistory(false);
+    showToast('Plano carregado');
   };
 
   const handleDeletePlan = async (id: string) => {
@@ -820,6 +829,7 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
     const plans = await loadPlans();
     setHistory(plans ?? []);
     if (activePlan?.id === id) handleReset();
+    showToast('Plano removido');
   };
 
   const handleCreateProject = async (data: Record<string, unknown>) => {
@@ -1031,6 +1041,18 @@ const Planner: React.FC<PlannerProps> = ({ projects, activeProjectId, addTasks }
             {!activePlan && (
               <div className="bg-surface border border-border-panel rounded-sm p-5 space-y-4">
                 <SectionLabel>ENTRADA DA MISSÃO</SectionLabel>
+                {history.length > 0 && (
+                  <button
+                    onClick={() => handleLoadPlan(history[0])}
+                    className="w-full flex items-center justify-between gap-3 rounded-sm border border-border-panel bg-bg-base px-3 py-2 text-left hover:border-accent-blue/30 transition-colors"
+                  >
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Continuar ultimo plano</p>
+                      <p className="mt-1 text-sm text-text-primary">{history[0].title}</p>
+                    </div>
+                    <Icon name="history" size="sm" className="text-accent-blue" />
+                  </button>
+                )}
                 <div>
                   <label className="block text-xs font-medium text-text-secondary mb-1.5">Título</label>
                   <input

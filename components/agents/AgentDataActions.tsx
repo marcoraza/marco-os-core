@@ -381,9 +381,11 @@ const ACTIONS: Array<{
 export default function AgentDataActions({ agentId, agentName = 'Agente' }: AgentDataActionsProps) {
   const [activeKind, setActiveKind] = useState<ActionKind>(null);
   const { refetch } = useSupabaseData();
+  const [lastAction, setLastAction] = useState<string | null>(null);
 
   const handleSuccess = () => {
     setActiveKind(null);
+    setLastAction(`Ultima acao concluida: ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
     void refetch();
   };
 
@@ -413,6 +415,11 @@ export default function AgentDataActions({ agentId, agentName = 'Agente' }: Agen
       {/* Action buttons */}
       <div className="space-y-2">
         <SectionLabel>Acoes Rapidas</SectionLabel>
+        {lastAction && (
+          <div className="rounded-sm border border-brand-mint/30 bg-brand-mint/10 px-3 py-2 text-[9px] text-brand-mint">
+            {lastAction}
+          </div>
+        )}
         {ACTIONS.map(action => (
           <div key={action.kind} className="space-y-0">
             <button

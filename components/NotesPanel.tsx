@@ -126,6 +126,7 @@ const TOOLBAR_ITEMS: { action: FormatAction; icon: string; label: string }[] = [
 const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectId }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showListMobile, setShowListMobile] = useState(true);
   const [previewMode, setPreviewMode] = useState(false);
   const [isBrainDumpFormOpen, setIsBrainDumpFormOpen] = useState(false);
@@ -151,12 +152,16 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
     setNotes(prev => [note, ...prev]);
     setSelectedId(id);
     setPreviewMode(false);
-          showToast('Nota criada!');
+    showToast('Nota criada!');
     syncToNotion('create-brain-dump', data);
   };
 
   const projectNotes = (notes ?? []).filter(n => !n.projectId || n.projectId === activeProjectId);
-  const selected = projectNotes.find(n => n.id === selectedId);
+  const filteredNotes = projectNotes.filter((note) => {
+    const haystack = `${note.title} ${note.body}`.toLowerCase();
+    return haystack.includes(searchQuery.trim().toLowerCase());
+  });
+  const selected = filteredNotes.find(n => n.id === selectedId) ?? projectNotes.find(n => n.id === selectedId);
 
   const createNote = () => {
     const title = newTitle.trim() || 'Nota sem título';
@@ -218,7 +223,7 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
           <Icon name="sticky_note_2" size="lg" className="text-accent-orange" />
           <div>
             <SectionLabel className="text-[12px] text-text-primary tracking-[0.1em]">Notas</SectionLabel>
-            <p className="text-[9px] text-text-secondary font-bold uppercase tracking-widest">{projectNotes.length} notas</p>
+            <p className="text-[9px] text-text-secondary font-bold uppercase tracking-widest">{filteredNotes.length}/{projectNotes.length} notas</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -260,6 +265,27 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
         </button>
       </div>
 
+      <div className="flex gap-2 shrink-0">
+        <div className="relative flex-1">
+          <Icon name="search" size="sm" className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Buscar nota, ideia ou trecho..."
+            className="w-full bg-bg-base border border-border-panel rounded-md pl-9 pr-3 py-2 text-[11px] text-text-primary focus:outline-none focus:border-accent-orange/40 transition-colors placeholder:text-text-secondary/40"
+          />
+        </div>
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="px-3 py-2 border border-border-panel rounded-md text-[10px] font-bold uppercase text-text-secondary hover:text-text-primary transition-colors"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+
       <div className="flex-1 flex gap-4 overflow-hidden min-h-0">
         {/* Notes List */}
         <div className={cn(
@@ -274,7 +300,15 @@ const NotesPanel: React.FC<NotesPanelProps> = ({ notes, setNotes, activeProjectI
               className="py-12"
             />
           )}
-          {projectNotes.map(note => (
+          {projectNotes.length > 0 && filteredNotes.length === 0 && (
+            <EmptyState
+              icon="search_off"
+              title="Nenhuma nota bate com a busca"
+              description="Ajuste os termos para encontrar a nota ou ideia desejada."
+              className="py-12"
+            />
+          )}
+          {filteredNotes.map(note => (
             <Card
               key={note.id}
               interactive

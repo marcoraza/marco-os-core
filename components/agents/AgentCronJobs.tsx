@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Badge, Card, Icon, SectionLabel, StatusDot } from '../ui';
+import { Badge, Card, Icon, SectionLabel, StatusDot, showToast } from '../ui';
 import { cn } from '../../utils/cn';
 import { jobBadge } from '../../data/agentMockData';
 import type { CronJob } from '../../data/agentMockData';
@@ -23,6 +23,7 @@ export default function AgentCronJobs({ agentId }: AgentCronJobsProps) {
   const [showNewForm, setShowNewForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newSchedule, setNewSchedule] = useState('');
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const stats = useMemo(() => {
     const counts = { ok: 0, warning: 0, failed: 0, paused: 0 };
@@ -56,10 +57,17 @@ export default function AgentCronJobs({ agentId }: AgentCronJobsProps) {
     // Update local state
     updateCronJob(updatedJob as CronJob);
     // Also persist via API
-    updateCronJobApi(job.id, {
+    void updateCronJobApi(job.id, {
       name: editName,
       schedule: editSchedule,
       enabled: !editPaused,
+    }).then((ok) => {
+      if (ok) {
+        setFeedback({ type: 'success', message: 'Cron job atualizado.' });
+        showToast('Cron job atualizado');
+      } else {
+        setFeedback({ type: 'error', message: 'Falha ao atualizar cron job.' });
+      }
     });
     cancelEdit();
   };
@@ -78,11 +86,18 @@ export default function AgentCronJobs({ agentId }: AgentCronJobsProps) {
     // Update local state immediately
     createCronJob(jobPayload);
     // Also persist via API
-    createCronJobApi({
+    void createCronJobApi({
       name: newName,
       schedule: newSchedule,
       agentId,
       enabled: true,
+    }).then((ok) => {
+      if (ok) {
+        setFeedback({ type: 'success', message: 'Cron job criado.' });
+        showToast('Cron job criado');
+      } else {
+        setFeedback({ type: 'error', message: 'Falha ao criar cron job.' });
+      }
     });
     setNewName('');
     setNewSchedule('');
@@ -124,6 +139,16 @@ export default function AgentCronJobs({ agentId }: AgentCronJobsProps) {
           <span className="text-[8px] font-black uppercase tracking-widest">Novo Job</span>
         </button>
       </div>
+      {feedback && (
+        <div className={cn(
+          'rounded border px-3 py-2 text-[10px]',
+          feedback.type === 'success'
+            ? 'border-brand-mint/30 bg-brand-mint/10 text-brand-mint'
+            : 'border-accent-red/30 bg-accent-red/10 text-accent-red'
+        )}>
+          {feedback.message}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Left: Job List */}
@@ -244,7 +269,13 @@ export default function AgentCronJobs({ agentId }: AgentCronJobsProps) {
                         onClick={() => {
                           // deleteCronJobApi handles both API delete + local state update
                           deleteCronJobApi(job.id).then(ok => {
-                            if (!ok) deleteCronJob(job.id); // fallback local-only delete
+                            if (!ok) {
+                              deleteCronJob(job.id); // fallback local-only delete
+                              setFeedback({ type: 'error', message: 'Cron job removido apenas localmente.' });
+                              return;
+                            }
+                            setFeedback({ type: 'success', message: 'Cron job removido.' });
+                            showToast('Cron job removido');
                           });
                           cancelEdit();
                         }}
