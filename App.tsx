@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHotkeys, useGoKeys } from './hooks/useHotkeys';
 import { useFlowState } from './hooks/useFlowState';
@@ -7,7 +7,6 @@ import { useAppHydration, useDebouncedPersistence } from './hooks/useAppPersiste
 import { useAgentRosterSync } from './hooks/useAgentRosterSync';
 import { useAppDomainActions } from './hooks/useAppDomainActions';
 import type { StoredAgent, StoredContact, StoredEvent, StoredNote } from './data/models';
-import { putAgent } from './data/repository';
 import type { Agent } from './types/agents';
 import type { View, Theme, Project, Task } from './lib/appTypes';
 import AppContentRouter from './components/AppContentRouter';
@@ -138,7 +137,6 @@ const AppContent: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isDeepWorkOpen, setIsDeepWorkOpen] = useState(false);
   const [quickCaptureOpen, setQuickCaptureOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   // ─── Focus modes ─────────────────────────────────────────────────────────────
   const ghostMode = useGhostMode();
@@ -266,12 +264,6 @@ const AppContent: React.FC = () => {
   const [events, setEvents] = useState<StoredEvent[]>([]);
   const [paletteContacts, setPaletteContacts] = useState<StoredContact[]>([]);
 
-  // ─── Effects ────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const clockInterval = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(clockInterval);
-  }, []);
-
   // ─── Keyboard shortcuts ─────────────────────────────────────────────────────
   const navigate = useCallback((view: string) => setCurrentView(view as View), []);
 
@@ -357,10 +349,14 @@ const AppContent: React.FC = () => {
   });
 
   // ─── Derived state ─────────────────────────────────────────────────────────
-  const activeTaskCounts = projects.reduce((acc, proj) => {
+  const activeTaskCounts = useMemo(() => projects.reduce((acc, proj) => {
     acc[proj.id] = tasks.filter(t => t.projectId === proj.id && t.status !== 'done').length;
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, number>), [projects, tasks]);
+  const handleOpenPalette = useCallback(() => setIsPaletteOpen(true), []);
+  const handleOpenMissionModal = useCallback(() => setIsMissionModalOpen(true), []);
+  const handleNavigateDashboard = useCallback(() => setCurrentView('dashboard'), []);
+  const handleOpenAddAgent = useCallback(() => setIsAddAgentOpen(true), []);
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -381,14 +377,13 @@ const AppContent: React.FC = () => {
 
       <AppHeader
         currentView={currentView}
-        currentTime={currentTime}
         activeAgent={activeAgent}
         activeAgentStatusColor={activeAgentStatusColor}
         agentsOnlineCount={agentsOnlineCount}
         isLive={isLive}
-        onNavigateHome={() => setCurrentView('dashboard')}
-        onOpenPalette={() => setIsPaletteOpen(true)}
-        onOpenMissionModal={() => setIsMissionModalOpen(true)}
+        onNavigateHome={handleNavigateDashboard}
+        onOpenPalette={handleOpenPalette}
+        onOpenMissionModal={handleOpenMissionModal}
       />
 
       {/* MAIN BODY */}
@@ -400,7 +395,7 @@ const AppContent: React.FC = () => {
           agentRoster={agentRoster}
           activeAgentId={activeAgentId}
           onAgentClick={handleAgentClick}
-          onAddAgent={() => setIsAddAgentOpen(true)}
+          onAddAgent={handleOpenAddAgent}
           isLive={isLive}
           connectionState={connectionState}
           agentsOnlineCount={agentsOnlineCount}
@@ -431,7 +426,7 @@ const AppContent: React.FC = () => {
                         onTaskClick={handleTaskClick}
                         activeProjectId={activeProjectId}
                         projects={projects}
-                        onAddTask={() => setIsMissionModalOpen(true)}
+                        onAddTask={handleOpenMissionModal}
                         events={events}
                         setEvents={setEvents}
                         addTasks={addTasks}
@@ -452,7 +447,7 @@ const AppContent: React.FC = () => {
                     onTaskClick={handleTaskClick}
                     activeProjectId={activeProjectId}
                     projects={projects}
-                    onAddTask={() => setIsMissionModalOpen(true)}
+                    onAddTask={handleOpenMissionModal}
                     events={events}
                     setEvents={setEvents}
                     addTasks={addTasks}
@@ -490,7 +485,7 @@ const AppContent: React.FC = () => {
       <MobileNav
         currentView={currentView}
         onNavigate={setCurrentView}
-        onOpenMissionModal={() => setIsMissionModalOpen(true)}
+        onOpenMissionModal={handleOpenMissionModal}
         projects={projects}
         activeProjectId={activeProjectId}
         activeTaskCounts={activeTaskCounts}
@@ -567,11 +562,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <SupabaseDataProvider>
-      <NotionDataProvider>
-        <ProjectProvider>
-          <AppContent />
-        </ProjectProvider>
-      </NotionDataProvider>
+      <ProjectProvider>
+        <AppContent />
+      </ProjectProvider>
     </SupabaseDataProvider>
   );
 };

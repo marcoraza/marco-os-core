@@ -1,3 +1,4 @@
+import React, { memo, useEffect, useState } from 'react';
 import type { View } from '../../lib/appTypes';
 import type { Agent } from '../../types/agents';
 import { Icon, StatusDot } from '../ui';
@@ -6,7 +7,6 @@ import { cn } from '../../utils/cn';
 
 interface AppHeaderProps {
   currentView: View;
-  currentTime: Date;
   activeAgent: Agent | undefined;
   activeAgentStatusColor: 'mint' | 'orange' | 'blue' | 'red';
   agentsOnlineCount: number;
@@ -30,9 +30,8 @@ const viewLabels: Record<string, string> = {
   'agent-detail': 'Agente',
 };
 
-export default function AppHeader({
+function AppHeader({
   currentView,
-  currentTime,
   activeAgent,
   activeAgentStatusColor,
   agentsOnlineCount,
@@ -41,6 +40,13 @@ export default function AppHeader({
   onOpenPalette,
   onOpenMissionModal,
 }: AppHeaderProps) {
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  useEffect(() => {
+    const clockInterval = window.setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => window.clearInterval(clockInterval);
+  }, []);
+
   if (currentView === 'mission-detail') return null;
 
   return (
@@ -141,3 +147,5 @@ export default function AppHeader({
     </header>
   );
 }
+
+export default memo(AppHeader);

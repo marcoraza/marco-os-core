@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import type { View, UptimeView } from '../../lib/appTypes';
 import type { Agent } from '../../types/agents';
 import { Icon, SectionLabel, StatusDot } from '../ui';
@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { id: 'settings',  icon: 'settings',       label: 'Configurações' },
 ] as const;
 
-export default function AppSidebar({
+function AppSidebar({
   currentView,
   onNavigate,
   agentRoster,
@@ -317,3 +317,5 @@ export default function AppSidebar({
     </>
   );
 }
+
+export default memo(AppSidebar);
