@@ -23,6 +23,8 @@ const AuditLog = lazy(() => import('./agents/AuditLog'));
 const GlobalSearch = lazy(() => import('./agents/GlobalSearch'));
 const PipelineOrchestration = lazy(() => import('./agents/PipelineOrchestration'));
 const WebhookManager = lazy(() => import('./agents/WebhookManager'));
+const TokenMonitor = lazy(() => import('./agents/TokenMonitor'));
+const SkillReport = lazy(() => import('./agents/SkillReport'));
 
 function TabFallback() {
   return (
@@ -55,6 +57,8 @@ const agentTabs: Tab[] = [
   { id: 'busca', label: 'Busca', icon: 'search' },
   { id: 'pipelines', label: 'Pipelines', icon: 'route' },
   { id: 'webhooks', label: 'Webhooks', icon: 'webhook' },
+  { id: 'token-monitor', label: 'Tokens', icon: 'monitoring' },
+  { id: 'skill-report', label: 'Skills §ID', icon: 'analytics' },
 ];
 
 export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProps) {
@@ -314,6 +318,16 @@ export default function AgentDetailView({ agentId, onBack }: AgentDetailViewProp
         {activeTab === 'webhooks' && (
           <Suspense fallback={<TabFallback />}>
             <WebhookManager />
+          </Suspense>
+        )}
+        {activeTab === 'token-monitor' && (
+          <Suspense fallback={<TabFallback />}>
+            <TokenMonitor />
+          </Suspense>
+        )}
+        {activeTab === 'skill-report' && (
+          <Suspense fallback={<TabFallback />}>
+            <SkillReport />
           </Suspense>
         )}
       </div>
