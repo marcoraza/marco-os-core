@@ -685,6 +685,327 @@
     .cards-grid { grid-template-columns: 1fr; }
     .header-phases { display: none; }
   }
+
+  /* ─── TAB BAR ─── */
+  .tab-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    align-items: stretch;
+    margin: -32px -32px 32px -32px;
+    padding: 0 32px;
+  }
+
+  .tab-item {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 14px 18px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.18s, border-color 0.18s, background 0.18s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    user-select: none;
+  }
+
+  .tab-item:hover {
+    color: var(--text-body);
+    background: rgba(0,0,0,0.025);
+  }
+
+  .tab-item.active {
+    color: var(--navy);
+    font-weight: 600;
+    border-bottom: 2px solid var(--navy);
+    background: rgba(0,0,0,0.032);
+  }
+
+  /* ─── PANEL VISIBILITY ─── */
+  .tab-panel { display: block; }
+  .tab-panel.hidden { display: none; }
+
+  /* ─── COMPETITIVE RESEARCH ─── */
+  .cr-section {
+    margin-bottom: 52px;
+  }
+
+  .cr-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .cr-section-heading {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    line-height: 1.1;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .cr-section-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── DATA TABLE ─── */
+  .cr-table-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .cr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cr-table thead tr {
+    background: rgba(26, 31, 54, 0.055);
+  }
+
+  .cr-table thead th {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .cr-table tbody tr:nth-child(even) {
+    background: rgba(0,0,0,0.018);
+  }
+
+  .cr-table tbody tr:hover {
+    background: rgba(0,0,0,0.035);
+  }
+
+  .cr-table tbody tr.cr-row-highlight {
+    background: rgba(59,130,246,0.07) !important;
+  }
+
+  .cr-table tbody td {
+    padding: 9px 14px;
+    color: var(--text-body);
+    border-top: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .cr-table tbody td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .cr-badge-sim {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16,185,129,0.12);
+    color: #059669;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cr-badge-nao {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cr-eng-high {
+    color: #059669;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .cr-eng-normal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-body);
+  }
+
+  .cr-consistency-alta {
+    font-size: 11px;
+    font-weight: 600;
+    color: #059669;
+  }
+
+  .cr-consistency-media {
+    font-size: 11px;
+    font-weight: 600;
+    color: #D97706;
+  }
+
+  .cr-consistency-baixa {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ─── PATTERN PILLS ─── */
+  .cr-patterns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .cr-pattern-pill {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-body);
+  }
+
+  /* ─── COMPETITOR CARDS ─── */
+  .cr-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .cr-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.055);
+    padding: 16px;
+  }
+
+  .cr-card-handle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  .cr-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+
+  .cr-card-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin-bottom: 10px;
+  }
+
+  .cr-card-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  .cr-card-row:last-child { margin-bottom: 0; }
+
+  .cr-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+  }
+
+  .cr-card-value {
+    font-size: 12px;
+    color: var(--text-body);
+    line-height: 1.45;
+  }
+
+  /* ─── OPPORTUNITY CARDS ─── */
+  .cr-opp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .cr-opp-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.055);
+    padding: 18px;
+    border-left: 3px solid var(--navy);
+  }
+
+  .cr-opp-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cr-opp-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .cr-opp-desc {
+    font-size: 12px;
+    color: var(--text-body);
+    line-height: 1.55;
+  }
+
+  .cr-callout {
+    background: rgba(59,130,246,0.07);
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--text-body);
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+
+  .cr-callout strong {
+    color: var(--navy);
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -717,7 +1038,424 @@
 
   <!-- MAIN -->
   <main id="main">
-    <!-- injected by JS -->
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <div class="tab-item active" id="tab-btn-plano" onclick="switchTab('plano')">Plano Operacional</div>
+      <div class="tab-item" id="tab-btn-pesquisa" onclick="switchTab('pesquisa')">Pesquisa Competitiva</div>
+    </div>
+
+    <!-- PANEL: PLANO OPERACIONAL -->
+    <div id="panel-plano" class="tab-panel">
+      <!-- injected by JS -->
+    </div>
+
+    <!-- PANEL: PESQUISA COMPETITIVA -->
+    <div id="panel-pesquisa" class="tab-panel hidden">
+
+      <!-- S1: VISAO GERAL QUANTITATIVA -->
+      <div class="cr-section">
+        <div class="cr-section-title">Sprint 1</div>
+        <div class="cr-section-heading">Visao Geral Quantitativa</div>
+        <div class="cr-section-sub">dados coletados 13/Mar/2026</div>
+
+        <div class="cr-callout">
+          <strong>Destaque:</strong> Emili lidera em engajamento (8,61% vs media do nicho ~0,8%) e frequencia (5,60 posts/semana) — ambos indicadores distantes de todos os concorrentes mapeados.
+        </div>
+
+        <div class="cr-table-wrap">
+          <table class="cr-table">
+            <thead>
+              <tr>
+                <th>Perfil</th>
+                <th>Seguidores</th>
+                <th>Posts/sem</th>
+                <th>Engajamento</th>
+                <th>Tipo principal</th>
+                <th>Consistencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="cr-row-highlight">
+                <td>@emilizaremba</td>
+                <td>28.866</td>
+                <td>5,60</td>
+                <td><span class="cr-eng-high">8,61%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-alta">Alta</span></td>
+              </tr>
+              <tr>
+                <td>@thaisgois</td>
+                <td>25.684</td>
+                <td>0,91</td>
+                <td><span class="cr-eng-normal">0,30%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@docevegana</td>
+                <td>46.150</td>
+                <td>0,26</td>
+                <td><span class="cr-eng-normal">0,50%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@confeitariasemacucar</td>
+                <td>22.924</td>
+                <td>0,05</td>
+                <td><span class="cr-eng-normal">0,53%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@healthybitesatelier</td>
+                <td>177.630</td>
+                <td>0,08</td>
+                <td><span class="cr-eng-normal">2,45%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@pa.parmigiani</td>
+                <td>107.057</td>
+                <td>1,27</td>
+                <td><span class="cr-eng-normal">1,12%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-media">Media</span></td>
+              </tr>
+              <tr>
+                <td>@chefsandramaciel</td>
+                <td>9.981</td>
+                <td>0,84</td>
+                <td><span class="cr-eng-normal">0,73%</span></td>
+                <td>Image</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@amorahconfeitaria</td>
+                <td>8.925</td>
+                <td>0,21</td>
+                <td><span class="cr-eng-normal">0,84%</span></td>
+                <td>Reels</td>
+                <td><span class="cr-consistency-baixa">Baixa</span></td>
+              </tr>
+              <tr>
+                <td>@padariafuncional</td>
+                <td>5.758</td>
+                <td>12,00</td>
+                <td><span class="cr-eng-normal">0,05%</span></td>
+                <td>Image</td>
+                <td><span class="cr-consistency-alta">Alta</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Padroes do nicho</div>
+        <div class="cr-patterns">
+          <div class="cr-pattern-pill">Melhor engajamento concentrado em video</div>
+          <div class="cr-pattern-pill">Cadencia media: 2,36 posts/semana</div>
+          <div class="cr-pattern-pill">Vocabulario recorrente: pao, bem, acucar, vida, massa, chocolate</div>
+        </div>
+      </div>
+
+      <!-- S2: ANALISE QUALITATIVA -->
+      <div class="cr-section">
+        <div class="cr-section-title">Sprint 2</div>
+        <div class="cr-section-heading">Analise Qualitativa por Perfil</div>
+        <div class="cr-section-sub">presenca, monetizacao, funil e parcerias</div>
+
+        <div class="cr-cards-grid">
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@thaisgois</div>
+            <div class="cr-card-name">Thais Gois</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Encomenda via WhatsApp · loja @shopthaisgois</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">Trafego para loja; posicionamento de nicho</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="font-family:'JetBrains Mono',monospace; font-size:11px;">@shopthaisgois</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@docevegana</div>
+            <div class="cr-card-name">Doce Vegana</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Encomenda WhatsApp · workshop/curso proprio</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">Posicionamento confeitaria vegana artesanal</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="font-family:'JetBrains Mono',monospace; font-size:11px;">@kellysoaresveganchef</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@confeitariasemacucar</div>
+            <div class="cr-card-name">Confeitaria Sem Acucar</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Loja fisica Curitiba · encomenda WhatsApp</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">WhatsApp direto na bio (4199511-8953)</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="font-family:'JetBrains Mono',monospace; font-size:11px;">@4estacoesrevista · @emporio_do_diabetico</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@healthybitesatelier</div>
+            <div class="cr-card-name">Healthy Bites Atelier</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Loja fisica SP · iFood</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">Endereco fisico + iFood na bio</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="font-family:'JetBrains Mono',monospace; font-size:11px;">@ifoodbrasil</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@chefsandramaciel</div>
+            <div class="cr-card-name">Chef Sandra Maciel</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Cursos Hotmart · loja fisica Curitiba</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">Cursos on-line sem gluten, sem leite e sem ovos via Hotmart</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nao identificadas</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@amorahconfeitaria</div>
+            <div class="cr-card-name">Amorah Confeitaria</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Loja fisica Campinas · encomenda WhatsApp</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">Endereco fisico na bio</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nao identificadas</div>
+            </div>
+          </div>
+
+          <div class="cr-card">
+            <div class="cr-card-handle">@padariafuncional</div>
+            <div class="cr-card-name">Padaria Funcional de Vinhedo</div>
+            <div class="cr-card-divider"></div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Cross-platform</div>
+              <div class="cr-card-value" style="color:var(--text-muted);">Nenhuma plataforma identificada</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Monetizacao</div>
+              <div class="cr-card-value">Loja fisica Vinhedo · delivery via Goomer</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Funil / CTA</div>
+              <div class="cr-card-value">WhatsApp + link cardapio</div>
+            </div>
+            <div class="cr-card-row">
+              <div class="cr-card-label">Parcerias</div>
+              <div class="cr-card-value" style="font-family:'JetBrains Mono',monospace; font-size:11px;">@nutrivanessadenadai</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- S3: MATRIZ DE MONETIZACAO -->
+      <div class="cr-section">
+        <div class="cr-section-title">Sprint 2</div>
+        <div class="cr-section-heading">Matriz de Monetizacao</div>
+        <div class="cr-section-sub">comparativo de canais de receita por perfil</div>
+
+        <div class="cr-table-wrap">
+          <table class="cr-table">
+            <thead>
+              <tr>
+                <th>Perfil</th>
+                <th>Loja</th>
+                <th>Delivery</th>
+                <th>Curso</th>
+                <th>E-book</th>
+                <th>Mentoria</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="cr-row-highlight">
+                <td>emilizaremba</td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>thaisgois</td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>docevegana</td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>confeitariasemacucar</td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>healthybitesatelier</td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>chefsandramaciel</td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>amorahconfeitaria</td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+              <tr>
+                <td>padariafuncional</td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-sim">sim</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+                <td><span class="cr-badge-nao">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- S4: OPORTUNIDADES -->
+      <div class="cr-section">
+        <div class="cr-section-title">Analise estrategica</div>
+        <div class="cr-section-heading">Oportunidades para Emili</div>
+        <div class="cr-section-sub">gaps competitivos identificados no nicho</div>
+
+        <div class="cr-opp-grid">
+
+          <div class="cr-opp-card">
+            <div class="cr-opp-num">01 / Monetizacao digital</div>
+            <div class="cr-opp-title">Monetizacao digital nao explorada</div>
+            <div class="cr-opp-desc">Nenhum concorrente tem e-book, receituario digital ou mentoria. Blue ocean para Emili entrar sem competicao direta.</div>
+          </div>
+
+          <div class="cr-opp-card">
+            <div class="cr-opp-num">02 / Cross-platform</div>
+            <div class="cr-opp-title">Cross-platform zerado no nicho</div>
+            <div class="cr-opp-desc">Nenhum concorrente tem TikTok ou YouTube estruturado. Primeiro a chegar domina o algoritmo e a descoberta organica.</div>
+          </div>
+
+          <div class="cr-opp-card">
+            <div class="cr-opp-num">03 / CTA na bio</div>
+            <div class="cr-opp-title">Bio sem CTA de conversao</div>
+            <div class="cr-opp-desc">Maioria das bios e apenas posicionamento. Adicionar link de captura ou produto gera diferencial de conversao imediato.</div>
+          </div>
+
+          <div class="cr-opp-card">
+            <div class="cr-opp-num">04 / Parcerias</div>
+            <div class="cr-opp-title">Parcerias mais intencionais</div>
+            <div class="cr-opp-desc">Emili ja tem BoxViva, DUX, Fugini. Nenhum concorrente mostra funil claro de collab → prova social → oferta. Estruturar isso primeiro.</div>
+          </div>
+
+          <div class="cr-opp-card">
+            <div class="cr-opp-num">05 / Engajamento</div>
+            <div class="cr-opp-title">Engajamento 3-28x maior</div>
+            <div class="cr-opp-desc">Posicao de lideranca ja consolidada. Prioridade: converter audiencia engajada em receita antes de buscar mais crescimento.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /panel-pesquisa -->
+
   </main>
 
 </div>
@@ -1277,7 +2015,7 @@ function renderHeader() {
 // ─── MAIN CONTENT ────────────────────────────────────────────────────────────
 
 function renderMain() {
-  const main = document.getElementById('main');
+  const main = document.getElementById('panel-plano');
   main.innerHTML = PHASES.map(phase => {
     const pct = phaseProgress(phase.id);
     const cardsHTML = phase.ops.map(opId => renderCard(opId)).join('');
@@ -1322,6 +2060,30 @@ function initIntersectionObserver() {
   }, { threshold: 0.2, rootMargin: '-60px 0px 0px 0px' });
 
   sections.forEach(s => observer.observe(s));
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  const planoPanel = document.getElementById('panel-plano');
+  const pesquisaPanel = document.getElementById('panel-pesquisa');
+  const planoBtn = document.getElementById('tab-btn-plano');
+  const pesquisaBtn = document.getElementById('tab-btn-pesquisa');
+
+  if (tab === 'plano') {
+    planoPanel.classList.remove('hidden');
+    pesquisaPanel.classList.add('hidden');
+    planoBtn.classList.add('active');
+    pesquisaBtn.classList.remove('active');
+  } else {
+    pesquisaPanel.classList.remove('hidden');
+    planoPanel.classList.add('hidden');
+    pesquisaBtn.classList.add('active');
+    planoBtn.classList.remove('active');
+    // Scroll to top of main when switching to pesquisa
+    document.getElementById('main').scrollTop = 0;
+    window.scrollTo({ top: 60, behavior: 'smooth' });
+  }
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
