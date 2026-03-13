@@ -1400,6 +1400,591 @@
     border-radius: 3px;
     padding: 2px 4px;
   }
+
+  /* ─── OP EVENT LINK ─── */
+  .op-event-link {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    color: #3B82F6;
+    cursor: pointer;
+    margin-bottom: 12px;
+    text-decoration: none;
+  }
+  .op-event-link:hover { text-decoration: underline; }
+
+  /* ─── SIDEBAR CONTROL PER TAB ─── */
+  body.tab-evento #sidebar,
+  body.tab-pesquisa #sidebar { display: none; }
+
+  /* ─── EVENTO TIMELINE ─── */
+  .evt-timeline-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .evt-timeline-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 24px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .evt-timeline {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 12px;
+  }
+  .evt-timeline-line {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    height: 2px;
+    background: rgba(0,0,0,0.08);
+    z-index: 0;
+  }
+  .evt-timeline-node-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+  .evt-timeline-node {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    transition: transform 0.2s;
+  }
+  .evt-node-past {
+    background: #6B7280;
+    border-color: #6B7280;
+  }
+  .evt-node-next {
+    border: 2px solid;
+    background: transparent;
+  }
+  .evt-node-future {
+    border: 2px solid rgba(0,0,0,0.15);
+    background: transparent;
+  }
+  .evt-node-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--navy);
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .evt-node-date {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    margin-top: 2px;
+  }
+  @keyframes evtPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.45); }
+    50% { box-shadow: 0 0 0 7px rgba(59,130,246,0); }
+  }
+  .evt-node-pulse { animation: evtPulse 2s ease-in-out infinite; }
+  .evt-today-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fase1);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  @media (max-width: 620px) {
+    .evt-timeline { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 0; }
+    .evt-timeline-line { display: none; }
+    .evt-timeline-node-wrap { flex-direction: row; align-items: center; gap: 12px; flex: none; width: 100%; }
+    .evt-timeline-node { margin-bottom: 0; }
+    .evt-node-label, .evt-node-date { text-align: left; }
+    .evt-today-label { margin-top: 0; margin-left: 4px; }
+  }
+
+  /* ─── EVENT CARDS ─── */
+  .evt-cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) {
+    .evt-cards-row { grid-template-columns: 1fr; }
+  }
+  .evt-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    padding: 22px 22px 20px;
+    border-top: 3px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .evt-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(0,0,0,0.1);
+  }
+  .evt-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .evt-card-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+  .evt-card-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.06);
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+  .evt-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .evt-card-meta {
+    font-size: 12px;
+    color: var(--text-body);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .evt-card-meta strong { color: var(--navy); }
+  .evt-card-countdown {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+  }
+  .evt-card-countdown-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .evt-card-kpis {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .evt-kpi-item {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .evt-kpi-item strong { color: var(--navy); font-family: 'JetBrains Mono', monospace; }
+  .evt-tickets-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .evt-ticket-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.05);
+    color: var(--text-body);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  /* ─── CHECKLIST ─── */
+  .evt-checklist-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    padding: 22px 22px 20px;
+    margin-bottom: 28px;
+  }
+  .evt-checklist-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .evt-checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+    list-style: none;
+  }
+  @media (max-width: 560px) { .evt-checklist { grid-template-columns: 1fr; } }
+  .evt-check-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 6px 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .evt-check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #D1D5DB;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    background: transparent;
+  }
+  .evt-check-item.checked .evt-check-box {
+    background: var(--fase1);
+    border-color: var(--fase1);
+  }
+  .evt-check-text {
+    font-size: 13px;
+    color: var(--text-body);
+    transition: color 0.15s;
+  }
+  .evt-check-item.checked .evt-check-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  /* ─── ACCORDIONS ─── */
+  .evt-accordion-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .evt-accordion {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .evt-accordion.open { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .evt-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .evt-accordion-header:hover { background: rgba(0,0,0,0.02); }
+  .evt-accordion-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .evt-accordion-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    flex: 1;
+  }
+  .evt-accordion-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    flex-shrink: 0;
+  }
+  .evt-accordion.open .evt-accordion-chevron { transform: rotate(180deg); }
+  .evt-accordion-body {
+    display: none;
+    padding: 0 20px 20px;
+  }
+  .evt-accordion.open .evt-accordion-body { display: block; }
+
+  /* Inner sub-accordions */
+  .evt-sub-acc {
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .evt-sub-acc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(255,255,255,0.5);
+    transition: background 0.15s;
+  }
+  .evt-sub-acc-header:hover { background: rgba(255,255,255,0.8); }
+  .evt-sub-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    flex: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .evt-sub-chevron {
+    width: 13px;
+    height: 13px;
+    color: var(--text-muted);
+    transition: transform 0.22s;
+    flex-shrink: 0;
+  }
+  .evt-sub-acc.open .evt-sub-chevron { transform: rotate(180deg); }
+  .evt-sub-acc-body {
+    display: none;
+    padding: 12px 14px 14px;
+    background: rgba(255,255,255,0.35);
+  }
+  .evt-sub-acc.open .evt-sub-acc-body { display: block; }
+
+  /* Content inside accordions */
+  .evt-msg-central {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--navy);
+    border-left: 3px solid var(--fase1);
+    padding-left: 12px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .evt-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .evt-list li {
+    font-size: 13px;
+    color: var(--text-body);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .evt-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+  .evt-numbered-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .evt-numbered-list li {
+    font-size: 13px;
+    color: var(--text-body);
+    display: flex;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .evt-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    min-width: 18px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .evt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .evt-table th {
+    text-align: left;
+    padding: 7px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .evt-table td {
+    padding: 8px 10px;
+    color: var(--text-body);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .evt-table tr:last-child td { border-bottom: none; }
+  .evt-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+  .evt-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin: 16px 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .evt-section-label:first-child { margin-top: 0; }
+  .evt-headline-field {
+    font-size: 14px;
+    color: var(--navy);
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .evt-copy-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .evt-copy-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-body);
+    line-height: 1.6;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+    outline: none;
+    min-height: 1.6em;
+    padding-bottom: 3px;
+    word-break: break-word;
+  }
+  .evt-copy-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(59,130,246,0.1);
+    color: #3B82F6;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .evt-copy-btn:hover { background: rgba(59,130,246,0.18); }
+  .evt-copy-btn.copied { background: rgba(16,185,129,0.12); color: #10B981; }
+  .evt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .evt-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.05);
+    color: var(--text-body);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .evt-projection {
+    font-size: 13px;
+    color: var(--text-body);
+    background: rgba(245,158,11,0.08);
+    border-left: 3px solid var(--fase3);
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .evt-funnel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .evt-funnel-step {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(139,92,246,0.08);
+    color: #7C3AED;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .evt-funnel-arrow {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ─── EVENTO FOOTER ─── */
+  .evt-footer {
+    margin-top: 16px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+  }
+  .evt-footer-link {
+    font-size: 12px;
+    color: var(--fase1);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .evt-footer-link:hover { text-decoration: underline; }
+  .evt-footer-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+  }
 </style>
 </head>
 <body>
@@ -1437,6 +2022,7 @@
     <div class="tab-bar">
       <div class="tab-item active" id="tab-btn-plano" onclick="switchTab('plano')">Plano Operacional</div>
       <div class="tab-item" id="tab-btn-pesquisa" onclick="switchTab('pesquisa')">Pesquisa Competitiva</div>
+      <div class="tab-item" id="tab-btn-evento" onclick="switchTab('evento')">Evento</div>
     </div>
 
     <!-- PANEL: PLANO OPERACIONAL -->
@@ -1849,6 +2435,425 @@
       </div>
 
     </div><!-- /panel-pesquisa -->
+
+    <!-- PANEL: EVENTO -->
+    <div id="panel-evento" class="tab-panel hidden">
+
+      <!-- TIMELINE -->
+      <div class="evt-timeline-wrap">
+        <div class="evt-timeline-title">Calendario de marcos</div>
+        <div class="evt-timeline" id="evtTimeline">
+          <div class="evt-timeline-line"></div>
+
+          <div class="evt-timeline-node-wrap">
+            <div class="evt-timeline-node evt-node-past" title="Aquecimento" style="border-color:#6B7280;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5L5.5 10.5L11.5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="evt-node-label">Aquecimento</div>
+            <div class="evt-node-date">16/mar</div>
+          </div>
+
+          <div class="evt-timeline-node-wrap">
+            <div class="evt-timeline-node evt-node-next evt-node-pulse" id="evtNodeInscricoes" style="border-color:var(--fase1); color:var(--fase1);">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" fill="var(--fase1)"/></svg>
+            </div>
+            <div class="evt-node-label" style="color:var(--fase1);">Inscricoes</div>
+            <div class="evt-node-date">23/mar</div>
+            <div class="evt-today-label">proximo</div>
+          </div>
+
+          <div class="evt-timeline-node-wrap">
+            <div class="evt-timeline-node evt-node-future" style="border-color:var(--fase2);">
+            </div>
+            <div class="evt-node-label">Gratuito</div>
+            <div class="evt-node-date">11/abr</div>
+          </div>
+
+          <div class="evt-timeline-node-wrap">
+            <div class="evt-timeline-node evt-node-future" style="border-color:var(--fase3);">
+            </div>
+            <div class="evt-node-label">Venda Quente</div>
+            <div class="evt-node-date">11-14/abr</div>
+          </div>
+
+          <div class="evt-timeline-node-wrap">
+            <div class="evt-timeline-node evt-node-future" style="border-color:var(--fase4);">
+            </div>
+            <div class="evt-node-label">Pago</div>
+            <div class="evt-node-date">9/mai</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENT CARDS -->
+      <div class="evt-cards-row">
+
+        <!-- Card 1: Gratuito -->
+        <div class="evt-card" style="border-top-color:var(--fase1);">
+          <div class="evt-card-header">
+            <span class="evt-card-badge" style="background:rgba(59,130,246,0.1);color:var(--fase1);">GRATUITO</span>
+            <span class="evt-card-status">Em preparacao</span>
+          </div>
+          <div class="evt-card-title">Manha do Bolo de Cenoura Saudavel</div>
+          <div class="evt-card-meta">
+            <strong>Data:</strong> 11 de abril de 2026, 9h00–12h30<br>
+            <strong>Plataforma:</strong> Zoom ao vivo
+          </div>
+          <div class="evt-card-countdown" id="countdown-gratuito" style="color:var(--fase1);">—</div>
+          <div class="evt-card-countdown-label">dias para o evento</div>
+          <div class="evt-card-kpis">
+            <div class="evt-kpi-item">Inscritas: <strong>—</strong></div>
+            <div class="evt-kpi-item">Presenca: <strong>—</strong></div>
+            <div class="evt-kpi-item">Conversao: <strong>—</strong></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Pago -->
+        <div class="evt-card" style="border-top-color:var(--fase3);">
+          <div class="evt-card-header">
+            <span class="evt-card-badge" style="background:rgba(245,158,11,0.1);color:var(--fase3);">PAGO</span>
+            <span class="evt-card-status">Planejado</span>
+          </div>
+          <div class="evt-card-title">Imersao Bolos Saudaveis da Emily</div>
+          <div class="evt-card-meta">
+            <strong>Data:</strong> 9 de maio de 2026, 9h00–13h00
+          </div>
+          <div class="evt-tickets-row">
+            <span class="evt-ticket-chip" style="background:rgba(245,158,11,0.08);color:var(--fase3);">Essencial R$67</span>
+            <span class="evt-ticket-chip" style="background:rgba(245,158,11,0.12);color:var(--fase3);">VIP R$147</span>
+          </div>
+          <div class="evt-card-countdown" id="countdown-pago" style="color:var(--fase3);margin-top:12px;">—</div>
+          <div class="evt-card-countdown-label">dias para o evento</div>
+          <div class="evt-card-kpis">
+            <div class="evt-kpi-item">Vagas vendidas: <strong>—</strong></div>
+            <div class="evt-kpi-item">Receita: <strong>—</strong></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHECKLIST -->
+      <div class="evt-checklist-wrap">
+        <div class="evt-checklist-title">O que falta fazer</div>
+        <ul class="evt-checklist" id="evtChecklist">
+          <li class="evt-check-item" data-idx="0" onclick="toggleEvtCheck(0)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Nome aprovado</span>
+          </li>
+          <li class="evt-check-item" data-idx="1" onclick="toggleEvtCheck(1)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">LP publicada</span>
+          </li>
+          <li class="evt-check-item" data-idx="2" onclick="toggleEvtCheck(2)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Formulario funcionando</span>
+          </li>
+          <li class="evt-check-item" data-idx="3" onclick="toggleEvtCheck(3)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Grupo WhatsApp criado</span>
+          </li>
+          <li class="evt-check-item" data-idx="4" onclick="toggleEvtCheck(4)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Zoom configurado</span>
+          </li>
+          <li class="evt-check-item" data-idx="5" onclick="toggleEvtCheck(5)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Emails configurados</span>
+          </li>
+          <li class="evt-check-item" data-idx="6" onclick="toggleEvtCheck(6)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Mensagens de WhatsApp prontas</span>
+          </li>
+          <li class="evt-check-item" data-idx="7" onclick="toggleEvtCheck(7)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Calendario de conteudo pronto</span>
+          </li>
+          <li class="evt-check-item" data-idx="8" onclick="toggleEvtCheck(8)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Criativos de midia aprovados</span>
+          </li>
+          <li class="evt-check-item" data-idx="9" onclick="toggleEvtCheck(9)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Roteiro da Emily fechado</span>
+          </li>
+          <li class="evt-check-item" data-idx="10" onclick="toggleEvtCheck(10)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Links revisados</span>
+          </li>
+          <li class="evt-check-item" data-idx="11" onclick="toggleEvtCheck(11)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Pitch do evento pago pronto</span>
+          </li>
+          <li class="evt-check-item" data-idx="12" onclick="toggleEvtCheck(12)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Checkout do pago pronto</span>
+          </li>
+          <li class="evt-check-item" data-idx="13" onclick="toggleEvtCheck(13)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Replay configurado</span>
+          </li>
+          <li class="evt-check-item" data-idx="14" onclick="toggleEvtCheck(14)">
+            <div class="evt-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="evt-check-svg" style="display:none;"><path d="M1.5 5.5L4 8L8.5 2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <span class="evt-check-text">Follow-up 72h pronto</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ACCORDION GROUP -->
+      <div class="evt-accordion-group">
+
+        <!-- Bloco 1: Estrategia & Oferta -->
+        <div class="evt-accordion" id="acc-estrategia">
+          <div class="evt-accordion-header" onclick="toggleEvtAcc('acc-estrategia')" style="border-left-color:var(--fase1);">
+            <div class="evt-accordion-icon" style="background:var(--fase1);"></div>
+            <div class="evt-accordion-label">Estrategia &amp; Oferta</div>
+            <svg class="evt-accordion-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="evt-accordion-body">
+
+            <!-- Sub: Tese do Evento -->
+            <div class="evt-sub-acc" id="sub-tese">
+              <div class="evt-sub-acc-header" onclick="toggleEvtSub('sub-tese')">
+                <span class="evt-sub-label">Tese do Evento</span>
+                <svg class="evt-sub-chevron" viewBox="0 0 13 13" fill="none"><path d="M2.5 5L6.5 9L10.5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="evt-sub-acc-body">
+                <div class="evt-msg-central">"Nao e so tirar gluten, lactose e acucar. E saber reconstruir o bolo para que ele funcione de verdade."</div>
+                <div class="evt-section-label">O que o evento vende</div>
+                <ul class="evt-numbered-list">
+                  <li><span class="evt-num">01</span><span>Quebra da objecao "bolo saudavel nao fica bom"</span></li>
+                  <li><span class="evt-num">02</span><span>Confianca de conseguir reproduzir</span></li>
+                  <li><span class="evt-num">03</span><span>Autoridade da Emily como guia real</span></li>
+                  <li><span class="evt-num">04</span><span>Desejo de aprender mais no evento pago</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Sub: Oferta -->
+            <div class="evt-sub-acc" id="sub-oferta">
+              <div class="evt-sub-acc-header" onclick="toggleEvtSub('sub-oferta')">
+                <span class="evt-sub-label">Oferta</span>
+                <svg class="evt-sub-chevron" viewBox="0 0 13 13" fill="none"><path d="M2.5 5L6.5 9L10.5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="evt-sub-acc-body">
+                <div class="evt-section-label">Nome oficial</div>
+                <div class="evt-headline-field">Manha do Bolo de Cenoura Saudavel</div>
+                <div class="evt-section-label">Headline recomendada</div>
+                <div class="evt-headline-field">A aula ao vivo e gratuita para aprender o bolo de cenoura saudavel que nao fica seco, pesado nem com cara de receita de restricao.</div>
+                <div class="evt-section-label">Subheadline</div>
+                <div class="evt-headline-field" style="font-size:13px;color:var(--text-body);">Em uma manha no Zoom, a Emily Zaremba vai mostrar passo a passo como fazer um bolo de cenoura sem gluten, sem lactose e sem acucar com estrutura, sabor e apresentacao de verdade.</div>
+                <div class="evt-section-label">Bonus de inscricao</div>
+                <ul class="evt-list">
+                  <li>Lista de ingredientes</li>
+                  <li>Checklist de utensilios</li>
+                  <li>Card de equivalencias</li>
+                  <li>PDF de apoio</li>
+                  <li>Grupo WhatsApp</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Sub: Agenda da Manha -->
+            <div class="evt-sub-acc" id="sub-agenda">
+              <div class="evt-sub-acc-header" onclick="toggleEvtSub('sub-agenda')">
+                <span class="evt-sub-label">Agenda da Manha</span>
+                <svg class="evt-sub-chevron" viewBox="0 0 13 13" fill="none"><path d="M2.5 5L6.5 9L10.5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="evt-sub-acc-body">
+                <table class="evt-table">
+                  <thead><tr><th>Horario</th><th>Atividade</th></tr></thead>
+                  <tbody>
+                    <tr><td>9h00–9h15</td><td>Abertura, enquadramento, quem e Emily</td></tr>
+                    <tr><td>9h15–10h00</td><td>Aula principal: estrutura do bolo, ingredientes, erros</td></tr>
+                    <tr><td>10h00–10h50</td><td>Demonstracao ao vivo: massa, ponto, forno</td></tr>
+                    <tr><td>10h50–11h05</td><td>Pausa + reforco de permanencia</td></tr>
+                    <tr><td>11h05–11h40</td><td>Desenformar, acabamento, variacoes</td></tr>
+                    <tr><td>11h40–12h00</td><td>Pitch do evento pago</td></tr>
+                    <tr><td>12h00–12h30</td><td>Q&amp;A e CTA final</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bloco 2: Aquisicao -->
+        <div class="evt-accordion" id="acc-aquisicao">
+          <div class="evt-accordion-header" onclick="toggleEvtAcc('acc-aquisicao')" style="border-left-color:var(--fase2);">
+            <div class="evt-accordion-icon" style="background:var(--fase2);"></div>
+            <div class="evt-accordion-label">Aquisicao</div>
+            <svg class="evt-accordion-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="evt-accordion-body">
+
+            <div class="evt-section-label">Calendario de Campanha</div>
+            <table class="evt-table" style="margin-bottom:16px;">
+              <thead><tr><th>Periodo</th><th>Acao</th></tr></thead>
+              <tbody>
+                <tr><td>16–22/mar</td><td>Aquecimento narrativo: erros comuns, bastidores</td></tr>
+                <tr><td>23/mar</td><td>Abertura oficial das inscricoes</td></tr>
+                <tr><td>23/mar–10/abr</td><td>Campanha principal</td></tr>
+                <tr><td>11/abr</td><td>Evento gratuito</td></tr>
+                <tr><td>11–14/abr</td><td>Venda quente do pago (72h)</td></tr>
+                <tr><td>27/abr</td><td>Abertura geral do pago</td></tr>
+                <tr><td>9/mai</td><td>Imersao paga</td></tr>
+              </tbody>
+            </table>
+
+            <div class="evt-section-label">Funil</div>
+            <div class="evt-funnel">
+              <span class="evt-funnel-step">Instagram/Meta</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">LP</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Inscricao</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Confirmacao</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Grupo WhatsApp</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Aquecimento D-7 a D0</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Zoom</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Pitch</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Follow-up 72h</span><span class="evt-funnel-arrow">→</span>
+              <span class="evt-funnel-step">Venda do pago</span>
+            </div>
+
+            <div class="evt-section-label" style="margin-top:20px;">Copy pronta</div>
+
+            <div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Headline</div>
+            <div class="evt-copy-row">
+              <span class="evt-copy-text" contenteditable="true" id="copy-headline">A aula ao vivo e gratuita para aprender o bolo de cenoura saudavel que nao fica seco, pesado nem com cara de receita de restricao.</span>
+              <button class="evt-copy-btn" onclick="evtCopyField('copy-headline', this)">Copiar</button>
+            </div>
+
+            <div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Mensagem-mestra</div>
+            <div class="evt-copy-row">
+              <span class="evt-copy-text" contenteditable="true" id="copy-mestra">Em uma manha no Zoom, a Emily Zaremba vai mostrar passo a passo como fazer um bolo de cenoura sem gluten, sem lactose e sem acucar com estrutura, sabor e apresentacao de verdade.</span>
+              <button class="evt-copy-btn" onclick="evtCopyField('copy-mestra', this)">Copiar</button>
+            </div>
+
+            <div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Copy WhatsApp</div>
+            <div class="evt-copy-row">
+              <span class="evt-copy-text" contenteditable="true" id="copy-wpp">Oi! Vou dar uma aula ao vivo e gratuita sobre bolo de cenoura saudavel de verdade — sem gluten, sem lactose, sem acucar e com gostinho de bolo de verdade. 11 de abril, 9h, Zoom. Garante sua vaga: [link]</span>
+              <button class="evt-copy-btn" onclick="evtCopyField('copy-wpp', this)">Copiar</button>
+            </div>
+
+            <div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text-muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Pitch do pago</div>
+            <div class="evt-copy-row">
+              <span class="evt-copy-text" contenteditable="true" id="copy-pitch">Se hoje voce viu como uma receita pode funcionar de verdade, no proximo mes eu vou te mostrar como dominar uma linha inteira de bolos saudaveis com tecnica, consistencia e acabamento.</span>
+              <button class="evt-copy-btn" onclick="evtCopyField('copy-pitch', this)">Copiar</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bloco 3: Experiencia -->
+        <div class="evt-accordion" id="acc-experiencia">
+          <div class="evt-accordion-header" onclick="toggleEvtAcc('acc-experiencia')" style="border-left-color:var(--fase3);">
+            <div class="evt-accordion-icon" style="background:var(--fase3);"></div>
+            <div class="evt-accordion-label">Experiencia</div>
+            <svg class="evt-accordion-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="evt-accordion-body">
+
+            <div class="evt-section-label">Estrutura do Evento Pago</div>
+            <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;">Imersao Bolos Saudaveis da Emily</div>
+            <div style="font-size:13px;color:var(--text-body);margin-bottom:12px;">9 de maio de 2026, 9h–13h</div>
+
+            <table class="evt-table" style="margin-bottom:4px;">
+              <thead><tr><th>Plano</th><th>Preco</th><th>Conteudo</th></tr></thead>
+              <tbody>
+                <tr><td>Essencial</td><td>R$ 67</td><td>Acesso ao vivo + material</td></tr>
+                <tr><td>VIP</td><td>R$ 147</td><td>Acesso + material + suporte + replay</td></tr>
+              </tbody>
+            </table>
+            <div class="evt-projection">30 vendas Essencial = R$2.010 &nbsp;|&nbsp; 15 vendas VIP = R$2.205</div>
+
+            <div class="evt-section-label" style="margin-top:20px;">Erros fatais a evitar</div>
+            <ul class="evt-list">
+              <li>Transformar gratuito em aula solta sem ponte</li>
+              <li>Ensinar demais sem abrir continuidade</li>
+              <li>LP vaga</li>
+              <li>Zoom sem operacao</li>
+              <li>Replay longo demais</li>
+              <li>Pitch timido demais</li>
+              <li>Nao coletar prova nova</li>
+            </ul>
+
+            <div class="evt-section-label" style="margin-top:16px;">Operacao minima</div>
+            <ul class="evt-list">
+              <li>Zoom Webinar (recomendado) ou Zoom Meeting com registro</li>
+              <li>Time minimo: Emily + suporte + produtor Zoom + marketing/trafego</li>
+              <li>30 min antes: abrir sala, testar audio/camera, validar ingredientes</li>
+            </ul>
+
+          </div>
+        </div>
+
+        <!-- Bloco 4: Conversao -->
+        <div class="evt-accordion" id="acc-conversao">
+          <div class="evt-accordion-header" onclick="toggleEvtAcc('acc-conversao')" style="border-left-color:var(--fase4);">
+            <div class="evt-accordion-icon" style="background:var(--fase4);"></div>
+            <div class="evt-accordion-label">Conversao</div>
+            <svg class="evt-accordion-chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="evt-accordion-body">
+
+            <div class="evt-section-label">Sequencia pos-evento (follow-up 72h)</div>
+            <table class="evt-table" style="margin-bottom:16px;">
+              <thead><tr><th>Dia</th><th>Acao</th></tr></thead>
+              <tbody>
+                <tr><td>D+0</td><td>Recap da aula + CTA do pago</td></tr>
+                <tr><td>D+1</td><td>Objecoes + prova social</td></tr>
+                <tr><td>D+2</td><td>Urgencia final</td></tr>
+                <tr><td>D+3</td><td>Fechamento</td></tr>
+              </tbody>
+            </table>
+
+            <div class="evt-section-label">Escada de eventos (roadmap)</div>
+            <ul class="evt-numbered-list" style="margin-bottom:16px;">
+              <li><span class="evt-num">1</span><span>Abril: Manha do Bolo de Cenoura Saudavel (gratuito)</span></li>
+              <li><span class="evt-num">2</span><span>Maio: Imersao Bolos Saudaveis da Emily (R$67–147)</span></li>
+              <li><span class="evt-num">3</span><span>Junho: Recheios, coberturas e acabamentos</span></li>
+              <li><span class="evt-num">4</span><span>Julho: Bolos saudaveis para vender</span></li>
+              <li><span class="evt-num">5</span><span>Agosto+: Clube, assinatura ou programa recorrente</span></li>
+            </ul>
+
+            <div class="evt-section-label">KPIs a monitorar</div>
+            <table class="evt-table" style="margin-bottom:16px;">
+              <thead><tr><th>Metrica</th></tr></thead>
+              <tbody>
+                <tr><td>Custo por lead</td></tr>
+                <tr><td>Taxa de inscricao</td></tr>
+                <tr><td>Taxa de comparecimento</td></tr>
+                <tr><td>Retencao media</td></tr>
+                <tr><td>CTR do CTA do pago</td></tr>
+                <tr><td>Taxa de compra do pago</td></tr>
+              </tbody>
+            </table>
+
+            <div class="evt-section-label">Stack recomendada</div>
+            <div class="evt-chips">
+              <span class="evt-chip">LP: Framer/Webflow</span>
+              <span class="evt-chip">CRM: HubSpot/RD Station</span>
+              <span class="evt-chip">Automacao: Make/Zapier</span>
+              <span class="evt-chip">WhatsApp Business</span>
+              <span class="evt-chip">Zoom Webinar</span>
+              <span class="evt-chip">Analytics: GTM + GA4</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /accordion-group -->
+
+      <!-- FOOTER -->
+      <div class="evt-footer">
+        <a class="evt-footer-link" href="https://zoom.us/webinar" target="_blank" rel="noopener">Zoom Webinar</a>
+        <a class="evt-footer-link" href="https://zoom.us/events" target="_blank" rel="noopener">Zoom Events</a>
+        <a class="evt-footer-link" href="https://www.facebook.com/business/ads/lead-ads" target="_blank" rel="noopener">Meta Lead Ads</a>
+        <a class="evt-footer-link" href="https://business.whatsapp.com/" target="_blank" rel="noopener">WhatsApp Business Platform</a>
+        <span class="evt-footer-meta">Playbook gerado em 13/Mar/2026</span>
+      </div>
+
+    </div><!-- /panel-evento -->
 
   </main>
 
@@ -2349,6 +3354,8 @@ function renderCard(opId) {
     <div class="op-expanded" id="expanded-${opId}">
       <div class="op-expand-divider"></div>
       <div class="op-objective"><strong>Objetivo</strong>${op.objective}</div>
+      ${opId === 'op07' ? '<a class="op-event-link" onclick="switchTab(\'evento\'); scrollToBlock(\'aquisicao\')">Ver campanha do evento &rarr;</a>' : ''}
+      ${opId === 'op08' ? '<a class="op-event-link" onclick="switchTab(\'evento\'); scrollToBlock(\'conversao\')">Ver plano do produto &rarr;</a>' : ''}
       ${depHTML}
       ${renderPeopleTabs(opId, color)}
       ${renderContextSection(opId)}
@@ -2586,22 +3593,130 @@ function initIntersectionObserver() {
 function switchTab(tab) {
   const planoPanel = document.getElementById('panel-plano');
   const pesquisaPanel = document.getElementById('panel-pesquisa');
+  const eventoPanel = document.getElementById('panel-evento');
   const planoBtn = document.getElementById('tab-btn-plano');
   const pesquisaBtn = document.getElementById('tab-btn-pesquisa');
+  const eventoBtn = document.getElementById('tab-btn-evento');
+
+  // Hide all panels
+  planoPanel.classList.add('hidden');
+  pesquisaPanel.classList.add('hidden');
+  eventoPanel.classList.add('hidden');
+  planoBtn.classList.remove('active');
+  pesquisaBtn.classList.remove('active');
+  eventoBtn.classList.remove('active');
+
+  // Remove per-tab body classes
+  document.body.classList.remove('tab-plano', 'tab-pesquisa', 'tab-evento');
 
   if (tab === 'plano') {
     planoPanel.classList.remove('hidden');
-    pesquisaPanel.classList.add('hidden');
     planoBtn.classList.add('active');
-    pesquisaBtn.classList.remove('active');
-  } else {
+    document.body.classList.add('tab-plano');
+  } else if (tab === 'pesquisa') {
     pesquisaPanel.classList.remove('hidden');
-    planoPanel.classList.add('hidden');
     pesquisaBtn.classList.add('active');
-    planoBtn.classList.remove('active');
-    // Scroll to top of main when switching to pesquisa
+    document.body.classList.add('tab-pesquisa');
     document.getElementById('main').scrollTop = 0;
     window.scrollTo({ top: 60, behavior: 'smooth' });
+  } else if (tab === 'evento') {
+    eventoPanel.classList.remove('hidden');
+    eventoBtn.classList.add('active');
+    document.body.classList.add('tab-evento');
+    document.getElementById('main').scrollTop = 0;
+    window.scrollTo({ top: 60, behavior: 'smooth' });
+    initEvtCountdowns();
+    initEvtChecklist();
+  }
+}
+
+function scrollToBlock(blockId) {
+  const blockMap = {
+    'aquisicao': 'acc-aquisicao',
+    'conversao': 'acc-conversao',
+    'estrategia': 'acc-estrategia',
+    'experiencia': 'acc-experiencia'
+  };
+  const accId = blockMap[blockId] || blockId;
+  const el = document.getElementById(accId);
+  if (!el) return;
+  // Open accordion if closed
+  if (!el.classList.contains('open')) toggleEvtAcc(accId);
+  setTimeout(() => {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+// ─── EVENTO PANEL LOGIC ───────────────────────────────────────────────────────
+
+function initEvtCountdowns() {
+  const now = new Date();
+  const gratuito = new Date('2026-04-11');
+  const pago = new Date('2026-05-09');
+  const daysGratuito = Math.ceil((gratuito - now) / (1000 * 60 * 60 * 24));
+  const daysPago = Math.ceil((pago - now) / (1000 * 60 * 60 * 24));
+  const cg = document.getElementById('countdown-gratuito');
+  const cp = document.getElementById('countdown-pago');
+  if (cg) cg.textContent = daysGratuito > 0 ? daysGratuito : '0';
+  if (cp) cp.textContent = daysPago > 0 ? daysPago : '0';
+}
+
+function initEvtChecklist() {
+  const saved = JSON.parse(localStorage.getItem('emili-event-checklist') || '[]');
+  const items = document.querySelectorAll('#evtChecklist .evt-check-item');
+  items.forEach((item, i) => {
+    if (saved[i]) {
+      item.classList.add('checked');
+      const svg = item.querySelector('.evt-check-svg');
+      if (svg) svg.style.display = '';
+    }
+  });
+}
+
+function toggleEvtCheck(idx) {
+  const item = document.querySelector(`#evtChecklist .evt-check-item[data-idx="${idx}"]`);
+  if (!item) return;
+  item.classList.toggle('checked');
+  const svg = item.querySelector('.evt-check-svg');
+  if (svg) svg.style.display = item.classList.contains('checked') ? '' : 'none';
+  // Persist
+  const saved = JSON.parse(localStorage.getItem('emili-event-checklist') || '[]');
+  saved[idx] = item.classList.contains('checked');
+  localStorage.setItem('emili-event-checklist', JSON.stringify(saved));
+}
+
+function toggleEvtAcc(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('open');
+}
+
+function toggleEvtSub(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('open');
+}
+
+function evtCopyField(fieldId, btn) {
+  const el = document.getElementById(fieldId);
+  if (!el) return;
+  const text = el.innerText || el.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
   }
 }
 
@@ -2881,6 +3996,9 @@ function init() {
   staggerCards();
   initIntersectionObserver();
   updateAllProgress();
+  // Pre-compute countdowns so they're ready when tab opens
+  initEvtCountdowns();
+  initEvtChecklist();
 }
 
 document.addEventListener('DOMContentLoaded', init);
