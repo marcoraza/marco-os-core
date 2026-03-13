@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emili Zaremba — Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fase1: #3B82F6;
+    --fase2: #8B5CF6;
+    --fase3: #F59E0B;
+    --fase4: #10B981;
+    --navy: #1a1f36;
+    --text-body: #4a5068;
+    --text-muted: #8892a4;
+    --card-bg: rgba(255, 255, 255, 0.72);
+    --card-border: rgba(255, 255, 255, 0.9);
+    --header-h: 60px;
+    --sidebar-w: 200px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(160deg, #e8f4ff 0%, #fef8f0 60%, #fdeee0 100%);
+    min-height: 100vh;
+    color: var(--navy);
+    background-attachment: fixed;
+  }
+
+  /* ─── HEADER ─── */
+  #header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+  }
+
+  .header-brand {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navy);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+
+  .header-stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .header-followers {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-body);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .header-followers-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .header-arrow {
+    width: 14px; height: 14px;
+    color: var(--text-muted);
+  }
+
+  .header-phases {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .header-phase-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .header-phase-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .mini-progress {
+    width: 72px;
+    height: 4px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mini-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .mini-progress-pct {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* ─── LAYOUT ─── */
+  #layout {
+    display: flex;
+    padding-top: var(--header-h);
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+    padding: 32px 0 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sidebar-track {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sidebar-track::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--fase1) 0%,
+      var(--fase1) 25%,
+      var(--fase2) 25%,
+      var(--fase2) 50%,
+      var(--fase3) 50%,
+      var(--fase3) 75%,
+      var(--fase4) 75%,
+      var(--fase4) 100%
+    );
+    opacity: 0.25;
+    border-radius: 1px;
+    z-index: 0;
+  }
+
+  .sidebar-node {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar-node:hover { opacity: 0.8; }
+
+  .sidebar-node-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 14px;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+  }
+
+  .sidebar-node.active .sidebar-node-circle {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.8), 0 0 0 6px currentColor;
+    transform: scale(1.1);
+  }
+
+  .sidebar-node-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 2px;
+  }
+
+  .sidebar-node-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-body);
+    line-height: 1.2;
+    transition: color 0.2s;
+  }
+
+  .sidebar-node.active .sidebar-node-name {
+    color: var(--navy);
+  }
+
+  .sidebar-node-weeks {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sidebar-mini-bar {
+    width: 60px;
+    height: 3px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .sidebar-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ─── MAIN ─── */
+  #main {
+    flex: 1;
+    padding: 32px 32px 64px;
+    min-width: 0;
+  }
+
+  /* ─── PHASE SECTION ─── */
+  .phase-section {
+    margin-bottom: 48px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .phase-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    line-height: 1;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+  }
+
+  .phase-week-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+
+  .phase-week-icon {
+    width: 12px; height: 12px;
+    opacity: 0.6;
+  }
+
+  .phase-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .phase-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(0,0,0,0.07);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .phase-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .phase-progress-label {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 90px;
+    text-align: right;
+  }
+
+  /* ─── CARDS GRID ─── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  /* ─── OP CARD ─── */
+  .op-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    padding: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s, opacity 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .op-card:hover {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+
+  /* State styles */
+  .op-card[data-state="doing"] {
+    border-left: 3px solid var(--phase-color, #3B82F6) !important;
+  }
+
+  .op-card[data-state="done"] {
+    opacity: 0.65;
+  }
+
+  .op-card[data-state="blocked"] {
+    border: 1px solid rgba(239,68,68,0.25) !important;
+  }
+
+  /* Fade-in stagger */
+  .op-card {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .op-card.visible {
+    animation: cardFadeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+
+  @keyframes cardFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .op-card[data-state="done"].visible {
+    animation: cardFadeInDone 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+
+  @keyframes cardFadeInDone {
+    to { opacity: 0.65; transform: translateY(0); }
+  }
+
+  /* Card top row */
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .status-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+    position: relative;
+    z-index: 2;
+  }
+
+  .status-circle:hover { transform: scale(1.15); }
+
+  /* ready state */
+  .status-circle.s-ready {
+    border: 2px solid #9CA3AF;
+    background: transparent;
+  }
+
+  /* doing state */
+  .status-circle.s-doing {
+    background: var(--phase-color, #3B82F6);
+    border: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(59,130,246,0); }
+  }
+
+  .status-circle.s-doing { animation: pulseDoing 2s ease-in-out infinite; }
+
+  @keyframes pulseDoing {
+    0%, 100% { box-shadow: 0 0 0 0 var(--pulse-color, rgba(59,130,246,0.4)); }
+    50% { box-shadow: 0 0 0 5px transparent; }
+  }
+
+  /* done state */
+  .status-circle.s-done {
+    background: #10B981;
+    border: none;
+  }
+
+  /* blocked state */
+  .status-circle.s-blocked {
+    background: #EF4444;
+    border: none;
+  }
+
+  .op-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--phase-color, #3B82F6);
+    flex-shrink: 0;
+  }
+
+  .op-status-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .badge-ready {
+    background: rgba(156,163,175,0.15);
+    color: #6B7280;
+  }
+
+  .badge-doing {
+    background: rgba(59,130,246,0.12);
+    color: #3B82F6;
+  }
+
+  .badge-doing.c-fase2 { background: rgba(139,92,246,0.12); color: #8B5CF6; }
+  .badge-doing.c-fase3 { background: rgba(245,158,11,0.12); color: #D97706; }
+  .badge-doing.c-fase4 { background: rgba(16,185,129,0.12); color: #10B981; }
+
+  .badge-done {
+    background: rgba(16,185,129,0.12);
+    color: #10B981;
+  }
+
+  .badge-blocked {
+    background: rgba(239,68,68,0.12);
+    color: #EF4444;
+  }
+
+  /* Card title */
+  .op-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.3;
+    margin-bottom: 8px;
+    transition: text-decoration 0.3s;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .op-card[data-state="done"] .op-title {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    color: var(--text-muted);
+  }
+
+  @keyframes strikethrough {
+    from { text-decoration-color: transparent; }
+    to { text-decoration-color: currentColor; }
+  }
+
+  .op-title.striking {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    animation: strikethrough 0.4s ease-in-out forwards;
+  }
+
+  /* Owner */
+  .op-owner {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .owner-avatar {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .op-owner-text {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .op-time {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  /* Expandable content */
+  .op-expanded {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .op-card.expanded .op-expanded {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  .op-expand-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin-bottom: 12px;
+  }
+
+  .op-objective {
+    font-size: 12px;
+    color: var(--text-body);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .op-objective strong {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .op-subtasks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .op-subtask {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-body);
+  }
+
+  .subtask-check {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid #D1D5DB;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .subtask-check.checked {
+    background: var(--phase-color, #3B82F6);
+    border-color: var(--phase-color, #3B82F6);
+  }
+
+  .op-dep {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 12px;
+    padding: 5px 8px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 6px;
+    border-left: 2px solid #E5E7EB;
+  }
+
+  .op-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .op-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.8);
+    color: var(--text-body);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .op-btn:hover { background: rgba(255,255,255,1); border-color: rgba(0,0,0,0.2); }
+
+  .op-btn.primary {
+    background: var(--phase-color, #3B82F6);
+    color: white;
+    border-color: transparent;
+  }
+
+  .op-btn.primary:hover { filter: brightness(1.1); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    #sidebar { display: none; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .header-phases { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="header-brand">Emili Zaremba</div>
+  <div class="header-divider"></div>
+  <div class="header-stats">
+    <span class="header-followers">28.8K</span>
+    <span class="header-followers-label">seguidores</span>
+    <svg class="header-arrow" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="header-phases" id="headerPhases">
+    <!-- injected by JS -->
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-track" id="sidebarTrack">
+      <!-- injected by JS -->
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main">
+    <!-- injected by JS -->
+  </main>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const PHASES = [
+  {
+    id: 'fase1',
+    name: 'Fundacao',
+    label: 'FUNDACAO',
+    color: '#3B82F6',
+    pulseColor: 'rgba(59,130,246,0.4)',
+    weeks: 'Semana 1-2',
+    weekCode: 'WEEK 01-02',
+    num: 1,
+    ops: ['op01','op02','op03','op04']
+  },
+  {
+    id: 'fase2',
+    name: 'Captura',
+    label: 'CAPTURA',
+    color: '#8B5CF6',
+    pulseColor: 'rgba(139,92,246,0.4)',
+    weeks: 'Semana 3-4',
+    weekCode: 'WEEK 03-04',
+    num: 2,
+    ops: ['op05','op06','op07']
+  },
+  {
+    id: 'fase3',
+    name: 'Monetizacao',
+    label: 'MONETIZACAO',
+    color: '#F59E0B',
+    pulseColor: 'rgba(245,158,11,0.4)',
+    weeks: 'Semana 5-8',
+    weekCode: 'WEEK 05-08',
+    num: 3,
+    ops: ['op08','op09','op10']
+  },
+  {
+    id: 'fase4',
+    name: 'Escala',
+    label: 'ESCALA',
+    color: '#10B981',
+    pulseColor: 'rgba(16,185,129,0.4)',
+    weeks: 'Semana 9-12',
+    weekCode: 'WEEK 09-12',
+    num: 4,
+    ops: ['op11','op12','op13']
+  }
+];
+
+const OPS = {
+  op01: {
+    phase: 'fase1',
+    code: 'OP-01',
+    title: 'Reposicionamento de Bio',
+    time: '15min',
+    owner: 'Marco → Emili',
+    ownerInitials: 'ME',
+    ownerColor: '#3B82F6',
+    objective: 'Bio que comunica nicho + diferencial + CTA em 150 caracteres.',
+    subtasks: ['Analisar bio atual', 'Redigir 3 opcoes', 'Emili escolhe', 'Publicar'],
+    dep: null
+  },
+  op02: {
+    phase: 'fase1',
+    code: 'OP-02',
+    title: 'Ativacao TikTok',
+    time: '30min setup',
+    owner: 'Emili + Frank',
+    ownerInitials: 'EF',
+    ownerColor: '#3B82F6',
+    objective: 'Presenca no TikTok com conteudo existente.',
+    subtasks: ['Criar conta', 'Bio configurada', '5 Reels baixados', 'Primeiro post'],
+    dep: null
+  },
+  op03: {
+    phase: 'fase1',
+    code: 'OP-03',
+    title: 'Setup Landing Page',
+    time: '2h',
+    owner: 'Frank → Marco → Emili',
+    ownerInitials: 'FM',
+    ownerColor: '#3B82F6',
+    objective: 'Hub de links com captura de emails.',
+    subtasks: ['Conta Carrd', 'Links configurados', 'Mailchimp', 'URL na bio'],
+    dep: 'OP-04'
+  },
+  op04: {
+    phase: 'fase1',
+    code: 'OP-04',
+    title: 'Lead Magnet / E-book',
+    time: '1-2h',
+    owner: 'Frank → Emili',
+    ownerInitials: 'FE',
+    ownerColor: '#3B82F6',
+    objective: 'PDF "10 Receitas Saudaveis com 8 Ingredientes ou Menos".',
+    subtasks: ['Extrair receitas', 'Estruturar PDF', 'Revisao Emili', 'Hospedar Drive'],
+    dep: null
+  },
+  op05: {
+    phase: 'fase2',
+    code: 'OP-05',
+    title: 'Stories Diarios',
+    time: '15-20min/dia',
+    owner: 'Emili',
+    ownerInitials: 'E',
+    ownerColor: '#8B5CF6',
+    objective: 'Aumentar conexao e tempo de tela.',
+    subtasks: ['Template de stories', 'Calendario de temas', 'Primeira semana'],
+    dep: null
+  },
+  op06: {
+    phase: 'fase2',
+    code: 'OP-06',
+    title: 'Midia Kit',
+    time: '1h',
+    owner: 'Frank → Marco',
+    ownerInitials: 'FM',
+    ownerColor: '#8B5CF6',
+    objective: 'PDF para fechar parcerias — Story R$300 / Reel R$800 / Pacote R$2.000.',
+    subtasks: ['Coleta dados', 'Design PDF', 'Aprovacao Marco', 'Publicado'],
+    dep: null
+  },
+  op07: {
+    phase: 'fase2',
+    code: 'OP-07',
+    title: 'Campanha de Captura',
+    time: '5min/dia',
+    owner: 'Emili + Frank',
+    ownerInitials: 'EF',
+    ownerColor: '#8B5CF6',
+    objective: '500 leads em 30 dias.',
+    subtasks: ['Reel de lancamento', 'CTA em posts', 'Story semanal', '500 leads'],
+    dep: 'OP-03 + OP-04'
+  },
+  op08: {
+    phase: 'fase3',
+    code: 'OP-08',
+    title: 'Primeiro Produto Digital',
+    time: null,
+    owner: 'Marco + Frank + Emili',
+    ownerInitials: 'MF',
+    ownerColor: '#F59E0B',
+    objective: '"Receituario Completo: 30 Receitas" — R$47 entrada / R$97 premium. Criterio: 50 vendas = R$2.350-4.850.',
+    subtasks: ['Plataforma escolhida', 'Produto configurado', 'Pagina de vendas', 'Lancamento'],
+    dep: null
+  },
+  op09: {
+    phase: 'fase3',
+    code: 'OP-09',
+    title: 'Parcerias Pagas',
+    time: '1h/semana',
+    owner: 'Marco + Emili',
+    ownerInitials: 'ME',
+    ownerColor: '#F59E0B',
+    objective: 'Minimo R$500/post — marcas BoxViva, DUX, Fugini.',
+    subtasks: ['Midia kit enviado', '3 marcas prospectadas', '1 parceria fechada', '2 parcerias'],
+    dep: null
+  },
+  op10: {
+    phase: 'fase3',
+    code: 'OP-10',
+    title: 'YouTube — 4 Videos',
+    time: null,
+    owner: 'Emili + Frank',
+    ownerInitials: 'EF',
+    ownerColor: '#F59E0B',
+    objective: '4 videos, 1k views total.',
+    subtasks: ['Canal criado', 'Video 1', 'Video 2', 'Video 3', 'Video 4'],
+    dep: null
+  },
+  op11: {
+    phase: 'fase4',
+    code: 'OP-11',
+    title: 'Mini-Curso',
+    time: null,
+    owner: 'Marco + Frank + Emili',
+    ownerInitials: 'MF',
+    ownerColor: '#10B981',
+    objective: '"Panificacao Saudavel do Zero" — R$197-297. Criterio: 30 vendas = R$5.910-8.910.',
+    subtasks: ['Roteiro dos modulos', 'Gravacao concluida', 'Plataforma configurada', 'Lancamento'],
+    dep: null
+  },
+  op12: {
+    phase: 'fase4',
+    code: 'OP-12',
+    title: 'Pinterest Automatizado',
+    time: null,
+    owner: 'Frank + Emili',
+    ownerInitials: 'FE',
+    ownerColor: '#10B981',
+    objective: '500 cliques/mes apos 60 dias.',
+    subtasks: ['Conta business', '20 pins publicados', 'Automacao configurada', '500 cliques'],
+    dep: null
+  },
+  op13: {
+    phase: 'fase4',
+    code: 'OP-13',
+    title: 'Produto Fisico — Teste',
+    time: null,
+    owner: 'Emili',
+    ownerInitials: 'E',
+    ownerColor: '#10B981',
+    objective: 'Opcoes: Kit ingredientes R$89-149 / Box mensal R$99-199.',
+    subtasks: ['Pesquisa de interesse', 'Pre-venda aberta', '20 unidades', 'Logistica'],
+    dep: null
+  }
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+
+const STATE_KEY = 'emili-ops-state';
+const STATES = ['ready','doing','done','blocked'];
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+let appState = loadState();
+
+function getOpState(opId) {
+  return (appState[opId] && appState[opId].status) || 'ready';
+}
+
+function getSubtasks(opId) {
+  return (appState[opId] && appState[opId].subtasks) || {};
+}
+
+function cycleState(opId) {
+  const cur = getOpState(opId);
+  const idx = STATES.indexOf(cur);
+  const next = STATES[(idx + 1) % STATES.length];
+  if (!appState[opId]) appState[opId] = {};
+  appState[opId].status = next;
+  appState[opId].timestamp = Date.now();
+  saveState(appState);
+  updateCard(opId);
+  updateAllProgress();
+}
+
+function toggleSubtask(opId, idx) {
+  if (!appState[opId]) appState[opId] = {};
+  if (!appState[opId].subtasks) appState[opId].subtasks = {};
+  appState[opId].subtasks[idx] = !appState[opId].subtasks[idx];
+  saveState(appState);
+  renderSubtaskCheck(opId, idx);
+}
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+
+function getPhaseForOp(opId) {
+  return PHASES.find(p => p.ops.includes(opId));
+}
+
+function getPhaseColor(phaseId) {
+  return PHASES.find(p => p.id === phaseId)?.color || '#3B82F6';
+}
+
+function getPulseColor(phaseId) {
+  return PHASES.find(p => p.id === phaseId)?.pulseColor || 'rgba(59,130,246,0.4)';
+}
+
+function phaseProgress(phaseId) {
+  const phase = PHASES.find(p => p.id === phaseId);
+  if (!phase) return 0;
+  const done = phase.ops.filter(opId => getOpState(opId) === 'done').length;
+  return Math.round((done / phase.ops.length) * 100);
+}
+
+function stateBadgeClass(state, phaseId) {
+  const phaseNum = PHASES.find(p=>p.id===phaseId)?.num || 1;
+  if (state === 'doing') return `badge-doing c-fase${phaseNum}`;
+  return `badge-${state}`;
+}
+
+function stateBadgeLabel(state) {
+  const labels = { ready: 'Pendente', doing: 'Em Andamento', done: 'Concluido', blocked: 'Bloqueado' };
+  return labels[state] || state;
+}
+
+// SVG icons
+function svgCheck() {
+  return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function svgX() {
+  return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 7.5l5-5M7.5 7.5l-5-5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+}
+
+function svgCheckSmall() {
+  return `<svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function calendarIcon() {
+  return `<svg class="phase-week-icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1 5h10" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function renderStatusCircle(opId) {
+  const state = getOpState(opId);
+  const phase = getPhaseForOp(opId);
+  const color = phase?.color || '#3B82F6';
+  const pulse = phase?.pulseColor || 'rgba(59,130,246,0.4)';
+
+  let inner = '';
+  let cls = `status-circle s-${state}`;
+  let style = '';
+
+  if (state === 'doing') {
+    style = `style="--phase-color:${color}; --pulse-color:${pulse};"`;
+  }
+  if (state === 'done') {
+    inner = svgCheck();
+  }
+  if (state === 'blocked') {
+    inner = svgX();
+  }
+
+  return `<div class="${cls}" ${style} onclick="event.stopPropagation(); cycleState('${opId}')" title="Ciclar estado">${inner}</div>`;
+}
+
+function renderCard(opId) {
+  const op = OPS[opId];
+  const phase = getPhaseForOp(opId);
+  const state = getOpState(opId);
+  const color = phase?.color || '#3B82F6';
+  const pulse = phase?.pulseColor || 'rgba(59,130,246,0.4)';
+  const subtasks = getSubtasks(opId);
+
+  const cardStyle = state === 'doing'
+    ? `style="--phase-color:${color}; --pulse-color:${pulse}; border-left: 3px solid ${color};"` 
+    : `style="--phase-color:${color}; --pulse-color:${pulse};"`;
+
+  const subtasksHTML = op.subtasks.map((st, i) => {
+    const checked = subtasks[i];
+    return `<li class="op-subtask">
+      <div class="subtask-check ${checked ? 'checked' : ''}" id="stask-${opId}-${i}" onclick="event.stopPropagation(); toggleSubtask('${opId}', ${i})" style="${checked ? `background:${color};border-color:${color};` : ''}">${checked ? svgCheckSmall() : ''}</div>
+      <span style="${checked ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">${st}</span>
+    </li>`;
+  }).join('');
+
+  const depHTML = op.dep
+    ? `<div class="op-dep">Depende de: <strong>${op.dep}</strong></div>`
+    : '';
+
+  const badgeClass = stateBadgeClass(state, phase?.id);
+  const badgeLabel = stateBadgeLabel(state);
+  const timeHTML = op.time ? `<span class="op-time">${op.time}</span>` : '';
+
+  return `<div class="op-card" id="card-${opId}" data-op="${opId}" data-state="${state}" data-phase="${phase?.id}" ${cardStyle} onclick="toggleCard('${opId}')">
+    <div class="card-top">
+      ${renderStatusCircle(opId)}
+      <span class="op-code">${op.code}</span>
+      <span class="op-status-badge ${badgeClass}" id="badge-${opId}">${badgeLabel}</span>
+    </div>
+    <div class="op-title" id="title-${opId}">${op.title}</div>
+    <div class="op-owner">
+      <div class="owner-avatar" style="background:${color};">${op.ownerInitials.charAt(0)}</div>
+      <span class="op-owner-text">${op.owner}</span>
+      ${timeHTML}
+    </div>
+    <div class="op-expanded" id="expanded-${opId}">
+      <div class="op-expand-divider"></div>
+      <div class="op-objective"><strong>Objetivo</strong>${op.objective}</div>
+      ${depHTML}
+      <div class="op-objective" style="margin-bottom:6px;"><strong>Sub-tarefas</strong></div>
+      <ul class="op-subtasks">${subtasksHTML}</ul>
+      <div class="op-actions">
+        <button class="op-btn primary" onclick="event.stopPropagation(); setOpState('${opId}','doing')" style="background:${color};">Iniciar</button>
+        <button class="op-btn" onclick="event.stopPropagation(); setOpState('${opId}','done')">Concluir</button>
+        <button class="op-btn" onclick="event.stopPropagation(); setOpState('${opId}','blocked')">Bloquear</button>
+        <button class="op-btn" onclick="event.stopPropagation(); setOpState('${opId}','ready')">Resetar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateCard(opId) {
+  const cardEl = document.getElementById(`card-${opId}`);
+  if (!cardEl) return;
+
+  const op = OPS[opId];
+  const phase = getPhaseForOp(opId);
+  const state = getOpState(opId);
+  const color = phase?.color || '#3B82F6';
+  const pulse = phase?.pulseColor || 'rgba(59,130,246,0.4)';
+
+  // Update data-state
+  cardEl.dataset.state = state;
+
+  // Update border
+  cardEl.style.setProperty('--phase-color', color);
+  cardEl.style.setProperty('--pulse-color', pulse);
+  if (state === 'doing') {
+    cardEl.style.borderLeft = `3px solid ${color}`;
+  } else if (state === 'blocked') {
+    cardEl.style.borderLeft = '';
+    cardEl.style.border = '1px solid rgba(239,68,68,0.25)';
+  } else {
+    cardEl.style.borderLeft = '';
+    cardEl.style.border = `1px solid var(--card-border)`;
+  }
+
+  // Update opacity for done
+  if (state === 'done') {
+    cardEl.style.opacity = '0.65';
+  } else {
+    cardEl.style.opacity = '';
+  }
+
+  // Update status circle
+  const circleParent = cardEl.querySelector('.card-top');
+  const oldCircle = circleParent.querySelector('.status-circle');
+  if (oldCircle) {
+    const newCircle = document.createElement('div');
+    newCircle.innerHTML = renderStatusCircle(opId);
+    oldCircle.replaceWith(newCircle.firstChild);
+  }
+
+  // Update badge
+  const badge = document.getElementById(`badge-${opId}`);
+  if (badge) {
+    badge.className = `op-status-badge ${stateBadgeClass(state, phase?.id)}`;
+    badge.textContent = stateBadgeLabel(state);
+  }
+
+  // Strikethrough title
+  const titleEl = document.getElementById(`title-${opId}`);
+  if (titleEl) {
+    if (state === 'done') {
+      titleEl.classList.add('striking');
+    } else {
+      titleEl.classList.remove('striking');
+      titleEl.style.textDecoration = '';
+      titleEl.style.color = '';
+    }
+  }
+}
+
+function setOpState(opId, newState) {
+  if (!appState[opId]) appState[opId] = {};
+  appState[opId].status = newState;
+  appState[opId].timestamp = Date.now();
+  saveState(appState);
+  updateCard(opId);
+  updateAllProgress();
+}
+
+function toggleCard(opId) {
+  const card = document.getElementById(`card-${opId}`);
+  if (!card) return;
+  card.classList.toggle('expanded');
+}
+
+function renderSubtaskCheck(opId, idx) {
+  const phase = getPhaseForOp(opId);
+  const color = phase?.color || '#3B82F6';
+  const el = document.getElementById(`stask-${opId}-${idx}`);
+  if (!el) return;
+  const subtasks = getSubtasks(opId);
+  const checked = subtasks[idx];
+  el.className = `subtask-check ${checked ? 'checked' : ''}`;
+  el.style.background = checked ? color : '';
+  el.style.borderColor = checked ? color : '';
+  el.innerHTML = checked ? svgCheckSmall() : '';
+  const span = el.nextElementSibling;
+  if (span) {
+    span.style.textDecoration = checked ? 'line-through' : '';
+    span.style.color = checked ? 'var(--text-muted)' : '';
+  }
+}
+
+// ─── PROGRESS ───────────────────────────────────────────────────────────────
+
+function updateAllProgress() {
+  PHASES.forEach(phase => {
+    const pct = phaseProgress(phase.id);
+
+    // Phase progress bar in main
+    const bar = document.getElementById(`phase-bar-${phase.id}`);
+    if (bar) bar.style.width = pct + '%';
+
+    const label = document.getElementById(`phase-pct-${phase.id}`);
+    if (label) label.textContent = pct + '% Completo';
+
+    // Sidebar bar
+    const sbar = document.getElementById(`sidebar-bar-${phase.id}`);
+    if (sbar) sbar.style.width = pct + '%';
+
+    // Header bar
+    const hbar = document.getElementById(`header-bar-${phase.id}`);
+    if (hbar) hbar.style.width = pct + '%';
+
+    const hpct = document.getElementById(`header-pct-${phase.id}`);
+    if (hpct) hpct.textContent = pct + '%';
+  });
+}
+
+// ─── SIDEBAR ────────────────────────────────────────────────────────────────
+
+function renderSidebar() {
+  const track = document.getElementById('sidebarTrack');
+  track.innerHTML = PHASES.map(phase => {
+    const pct = phaseProgress(phase.id);
+    return `<div class="sidebar-node" id="snode-${phase.id}" data-phase="${phase.id}" onclick="scrollToPhase('${phase.id}')">
+      <div class="sidebar-node-circle" style="background:${phase.color};">${phase.num}</div>
+      <div class="sidebar-node-info">
+        <div class="sidebar-node-name">${phase.name}</div>
+        <div class="sidebar-node-weeks">${phase.weeks}</div>
+        <div class="sidebar-mini-bar">
+          <div class="sidebar-mini-fill" id="sidebar-bar-${phase.id}" style="background:${phase.color}; width:${pct}%;"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function scrollToPhase(phaseId) {
+  const el = document.getElementById(`section-${phaseId}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setSidebarActive(phaseId) {
+  document.querySelectorAll('.sidebar-node').forEach(n => n.classList.remove('active'));
+  const node = document.getElementById(`snode-${phaseId}`);
+  if (node) node.classList.add('active');
+}
+
+// ─── HEADER ─────────────────────────────────────────────────────────────────
+
+function renderHeader() {
+  const container = document.getElementById('headerPhases');
+  container.innerHTML = PHASES.map(phase => {
+    const pct = phaseProgress(phase.id);
+    return `<div class="header-phase-bar">
+      <span class="header-phase-label" style="color:${phase.color};">F${phase.num}</span>
+      <div class="mini-progress">
+        <div class="mini-progress-fill" id="header-bar-${phase.id}" style="background:${phase.color}; width:${pct}%;"></div>
+      </div>
+      <span class="mini-progress-pct" id="header-pct-${phase.id}">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── MAIN CONTENT ────────────────────────────────────────────────────────────
+
+function renderMain() {
+  const main = document.getElementById('main');
+  main.innerHTML = PHASES.map(phase => {
+    const pct = phaseProgress(phase.id);
+    const cardsHTML = phase.ops.map(opId => renderCard(opId)).join('');
+    return `<section class="phase-section" id="section-${phase.id}" data-phase="${phase.id}">
+      <div class="phase-header">
+        <h2 class="phase-title">${phase.label}</h2>
+        <div class="phase-week-badge">${calendarIcon()} ${phase.weekCode}</div>
+      </div>
+      <div class="phase-progress-row">
+        <div class="phase-progress-bar">
+          <div class="phase-progress-fill" id="phase-bar-${phase.id}" style="background:${phase.color}; width:${pct}%;"></div>
+        </div>
+        <span class="phase-progress-label" id="phase-pct-${phase.id}">${pct}% Completo</span>
+      </div>
+      <div class="cards-grid">${cardsHTML}</div>
+    </section>`;
+  }).join('');
+}
+
+// ─── STAGGER FADE-IN ─────────────────────────────────────────────────────────
+
+function staggerCards() {
+  const cards = document.querySelectorAll('.op-card');
+  cards.forEach((card, i) => {
+    setTimeout(() => {
+      card.classList.add('visible');
+    }, 80 + i * 55);
+  });
+}
+
+// ─── INTERSECTION OBSERVER ───────────────────────────────────────────────────
+
+function initIntersectionObserver() {
+  const sections = document.querySelectorAll('.phase-section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const phaseId = entry.target.dataset.phase;
+        if (phaseId) setSidebarActive(phaseId);
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-60px 0px 0px 0px' });
+
+  sections.forEach(s => observer.observe(s));
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+function init() {
+  renderMain();
+  renderSidebar();
+  renderHeader();
+  setSidebarActive('fase1');
+  staggerCards();
+  initIntersectionObserver();
+  updateAllProgress();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
