@@ -224,9 +224,17 @@ a:focus-visible {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
-  gap: 18px;
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.hero-copy {
+  max-width: 760px;
+}
+
+.hero .chips {
+  margin-top: 2px;
 }
 
 .chips,
@@ -238,7 +246,12 @@ a:focus-visible {
 }
 
 .kpis {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.kpis .label {
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 .value {
@@ -281,6 +294,15 @@ a:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.actions-grid {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.actions-grid .card {
+  padding: 16px 18px;
+}
+
 .pillars,
 .funnel-steps {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -292,6 +314,15 @@ a:focus-visible {
   background: rgba(255, 255, 255, 0.56);
   padding: 14px;
   border-radius: 14px;
+}
+
+.phase {
+  padding: 18px;
+}
+
+.phase .sub {
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .phase.active,
@@ -524,6 +555,13 @@ label {
   opacity: 1;
 }
 
+.overview-footer {
+  margin-top: 18px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 @media (max-width: 768px) {
   .app {
     grid-template-columns: 1fr;
@@ -569,7 +607,7 @@ label {
   }
 
   .kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .calendar {
@@ -614,7 +652,7 @@ label {
 <div class="app">
 <aside class="sidebar"><div class="brand"><div class="eyebrow">Helio Light Theme</div><h1>Emili<br>Zaremba</h1><p>Dashboard completo para estratégia, conteúdo, concorrência e monetização.</p></div><nav class="nav" id="nav" role="tablist" aria-label="Seções do dashboard"></nav></aside>
 <main class="main" id="main">
-<section class="panel active" id="tab-overview" role="tabpanel" aria-labelledby="tab-button-overview"><div class="hero"><div class="hero-grid"><div><div class="eyebrow">Overview</div><h2>Converter o viral em lista, prova e receita.</h2><p>A lógica do dashboard é simples: capitalizar o alcance agora, estruturar captura, abrir oferta e escalar a marca em novos canais antes da janela esfriar.</p></div><div class="chips"><div class="chip">Viral ativo</div><div class="chip">8,61% de engagement</div><div class="chip">Monetização zerada</div><div class="chip">Janela 2-4 semanas</div></div></div></div><div class="grid kpis"><div class="card"><div class="label">Seguidores</div><div class="value">28,866</div></div><div class="card"><div class="label">Engagement</div><div class="value">8.61%</div></div><div class="card"><div class="label">Views Viral</div><div class="value">2.45M</div></div><div class="card"><div class="label">Likes Viral</div><div class="value">117K</div></div><div class="card"><div class="label">Emails Capturados</div><div class="value"><input class="editable kpi" data-key="emails" value="0"></div></div><div class="card"><div class="label">Revenue</div><div class="value"><input class="editable kpi" data-key="revenue" value="R$0"></div></div></div><div class="overview-grid" style="margin-top:18px"><div class="card"><div class="label">Quadrante competitivo</div><h3 style="font:400 30px var(--serif);margin:8px 0">Seguidores x engagement</h3><svg id="scatter" viewBox="0 0 780 420"></svg></div><div class="grid"><div class="card"><div class="label">Progresso 30-60-90</div><div class="phase-bar" id="phaseBar"></div></div><div class="card"><div class="label">Ações imediatas</div><div class="actions-grid"><div class="card"><label><input type="checkbox" class="quick" data-key="bio"> Atualizar bio com CTA</label></div><div class="card"><label><input type="checkbox" class="quick" data-key="stories"> Publicar sequência de stories</label></div><div class="card"><label><input type="checkbox" class="quick" data-key="lead"> Subir lead magnet + automação</label></div></div></div></div></div></section>
+<section class="panel active" id="tab-overview" role="tabpanel" aria-labelledby="tab-button-overview"><div class="hero"><div class="hero-grid"><div class="hero-copy"><div class="eyebrow">Overview</div><h2>Converter o viral em lista, prova e receita.</h2><p>A lógica do dashboard é simples: capitalizar o alcance agora, estruturar captura, abrir oferta e escalar a marca em novos canais antes da janela esfriar.</p></div><div class="chips"><div class="chip">Viral ativo</div><div class="chip">32,82% de engagement</div><div class="chip">Monetização zerada</div><div class="chip">Janela 2-4 semanas</div></div></div></div><div class="grid kpis"><div class="card"><div class="label">Seguidores</div><div class="value">30.839</div></div><div class="card"><div class="label">Engagement</div><div class="value">32.82%</div></div><div class="card"><div class="label">Views Viral</div><div class="value">2.45M</div></div><div class="card"><div class="label">Likes Viral</div><div class="value">117K</div></div><div class="card"><div class="label">Emails Capturados</div><div class="value"><input class="editable kpi" data-key="emails" value="0"></div></div><div class="card"><div class="label">Revenue</div><div class="value"><input class="editable kpi" data-key="revenue" value="R$0"></div></div></div><div class="overview-grid" style="margin-top:18px"><div class="card"><div class="label">Quadrante competitivo</div><h3 style="font:400 30px var(--serif);margin:8px 0">Seguidores x engagement</h3><svg id="scatter" viewBox="0 0 780 420"></svg></div><div class="grid"><div class="card"><div class="label">Progresso 30-60-90</div><div class="phase-bar" id="phaseBar"></div></div><div class="card"><div class="label">Ações imediatas</div><div class="actions-grid"><div class="card"><label><input type="checkbox" class="quick" data-key="bio"> Atualizar bio com CTA</label></div><div class="card"><label><input type="checkbox" class="quick" data-key="stories"> Publicar sequência de stories</label></div><div class="card"><label><input type="checkbox" class="quick" data-key="lead"> Subir lead magnet + automação</label></div></div></div></div><div class="overview-footer" id="overviewFooter">Atualizado em 14/03/2026 16:42 BRT</div></div></section>
 <section class="panel" id="tab-competitivo" role="tabpanel" aria-labelledby="tab-button-competitivo"><div class="hero"><div class="eyebrow">Competitivo</div><h2 style="font-size:48px">Mapa dos 38 concorrentes.</h2></div><div class="danger-grid" id="dangerGrid"></div><div class="card" style="margin-top:18px"><div class="toolbar" id="nicheFilters"></div><div class="toolbar" id="riskFilters" style="margin-top:10px"></div></div><div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>#</th><th>Handle</th><th class="sortable" data-sort="followers">Seguidores</th><th>Nicho</th><th>Engagement</th><th>Produto Digital</th><th class="sortable" data-sort="risk">Risco</th><th>Verificação</th></tr></thead><tbody id="compRows"></tbody></table></div></section>
 <section class="panel" id="tab-swot" role="tabpanel" aria-labelledby="tab-button-swot"><div class="hero"><div class="eyebrow">SWOT</div><h2 style="font-size:48px">Força, lacuna, oportunidade e ameaça no mesmo quadro.</h2></div><div class="swot-grid" id="swot"></div></section>
 <section class="panel" id="tab-plano" role="tabpanel" aria-labelledby="tab-button-plano"><div class="hero"><div class="eyebrow">Plano 30-60-90</div><h2 style="font-size:48px">31 ações com dono, data, métrica e status.</h2></div><div class="card"><div class="toolbar" id="ownerFilters"></div></div><div class="card" style="margin-top:18px"><div class="timeline-nav" id="phaseNav"></div><div class="grid" id="phaseCards" style="grid-template-columns:repeat(3,1fr);margin:14px 0"></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Ação</th><th>Quando</th><th>Quem</th><th>Métrica</th><th>Status</th></tr></thead><tbody id="planRows"></tbody></table></div></div></section>
@@ -663,9 +701,10 @@ function scatter(){
   if(!svg||!tooltip)return;
   const W=780,H=420,p={l:56,r:18,t:18,b:42};
   const pts=competitors.map(c=>({l:c[0],f:num(c[1])*1000,e:num(c[3]),r:riskOrder[c[6]]||1,risk:c[6],niche:c[2]}));
-  pts.push({l:'@emilizaremba',f:28866,e:8.61,r:5,risk:'Muito Alto',niche:'Perfil atual',me:1});
+  pts.push({l:'@emilizaremba',f:30839,e:32.82,r:5,risk:'Muito Alto',niche:'Perfil atual',me:1});
   const maxX=Math.max(...pts.map(x=>x.f))*1.06,maxY=Math.max(...pts.map(x=>x.e))*1.08;
   const X=v=>p.l+(v/maxX)*(W-p.l-p.r),Y=v=>H-p.b-(v/maxY)*(H-p.t-p.b);
+  const topRiskLabels=new Set(pts.filter(pt=>!pt.me).sort((a,b)=>b.r-a.r||b.e-a.e||b.f-a.f).slice(0,5).map(pt=>pt.l));
   let o=`<rect x="0" y="0" width="${W}" height="${H}" rx="18" fill="rgba(255,255,255,.22)"/>`;
   for(let i=0;i<5;i++){
     const yy=p.t+i*((H-p.t-p.b)/4),xx=p.l+i*((W-p.l-p.r)/4);
@@ -675,8 +714,13 @@ function scatter(){
     const fill=pt.me?'#2563eb':pt.r>=5?'#dc2626':pt.r>=4?'#f59e0b':'#7aa7ff';
     const rr=pt.me?16:5+pt.r*2.2;
     const label=`${pt.l} | ${pt.niche} | ${Math.round(pt.f).toLocaleString('pt-BR')} seguidores | ${pt.e}% eng.`;
-    o+=`<circle class="scatter-point" data-label="${label}" cx="${X(pt.f)}" cy="${Y(pt.e)}" r="${rr}" fill="${fill}" fill-opacity="${pt.me?'.95':'.68'}" stroke="white" stroke-width="2" tabindex="0" aria-label="${label}"/>`;
-    if(pt.me||pt.r>=4.5)o+=`<text x="${X(pt.f)+10}" y="${Y(pt.e)-10}" font-size="12" font-weight="700">${pt.l}</text>`;
+    const x=X(pt.f), y=Y(pt.e);
+    o+=`<circle class="scatter-point" data-label="${label}" cx="${x}" cy="${y}" r="${rr}" fill="${fill}" fill-opacity="${pt.me?'.95':'.68'}" stroke="white" stroke-width="2" tabindex="0" aria-label="${label}"/>`;
+    if(pt.me||topRiskLabels.has(pt.l)){
+      const tx=Math.min(W-p.r-110,x+10);
+      const ty=Math.max(p.t+12,y-10);
+      o+=`<text x="${tx}" y="${ty}" font-size="10" font-weight="700">${pt.l}</text>`;
+    }
   });
   svg.innerHTML=o;
   const showTip=(event)=>{
