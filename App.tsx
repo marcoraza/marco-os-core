@@ -22,7 +22,7 @@ const DeepWorkPanel = lazy(() => import('./components/focus/DeepWorkPanel').then
 const QuickCaptureModal = lazy(() => import('./components/capture/QuickCaptureModal').then(m => ({ default: m.QuickCaptureModal })));
 
 const CommandPalette = lazy(() => import('./components/CommandPalette'));
-const AgentAddModal = lazy(() => import('./components/AgentAddModal'));
+const AgentAddModal = lazy(() => import('./components/agents/AgentAddModal'));
 const MissionModal = lazy(() => import('./components/MissionModal'));
 const ProjectSwitcher = lazy(() => import('./components/layout/ProjectSwitcher'));
 const ShortcutsDialog = lazy(() => import('./components/layout/ShortcutsDialog'));

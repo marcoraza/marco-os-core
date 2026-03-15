@@ -22,7 +22,7 @@ Com a base técnica e os fluxos principais já sólidos, o próximo passo era ex
 
 ## Files
 - App.tsx
-- components/AgentCommandCenter.tsx
+- components/agents/AgentCommandCenter.tsx
 - components/CommandPalette.tsx
 - components/Planner.tsx
 - components/dashboard/MissionControlBar.tsx

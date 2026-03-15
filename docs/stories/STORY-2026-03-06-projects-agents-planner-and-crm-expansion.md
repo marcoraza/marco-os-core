@@ -21,7 +21,7 @@ Depois da expansão operacional inicial, faltava fortalecer quatro superfícies 
 
 ## Files
 - App.tsx
-- components/AgentDetailView.tsx
+- components/agents/AgentDetailView.tsx
 - components/CRM.tsx
 - components/Planner.tsx
 - components/layout/ProjectSwitcher.tsx

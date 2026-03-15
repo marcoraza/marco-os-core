@@ -22,8 +22,8 @@ Os fluxos de agentes, planner e notes estavam funcionais, mas ainda com falhas s
 - [x] `npm run build`
 
 ## Files
-- components/AgentCommandCenter.tsx
-- components/AgentDetailView.tsx
+- components/agents/AgentCommandCenter.tsx
+- components/agents/AgentDetailView.tsx
 - components/agents/AgentKanban.tsx
 - components/Planner.tsx
 - components/NotesPanel.tsx

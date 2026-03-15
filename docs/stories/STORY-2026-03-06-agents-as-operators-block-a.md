@@ -19,6 +19,6 @@ Mission Control e a area de detalhes dos agentes ainda estavam bons para observa
 - [x] `npm run build`
 
 ## Files
-- components/AgentCommandCenter.tsx
-- components/AgentDetailView.tsx
+- components/agents/AgentCommandCenter.tsx
+- components/agents/AgentDetailView.tsx
 - components/agents/AgentExecutions.tsx

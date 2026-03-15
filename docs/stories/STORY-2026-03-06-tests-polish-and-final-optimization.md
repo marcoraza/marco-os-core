@@ -21,7 +21,7 @@ A base ja estava estavel, mas ainda faltava ampliar cobertura nos pontos critico
 
 ## Files
 - App.tsx
-- components/AgentDetailView.tsx
+- components/agents/AgentDetailView.tsx
 - components/MissionModal.tsx
 - components/NotesPanel.tsx
 - components/Planner.tsx

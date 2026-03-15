@@ -27,7 +27,7 @@
 ## File List
 - [contexts/OpenClawContext.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/contexts/OpenClawContext.tsx)
 - [App.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/App.tsx)
-- [AgentCommandCenter.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/components/AgentCommandCenter.tsx)
+- [AgentCommandCenter.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/components/agents/AgentCommandCenter.tsx)
 - [AgentKanban.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/components/agents/AgentKanban.tsx)
 - [AgentConfig.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/components/agents/AgentConfig.tsx)
 - [AgentMemory.tsx](/Users/marko/Desktop/CLAUDE/PROJETOS/marco_os/components/agents/AgentMemory.tsx)

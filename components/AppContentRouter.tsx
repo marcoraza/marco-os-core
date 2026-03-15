@@ -9,8 +9,8 @@ const Learning = lazy(() => import('./Learning'));
 const Planner = lazy(() => import('./Planner'));
 const NotesPanel = lazy(() => import('./NotesPanel'));
 const CRM = lazy(() => import('./CRM'));
-const AgentCommandCenter = lazy(() => import('./AgentCommandCenter'));
-const AgentDetailView = lazy(() => import('./AgentDetailView'));
+const AgentCommandCenter = lazy(() => import('./agents/AgentCommandCenter'));
+const AgentDetailView = lazy(() => import('./agents/AgentDetailView'));
 const Settings = lazy(() => import('./Settings'));
 const MissionDetail = lazy(() => import('./MissionDetail'));
 

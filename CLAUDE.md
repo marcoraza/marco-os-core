@@ -482,8 +482,6 @@ import { cn } from '@/utils/cn';
 | `contexts/NotionDataContext.tsx` | Centralized Notion data polling (single timer) |
 | `contexts/OpenClawContext.tsx` | OpenClaw provider (WebSocket + HTTP + state) |
 | `components/ui/SyncBadge.tsx` | Sync timestamp display |
-| `components/ChatPanel.tsx` | Reusable agent chat drawer |
-| `hooks/useAgentChat.ts` | Chat session management |
 | `lib/openclaw.ts` | WebSocket client with auto-reconnect |
 | `lib/openclawHttp.ts` | HTTP client for Gateway `/tools/invoke` |
 | `lib/openclawTypes.ts` | Protocol types (AgentPresence, AgentRun, etc.) |
@@ -526,15 +524,15 @@ marco_os/
     NotesPanel.tsx             # notes
     CRM.tsx                    # crm → Network
     Settings.tsx               # settings
-    AgentCommandCenter.tsx     # agents-overview
-    AgentDetailView.tsx
     MissionDetail.tsx
     MissionModal.tsx
     CommandPalette.tsx         # Cmd+K
     NotificationCenter.tsx
-    AgentAddModal.tsx
     AgendaWidget.tsx
     agents/
+      AgentAddModal.tsx
+      AgentCommandCenter.tsx   # agents-overview
+      AgentDetailView.tsx
       AgentConfig.tsx
       AgentCronJobs.tsx
       AgentExecutions.tsx

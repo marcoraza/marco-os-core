@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Badge, Card, Icon, SectionLabel } from './ui';
-import type { Agent, AgentRole } from '../types/agents';
+import { Badge, Card, Icon, SectionLabel } from '../ui';
+import type { Agent, AgentRole } from '../../types/agents';
 
 type Props = {
   open: boolean;

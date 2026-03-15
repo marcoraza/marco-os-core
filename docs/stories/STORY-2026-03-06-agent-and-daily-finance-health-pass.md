@@ -20,7 +20,7 @@ Os proximos gargalos de uso diario estavam em dois eixos: operar agentes com men
 - [x] `npm run build`
 
 ## Files
-- components/AgentCommandCenter.tsx
-- components/AgentDetailView.tsx
+- components/agents/AgentCommandCenter.tsx
+- components/agents/AgentDetailView.tsx
 - components/Finance.tsx
 - components/Health.tsx

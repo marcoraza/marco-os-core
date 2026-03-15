@@ -19,7 +19,7 @@ O bloco inicial de agentes melhorou dispatch e leitura rápida, mas ainda faltav
 - [x] `npm run build`
 
 ## Files
-- components/AgentCommandCenter.tsx
+- components/agents/AgentCommandCenter.tsx
 - components/AppContentRouter.tsx
 - components/Planner.tsx
 - data/models.ts

@@ -102,8 +102,8 @@ Components were accessing array methods (`.map()`, `.filter()`, `.length`, `.som
 3. `components/CRM.tsx`
 4. `components/NotesPanel.tsx`
 5. `components/Planner.tsx`
-6. `components/AgentCommandCenter.tsx`
-7. `components/MissionControl.tsx`
+6. `components/agents/AgentCommandCenter.tsx`
+7. `components/dashboard/MissionControlBar.tsx`
 8. `components/dashboard/DashboardRightSidebar.tsx`
 
 ## Testing Recommendations

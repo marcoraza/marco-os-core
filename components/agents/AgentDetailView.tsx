@@ -1,30 +1,30 @@
 import React, { useState, useMemo, lazy, Suspense } from 'react';
-import { Badge, Icon, SectionLabel, StatusDot, Skeleton, EmptyState } from './ui';
-import { TabNav } from './ui/TabNav';
-import type { Tab } from './ui/TabNav';
-import { cn } from '../utils/cn';
-import { getTokenUsageForAgent, statusDot, formatTokens } from '../data/agentMockData';
-import { useAgents, useExecutions } from '../contexts/OpenClawContext';
-import AgentKanban from './agents/AgentKanban';
-import AgentExecutions from './agents/AgentExecutions';
-import AgentCronJobs from './agents/AgentCronJobs';
-import AgentHeartbeat from './agents/AgentHeartbeat';
-import AgentMemory from './agents/AgentMemory';
-import AgentConfig from './agents/AgentConfig';
-import TokenUsageCard from './agents/TokenUsageCard';
-import AgentDataActions from './agents/AgentDataActions';
+import { Badge, Icon, SectionLabel, StatusDot, Skeleton, EmptyState } from '../ui';
+import { TabNav } from '../ui/TabNav';
+import type { Tab } from '../ui/TabNav';
+import { cn } from '../../utils/cn';
+import { getTokenUsageForAgent, statusDot, formatTokens } from '../../data/agentMockData';
+import { useAgents, useExecutions } from '../../contexts/OpenClawContext';
+import AgentKanban from './AgentKanban';
+import AgentExecutions from './AgentExecutions';
+import AgentCronJobs from './AgentCronJobs';
+import AgentHeartbeat from './AgentHeartbeat';
+import AgentMemory from './AgentMemory';
+import AgentConfig from './AgentConfig';
+import TokenUsageCard from './TokenUsageCard';
+import AgentDataActions from './AgentDataActions';
 
-const AgentStandup = lazy(() => import('./agents/AgentStandup'));
-const ActivityFeed = lazy(() => import('./agents/ActivityFeed'));
-const AgentChat = lazy(() => import('./agents/AgentChat'));
-const GitHubIssues = lazy(() => import('./agents/GitHubIssues'));
-const QualityReviewGates = lazy(() => import('./agents/QualityReviewGates'));
-const AuditLog = lazy(() => import('./agents/AuditLog'));
-const GlobalSearch = lazy(() => import('./agents/GlobalSearch'));
-const PipelineOrchestration = lazy(() => import('./agents/PipelineOrchestration'));
-const WebhookManager = lazy(() => import('./agents/WebhookManager'));
-const TokenMonitor = lazy(() => import('./agents/TokenMonitor'));
-const SkillReport = lazy(() => import('./agents/SkillReport'));
+const AgentStandup = lazy(() => import('./AgentStandup'));
+const ActivityFeed = lazy(() => import('./ActivityFeed'));
+const AgentChat = lazy(() => import('./AgentChat'));
+const GitHubIssues = lazy(() => import('./GitHubIssues'));
+const QualityReviewGates = lazy(() => import('./QualityReviewGates'));
+const AuditLog = lazy(() => import('./AuditLog'));
+const GlobalSearch = lazy(() => import('./GlobalSearch'));
+const PipelineOrchestration = lazy(() => import('./PipelineOrchestration'));
+const WebhookManager = lazy(() => import('./WebhookManager'));
+const TokenMonitor = lazy(() => import('./TokenMonitor'));
+const SkillReport = lazy(() => import('./SkillReport'));
 
 function TabFallback() {
   return (

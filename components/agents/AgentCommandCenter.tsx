@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Badge, Card, Icon, SectionLabel, StatusDot, showToast } from './ui';
-import { cn } from '../utils/cn';
+import { Badge, Card, Icon, SectionLabel, StatusDot, showToast } from '../ui';
+import { cn } from '../../utils/cn';
 import {
   statusDot,
   KANBAN_ORDER,
   executionBadge,
   formatTokens,
   type KanbanStatus,
-} from '../data/agentMockData';
-import type { View } from '../lib/appTypes';
+} from '../../data/agentMockData';
+import type { View } from '../../lib/appTypes';
 import {
   useAgents,
   useKanban,
@@ -17,8 +17,8 @@ import {
   useConnectionState,
   useOpenClawActions,
   useTokenUsages,
-} from '../contexts/OpenClawContext';
-import { summarizeDelegationQueue, type DelegationQueueItem } from '../lib/productSignals';
+} from '../../contexts/OpenClawContext';
+import { summarizeDelegationQueue, type DelegationQueueItem } from '../../lib/productSignals';
 
 interface AgentCommandCenterProps {
   onAgentClick: (agentId: string) => void;

@@ -25,7 +25,7 @@ O produto já tinha boa base operacional, mas ainda faltavam cinco capacidades d
 - components/dashboard/MorningBriefCard.tsx
 - components/Learning.tsx
 - components/learning/DecisionJournalView.tsx
-- components/AgentCommandCenter.tsx
+- components/agents/AgentCommandCenter.tsx
 - components/CRM.tsx
 - lib/productSignals.ts
 - tests/product-signals.test.ts
