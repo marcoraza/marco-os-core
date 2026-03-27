@@ -4,7 +4,7 @@
  * Layout: ConnectionDot | 6 MetricPills (with border-l accent) | 7-bar cost sparkline | action buttons.
  * All store access via granular selectors (one per field).
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
 import { useMissionControlStore } from '../../../store/missionControl';
@@ -34,10 +34,12 @@ function MiniBarSparkline({
   data,
   width = 40,
   height = 16,
+  pulseLastBar = false,
 }: {
   data: number[];
   width?: number;
   height?: number;
+  pulseLastBar?: boolean;
 }) {
   const max = Math.max(...data, 0.01);
   const barCount = data.length;
@@ -66,8 +68,9 @@ function MiniBarSparkline({
             width={barWidth}
             height={barHeight}
             rx={0.5}
-            fill={isLast ? 'var(--color-accent-blue)' : 'var(--color-accent-blue)'}
+            fill="var(--color-accent-blue)"
             opacity={isLast ? 0.7 : 0.35}
+            className={isLast && pulseLastBar ? 'mc-sparkline-pulse' : undefined}
           />
         );
       })}
@@ -136,6 +139,8 @@ interface MetricPillProps {
   fraction?: { numerator: string; denominator: string };
   /** Optional trailing element (sparkline, badge, etc.) */
   trailing?: React.ReactNode;
+  /** Optional extra className applied to the value span (for animations). */
+  valueClassName?: string;
 }
 
 function MetricPill({
@@ -145,6 +150,7 @@ function MetricPill({
   borderColor,
   fraction,
   trailing,
+  valueClassName,
 }: MetricPillProps) {
   return (
     <div
@@ -156,12 +162,12 @@ function MetricPill({
     >
       <div className="flex flex-col gap-0 min-w-0">
         {fraction ? (
-          <span className="text-[11px] font-mono font-bold leading-tight">
+          <span className={cn('text-[11px] font-mono font-bold leading-tight', valueClassName)}>
             <span className={color}>{fraction.numerator}</span>
             <span className="text-text-secondary opacity-50">/{fraction.denominator}</span>
           </span>
         ) : (
-          <span className={cn('text-[11px] font-mono font-bold leading-tight', color)}>
+          <span className={cn('text-[11px] font-mono font-bold leading-tight', color, valueClassName)}>
             {value}
           </span>
         )}
@@ -276,6 +282,34 @@ export function MCMetricBar() {
     [tokenUsage],
   );
 
+  // -- Cost flash animation: brief opacity dip when cost changes --
+  const prevCostRef = useRef(metrics.costToday);
+  const [costFlash, setCostFlash] = useState(false);
+
+  useEffect(() => {
+    if (prevCostRef.current !== metrics.costToday) {
+      prevCostRef.current = metrics.costToday;
+      setCostFlash(true);
+      const timer = setTimeout(() => setCostFlash(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [metrics.costToday]);
+
+  // -- Sparkline pulse: last bar pulses when dailyCosts array changes --
+  const prevDailyCostsRef = useRef(dailyCosts);
+  const [sparklinePulse, setSparklinePulse] = useState(false);
+
+  useEffect(() => {
+    const prev = prevDailyCostsRef.current;
+    const changed = prev.length !== dailyCosts.length || prev.some((v, i) => v !== dailyCosts[i]);
+    if (changed) {
+      prevDailyCostsRef.current = dailyCosts;
+      setSparklinePulse(true);
+      const timer = setTimeout(() => setSparklinePulse(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [dailyCosts]);
+
   return (
     <div
       className={cn(
@@ -325,7 +359,8 @@ export function MCMetricBar() {
           value={metrics.costLabel}
           color="text-text-primary"
           borderColor="border-accent-blue/40"
-          trailing={<MiniBarSparkline data={dailyCosts} />}
+          valueClassName={costFlash ? 'mc-cost-flash' : undefined}
+          trailing={<MiniBarSparkline data={dailyCosts} pulseLastBar={sparklinePulse} />}
         />
         <MetricPill
           label="Sessoes"

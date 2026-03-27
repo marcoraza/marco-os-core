@@ -388,3 +388,35 @@ input:checked + .slider:before {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MC METRIC BAR ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Cost value flash: opacity dip on change (300ms) */
+@keyframes mc-cost-flash {
+    0%   { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.mc-cost-flash {
+    animation: mc-cost-flash 300ms ease-out forwards;
+}
+
+/* Sparkline last bar pulse: brief brightness boost (500ms) */
+@keyframes mc-sparkline-pulse {
+    0%   { opacity: 0.7; }
+    40%  { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.mc-sparkline-pulse {
+    animation: mc-sparkline-pulse 500ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mc-cost-flash,
+    .mc-sparkline-pulse {
+        animation: none;
+    }
+}

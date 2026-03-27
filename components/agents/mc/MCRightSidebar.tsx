@@ -6,6 +6,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
+import { MCAgentAvatar } from './MCAgentAvatar';
 import { useMissionControlStore, type MCAgent } from '../../../store/missionControl';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -155,13 +156,7 @@ function FocusedAgentCard({
 
       {/* Agent identity row */}
       <div className="flex items-center gap-2 mb-1">
-        <span
-          className={cn(
-            'w-2 h-2 rounded-full shrink-0',
-            STATUS_DOT[agent.status],
-            (agent.status === 'idle' || agent.status === 'busy') && STATUS_GLOW[agent.status],
-          )}
-        />
+        <MCAgentAvatar name={agent.name} status={agent.status} size="md" />
         <span className="text-xs font-bold text-text-primary truncate">{agent.name}</span>
         <span className="text-[8px] text-text-secondary font-mono">({agent.status})</span>
       </div>
@@ -266,14 +261,8 @@ function AgentRoster({
                 focusedAgentId !== agent.id && 'border border-transparent',
               )}
             >
-              {/* Status dot with glow for active agents */}
-              <span
-                className={cn(
-                  'w-1.5 h-1.5 rounded-full shrink-0',
-                  STATUS_DOT[agent.status],
-                  isActive && STATUS_GLOW[agent.status],
-                )}
-              />
+              {/* Agent avatar (sm) */}
+              <MCAgentAvatar name={agent.name} status={agent.status} size="sm" />
 
               {/* Agent name + live indicator */}
               <span className="flex items-center gap-1 text-[10px] font-bold text-text-primary truncate flex-1">
@@ -392,15 +381,13 @@ export function MCRightSidebar({ onAgentClick }: MCRightSidebarProps) {
 
   const handleSendMission = useCallback(() => {
     if (focusedAgent) {
-      // TODO: wire to mission creation flow
-      console.log('send-mission', focusedAgent.id);
+      useMissionControlStore.getState().openChatForAgent(String(focusedAgent.id));
     }
   }, [focusedAgent]);
 
   const handleChat = useCallback(() => {
     if (focusedAgent) {
-      // TODO: wire to chat panel
-      console.log('open-chat', focusedAgent.id);
+      useMissionControlStore.getState().openChatForAgent(String(focusedAgent.id));
     }
   }, [focusedAgent]);
 

@@ -18,7 +18,7 @@ import React, { useState, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
-import { StatusDot } from '../../ui/StatusDot';
+import { MCAgentAvatar } from './MCAgentAvatar';
 import { useMissionControlStore, type MCAgent } from '../../../store/missionControl';
 import { MCAgentTaskStrip } from './MCAgentTaskStrip';
 import { MCAgentSessions } from './MCAgentSessions';
@@ -28,13 +28,6 @@ const MCMemoryBrowserPanel = lazy(() => import('./MCMemoryBrowserPanel').then((m
 const MCTokenDashboardPanel = lazy(() => import('./MCTokenDashboardPanel'));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_DOT_COLOR: Record<MCAgent['status'], 'mint' | 'orange' | 'red' | 'blue'> = {
-  idle: 'mint',
-  busy: 'orange',
-  error: 'red',
-  offline: 'blue',
-};
 
 function relativeTime(ts?: number): string {
   if (!ts) return '--';
@@ -147,6 +140,7 @@ function ProfileHeader({
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => useMissionControlStore.getState().openChatForAgent(String(agent.id))}
             className="bg-surface border border-border-panel text-text-primary rounded-sm text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 hover:bg-surface-hover transition-all focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none"
           >
             <span className="flex items-center gap-1.5">
@@ -155,6 +149,7 @@ function ProfileHeader({
             </span>
           </button>
           <button
+            onClick={() => useMissionControlStore.getState().openChatForAgent(String(agent.id))}
             className="bg-brand-mint/10 border border-brand-mint/30 text-brand-mint rounded-sm text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 hover:bg-brand-mint/20 transition-all focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none"
           >
             <span className="flex items-center gap-1.5">
@@ -167,12 +162,7 @@ function ProfileHeader({
 
       {/* Agent info */}
       <div className="flex items-center gap-3 mb-2">
-        <StatusDot
-          color={STATUS_DOT_COLOR[agent.status]}
-          pulse={agent.status === 'busy'}
-          glow={agent.status === 'busy'}
-          size="md"
-        />
+        <MCAgentAvatar name={agent.name} status={agent.status} size="lg" />
         <h2 className="text-sm font-bold text-text-primary">{agent.name}</h2>
         <span className="text-[8px] font-bold uppercase tracking-widest text-text-secondary bg-surface border border-border-panel px-2 py-0.5 rounded-sm">
           {agent.role}

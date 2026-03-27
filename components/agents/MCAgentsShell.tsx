@@ -21,8 +21,11 @@ import { MCRightSidebar } from './mc/MCRightSidebar';
 const MCStandupPanel = lazy(() => import('./mc/MCStandupPanel').then((m) => ({ default: m.MCStandupPanel })));
 const MCTaskBoardPanel = lazy(() => import('./mc/MCTaskBoardPanel'));
 const MCActivityPanel = lazy(() => import('./mc/MCActivityPanel').then((m) => ({ default: m.MCActivityPanel })));
+const MCChatPanel = lazy(() => import('./mc/MCChatPanel').then((m) => ({ default: m.MCChatPanel })));
+const MCLivePulse = lazy(() => import('./mc/MCLivePulse').then((m) => ({ default: m.MCLivePulse })));
 
 const TABS: { id: MCAgentTab; label: string; icon: string }[] = [
+  { id: 'pulse',    label: 'Agora',     icon: 'sensors' },
   { id: 'standup',  label: 'Standup',   icon: 'summarize' },
   { id: 'tasks',    label: 'Tarefas',   icon: 'task_alt' },
   { id: 'activity', label: 'Atividade', icon: 'timeline' },
@@ -236,6 +239,16 @@ function ActivePanel() {
     );
   }
 
+  const panelContent = useMemo(() => {
+    switch (activeTab) {
+      case 'pulse':    return <MCLivePulse />;
+      case 'standup':  return <MCStandupPanel />;
+      case 'tasks':    return <MCTaskBoardPanel />;
+      case 'activity': return <MCActivityPanel />;
+      default:         return null;
+    }
+  }, [activeTab]);
+
   return (
     <Suspense
       fallback={
@@ -245,9 +258,17 @@ function ActivePanel() {
         </div>
       }
     >
-      {activeTab === 'standup' && <MCStandupPanel />}
-      {activeTab === 'tasks' && <MCTaskBoardPanel />}
-      {activeTab === 'activity' && <MCActivityPanel />}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          {panelContent}
+        </motion.div>
+      </AnimatePresence>
     </Suspense>
   );
 }
@@ -269,6 +290,11 @@ export default function MCAgentsShell({ onAgentClick }: MCAgentsShellProps) {
     });
   }, []);
 
+  // Chat panel state (granular selectors)
+  const showChatPanel = useMissionControlStore((s) => s.showChatPanel);
+  const chatAgentId = useMissionControlStore((s) => s.chatAgentId);
+  const closeChatPanel = useMissionControlStore((s) => s.closeChatPanel);
+
   return (
     <div className="flex flex-col h-full">
       {/* Sticky metric bar */}
@@ -288,6 +314,32 @@ export default function MCAgentsShell({ onAgentClick }: MCAgentsShellProps) {
         {/* Right sidebar (xl only) */}
         {onAgentClick && <MCRightSidebar onAgentClick={onAgentClick} />}
       </div>
+
+      {/* Chat Panel overlay */}
+      {showChatPanel && chatAgentId && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={closeChatPanel}>
+          <div className="bg-black/40 absolute inset-0" />
+          <div
+            className="relative w-[400px] h-full bg-bg-base border-l border-border-panel flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-panel">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Chat</span>
+              <button
+                onClick={closeChatPanel}
+                className="p-1 text-text-secondary hover:text-text-primary transition-colors focus-visible:ring-2 focus-visible:ring-brand-mint/50 focus-visible:outline-none rounded-sm"
+              >
+                <Icon name="close" size="sm" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Suspense fallback={<div className="p-3"><div className="bg-border-panel animate-pulse rounded-sm h-12" /></div>}>
+                <MCChatPanel agentId={chatAgentId} />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

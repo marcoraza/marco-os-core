@@ -198,8 +198,8 @@ export interface MCNotification {
 
 export type MCConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-/** Main overview tabs (3 tabs only — redesign V2) */
-export type MCAgentTab = 'standup' | 'tasks' | 'activity';
+/** Main overview tabs (4 tabs — redesign V2) */
+export type MCAgentTab = 'pulse' | 'standup' | 'tasks' | 'activity';
 
 /** Config view tabs (4 tabs) */
 export type MCConfigTab = 'system' | 'cron' | 'webhooks' | 'skills';
@@ -280,6 +280,13 @@ interface MissionControlState {
   showLogTerminal: boolean;
   setShowLogTerminal: (show: boolean) => void;
   toggleLogTerminal: () => void;
+
+  // Chat panel
+  showChatPanel: boolean;
+  chatAgentId: string | null;
+  setShowChatPanel: (show: boolean) => void;
+  openChatForAgent: (agentId: string) => void;
+  closeChatPanel: () => void;
 }
 
 export const useMissionControlStore = create<MissionControlState>()((set) => ({
@@ -344,7 +351,7 @@ export const useMissionControlStore = create<MissionControlState>()((set) => ({
   setNotifications: (notifications) => set({ notifications }),
 
   // UI Navigation
-  activeTab: 'standup',
+  activeTab: 'pulse',
   setActiveTab: (tab) => set({ activeTab: tab }),
   activeDetailTab: 'overview',
   setActiveDetailTab: (tab) => set({ activeDetailTab: tab }),
@@ -359,4 +366,11 @@ export const useMissionControlStore = create<MissionControlState>()((set) => ({
   showLogTerminal: false,
   setShowLogTerminal: (show) => set({ showLogTerminal: show }),
   toggleLogTerminal: () => set((state) => ({ showLogTerminal: !state.showLogTerminal })),
+
+  // Chat panel
+  showChatPanel: false,
+  chatAgentId: null,
+  setShowChatPanel: (show) => set({ showChatPanel: show }),
+  openChatForAgent: (agentId) => set({ showChatPanel: true, chatAgentId: agentId }),
+  closeChatPanel: () => set({ showChatPanel: false, chatAgentId: null }),
 }));
